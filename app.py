@@ -569,7 +569,7 @@ if selected == "🌱Tratores":
             #########################################################################################################
 
             if st.button('Gerar PDF para Tratores'):
-                        figures = [ fig_utilizacao, fig_fator, fig_combust, fig_rotacao, fig_hrmotor,fig_desloc, fig_patinagem4, fig_patinagem3]  
+                        figures = [ fig_utilizacao, fig_fator, fig_combust, fig_rotacao, fig_hrmotor,fig_desloc, fig_patinagem4]  
                         pdf_buffer = generate_pdf( df_tractors, figures, background_image_first_page, background_image_other_pages)
                         st.download_button(
                             label="Baixar PDF",
