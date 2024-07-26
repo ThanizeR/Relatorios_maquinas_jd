@@ -6,7 +6,7 @@ port = 8501
 
 [theme]
 primaryColor="#006013"
-backgroundColor="#e4e4e4"
+backgroundColor="#ffffff"
 secondaryBackgroundColor="#c1dcc1"
 textColor="#000000"
 font="serif"
