@@ -26,8 +26,6 @@ st.set_page_config("📊Análise de Trabalho", page_icon="", layout="wide")
 def load_data(file, file_type, encoding='utf-8'):
     try:
         if file_type == "CSV":
-            df = pd.read_csv(file, encoding=encoding)
-        elif file_type == "Excel":
             df = pd.read_excel(file, engine='openpyxl')
         return df
     except UnicodeDecodeError:
