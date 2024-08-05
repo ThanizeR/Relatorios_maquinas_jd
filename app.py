@@ -858,7 +858,7 @@ elif selected == "🌱Pulverizadores":
                     wrapped_labels = wrap_labels(maquinas_colheitadeira_desloc, width=10)  # Ajuste a largura conforme necessário
 
                     # Plotar gráfico de barras verticais
-                    fig_colheitadeira_desloc, ax_colheitadeira_desloc = plt.subplots(figsize=(12, 8))
+                    fig_pulverizador_desloc, ax_colheitadeira_desloc = plt.subplots(figsize=(12, 8))
 
                     # Cores e labels para as barras
                     colors_colheitadeira_desloc = ['tab:green', 'tab:gray']
@@ -891,7 +891,7 @@ elif selected == "🌱Pulverizadores":
                     # Adicionar legenda única
                     ax_colheitadeira_desloc.legend(loc='upper right', bbox_to_anchor=(1.24, 1.0))
                     col8, col9 = st.columns(2)
-                    col8.pyplot(fig_colheitadeira_desloc)
+                    col8.pyplot(fig_pulverizador_desloc)
 
                     #########################################################################################################################
                     # Definir os dados
@@ -902,7 +902,7 @@ elif selected == "🌱Pulverizadores":
                     df_selected_tractors_hrmotor = df_selected_tractors_hrmotor.sort_values(by="Horas de Operação do Motor Período (h)", ascending=False)
 
                     # Configurar o gráfico
-                    fig_hrmotor, ax_hrmotor = plt.subplots(figsize=(12, 8))
+                    fig_pulverizador_hrmotor, ax_hrmotor = plt.subplots(figsize=(12, 8))
 
                     # Extrair dados para plotagem
                     maquinas_tractors_hrmotor = df_selected_tractors_hrmotor["Máquina"]
@@ -930,15 +930,16 @@ elif selected == "🌱Pulverizadores":
                     ax_hrmotor.legend(labels_hrmotor, loc='upper right', bbox_to_anchor=(1.22, 1.0))
 
                     # Mostrar o gráfico de barras horizontais
-                    col9.pyplot(fig_hrmotor)
+                    col9.pyplot(fig_pulverizador_hrmotor)
                     #############################################################################################################
+                    
                     if st.button('Gerar PDF para Tratores'):
-                        figures = [ fig_colheitadeira_combus, fig_pulverizador_factor,  fig_rotacao, fig_hrmotor]  
+                        figures = [fig_pulverizador_combus, fig_pulverizador_factor,  fig_pulverizador_rotacao, fig_pulverizador_autotrac, fig_pulverizador_desloc,fig_pulverizador_hrmotor ]  
                         pdf_buffer = generate_pdf( df_sprayers, figures, background_image_first_page, background_image_other_pages)
                         st.download_button(
                             label="Baixar PDF",
                             data=pdf_buffer,
-                            file_name="relatorio.pdf",
+                            file_name="relatorio_pulverizador.pdf",
                             mime="application/pdf"
                         )
 
