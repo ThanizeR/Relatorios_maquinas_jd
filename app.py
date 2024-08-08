@@ -172,12 +172,11 @@ if selected == "🌱Tratores":
                         'Other Event': 'rgb(255, 127, 14)'
                     }
             #######################################################################################
-
             # Definir colunas para análise de utilização
             selected_columns_utilizacao = ["Máquina", 
-                                           "Utilização (Agricultura) Trabalho (%)",
-                                           "Utilização (Agricultura) Transporte (%)",
-                                           "Utilização (Agricultura) Marcha Lenta (%)"]
+                                        "Utilização (Agricultura) Trabalho (%)",
+                                        "Utilização (Agricultura) Transporte (%)",
+                                        "Utilização (Agricultura) Marcha Lenta (%)"]
 
             df_selected_tractors_utilizacao = df_tractors[selected_columns_utilizacao].copy()
 
@@ -186,30 +185,41 @@ if selected == "🌱Tratores":
             velocidades_total_tractors = df_selected_tractors_utilizacao.iloc[:, 1:].sum(axis=1)
             velocidades_percentual_tractors = df_selected_tractors_utilizacao.iloc[:, 1:].div(velocidades_total_tractors, axis=0) * 100
             wrapped_labels = wrap_labels(maquinas_tractors, width=10)  # Ajuste a largura conforme necessário
+
+            ## Ajustar a altura das barras dinamicamente
+            bar_height_utilizacao = 0.6
+            if len(maquinas_tractors) == 1:
+                bar_height_utilizacao = 0.2  # Barra mais fina
+
+            bar_positions_tractors_utilizacao = np.arange(len(maquinas_tractors))
+
             # Plotar gráfico de barras horizontais para % de Utilização
             fig_utilizacao, ax_utilizacao = plt.subplots(figsize=(12, 8))
 
             # Cores e labels para as barras de Utilização
             colors_utilizacao = ['tab:green', 'tab:gray', 'tab:orange']
             labels_utilizacao = ['Trabalhando', 'Transporte', 'Marcha Lenta']
-            bar_height_utilizacao = 0.6  # Altura das barras de Utilização
-            bar_positions_tractors_utilizacao = np.arange(len(maquinas_tractors))
 
             # Plotar as barras horizontais combinadas para cada máquina (utilização)
             for i, (maquina, row) in enumerate(zip(maquinas_tractors, velocidades_percentual_tractors.values)):
                 left = 0
                 for j, (percent, color) in enumerate(zip(row, colors_utilizacao)):
-                    ax_utilizacao.barh(bar_positions_tractors_utilizacao[i], percent, height=bar_height_utilizacao, left=left, label=labels_utilizacao[j] if i == 0 else "", color=color)
-                    ax_utilizacao.text(left + percent / 2, bar_positions_tractors_utilizacao[i], f'{percent:.1f}%', ha='center', va='center', color='black', fontsize=10)
+                    ax_utilizacao.barh(bar_positions_tractors_utilizacao[i], percent, height=bar_height_utilizacao, 
+                                    left=left, label=labels_utilizacao[j] if i == 0 else "", color=color)
+                    ax_utilizacao.text(left + percent / 2, bar_positions_tractors_utilizacao[i], 
+                                    f'{percent:.1f}%', ha='center', va='center', color='black', fontsize=10)
                     left += percent
 
             # Configurar os eixos e título
             ax_utilizacao.set_xlabel('')
-            ax_utilizacao.set_yticks(bar_positions_tractors_utilizacao)  # Manter os ticks do eixo y
-            ax_utilizacao.set_yticklabels(maquinas_tractors)  # Manter os rótulos do eixo y
-            ax_utilizacao.set_xticks([])  # Remover os ticks do eixo x
-            ax_utilizacao.set_yticklabels(wrapped_labels)  # Usar labels com quebra de linha
+            ax_utilizacao.set_yticks(bar_positions_tractors_utilizacao)
+            ax_utilizacao.set_yticklabels(wrapped_labels)
+            ax_utilizacao.set_xticks([])  
             ax_utilizacao.set_title('% de Utilização por Máquina - Tratores')
+
+            # Centralizar a barra única
+            if len(maquinas_tractors) == 1:
+                ax_utilizacao.set_ylim(-0.5, 0.5)  # Centralizar a barra no meio do gráfico
 
             # Adicionar legenda única para Utilização
             ax_utilizacao.legend(labels_utilizacao, loc='upper right', bbox_to_anchor=(1.21, 1.0))
@@ -217,6 +227,8 @@ if selected == "🌱Tratores":
             # Mostrar o gráfico de Utilização
             col4, col5 = st.columns(2)
             col4.pyplot(fig_utilizacao)
+
+
             #############################################################
 
             # Definir colunas para análise de fator de carga média do motor
@@ -316,7 +328,7 @@ if selected == "🌱Tratores":
             ax_combust.set_ylabel('')  # Texto do eixo y
             ax_combust.set_xticks(bar_positions_tractors_combust + bar_width_combust)
             ax_combust.set_xticklabels(maquinas_tractors_combust)
-            ax_combust.set_yticklabels(wrapped_labels)
+            ax_combust.set_xticklabels(wrapped_labels)
             ax_combust.set_title('Consumo de Combustível')
 
             # Definir as numerações do eixo y
@@ -401,7 +413,7 @@ if selected == "🌱Tratores":
 
         ###################################################################################################
 
-             # Definir os dados
+            # Definir os dados
             selected_columns_hrmotor = ["Máquina", "Horas de Operação do Motor Período (h)"]
             df_selected_tractors_hrmotor = df_tractors[selected_columns_hrmotor].copy()
 
@@ -415,8 +427,14 @@ if selected == "🌱Tratores":
             maquinas_tractors_hrmotor = df_selected_tractors_hrmotor["Máquina"]
             horas_operacao_hrmotor = df_selected_tractors_hrmotor["Horas de Operação do Motor Período (h)"]
             wrapped_labels = wrap_labels(maquinas_tractors_hrmotor, width=10)  # Ajuste a largura conforme necessário
+
+            # Ajustar a altura das barras dinamicamente
+            bar_height_hrmotor = 0.6
+            if len(maquinas_tractors_hrmotor) == 1:
+                bar_height_hrmotor = 0.2  # Barra mais fina
+
             # Plotar barras horizontais com cor verde musgo claro
-            bars = ax_hrmotor.barh(maquinas_tractors_hrmotor, horas_operacao_hrmotor, height=0.6, color='green')
+            bars = ax_hrmotor.barh(maquinas_tractors_hrmotor, horas_operacao_hrmotor, height=bar_height_hrmotor, color='green')
             labels_hrmotor = ['Hr de operação']
 
             # Adicionar os números de horas formatados no final de cada barra
@@ -430,12 +448,15 @@ if selected == "🌱Tratores":
             ax_hrmotor.set_title('Horas de Operação do Motor por Máquina')
             ax_hrmotor.set_yticklabels(wrapped_labels)
 
-            # Adicionar legenda única para Fator de Carga
+            # Centralizar a barra única
+            if len(maquinas_tractors_hrmotor) == 1:
+                ax_hrmotor.set_ylim(-0.5, 0.5)  # Centralizar a barra no meio do gráfico
+
+            # Adicionar legenda única para Horas de Operação
             ax_hrmotor.legend(labels_hrmotor, loc='upper right', bbox_to_anchor=(1.22, 1.0))
 
             # Mostrar o gráfico
             col8, col9 = st.columns(2)
-            # Mostrar o gráfico de barras horizontais
             col8.pyplot(fig_hrmotor)
 
 
