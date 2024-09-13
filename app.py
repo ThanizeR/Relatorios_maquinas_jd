@@ -41,73 +41,70 @@ def load_data(file, file_type, encoding='utf-8'):
 def wrap_labels(labels, width):
     return ['\n'.join(textwrap.wrap(label, width)) for label in labels]
 
-def generate_pdf(df_tractors, figures, background_image_first_page=None, background_image_other_pages=None):
+def generate_pdf_tratores(df_tractors, figures, background_image_first_page_tratores=None, background_image_other_pages=None):
     pdf_buffer = BytesIO()
-    c = canvas.Canvas(pdf_buffer, pagesize=A4)
+    c = canvas.Canvas(pdf_buffer, pagesize=landscape(A4))
 
-    page_width, page_height = A4
-    x_margin = 35
-    y_margin = 20
-    header_space_first_page = 100
-    header_space_other_pages = 25
+    page_width, page_height = landscape(A4)
+    x_margin = 60  # Margem lateral
+    y_margin = 40  # Margem vertical ajustada para subir o gráfico
+    header_space_other_pages = 70  # Espaço para a organização e datas
 
-    # Diminuir um pouco mais a largura e altura dos gráficos
-    graph_width = page_width - 2 * x_margin - 10
-    graph_height_first_page = (page_height - 2 * y_margin - header_space_first_page) / 2 - 12
-    graph_height_other_pages = (page_height - 2 * y_margin - header_space_other_pages) / 2 - 12
+    # Tamanho do gráfico
+    graph_width = page_width - 2 * x_margin  # Largura do gráfico
+    graph_height = page_height - header_space_other_pages - 2 * y_margin  # Altura do gráfico
 
     def set_background(page_num):
-        if page_num == 0 and background_image_first_page:
-            background = ImageReader(background_image_first_page)
+        if page_num == 0 and background_image_first_page_tratores:
+            background = ImageReader(background_image_first_page_tratores)
         elif background_image_other_pages:
             background = ImageReader(background_image_other_pages)
         else:
             return
-        c.drawImage(background, 0, 0, width=A4[0], height=A4[1])
+        c.drawImage(background, 0, 0, width=page_width, height=page_height)
 
-    page_num = 0
-    set_background(page_num)
+    # Primeira página (capa)
+    set_background(0)
+    c.showPage()
 
+    # Segunda página com organização, datas e gráficos
+    set_background(1)
+
+    # Adicionando informações da organização e datas na segunda página
     if 'Data de Início' in df_tractors.columns and 'Data Final' in df_tractors.columns and 'Organização' in df_tractors.columns:
         data_inicio = pd.to_datetime(df_tractors['Data de Início'].iloc[0])
         data_final = pd.to_datetime(df_tractors['Data Final'].iloc[0])
         organizacao = df_tractors['Organização'].iloc[0]
 
-        c.setFont("Helvetica-Bold", 10)  # Definir texto em negrito e tamanho 12
-        c.setFillColorRGB(1, 1, 1)  # Definir a cor do texto como branca
-        y_position = page_height - y_margin - 2  # Ajustar a posição do texto no cabeçalho
+        # Texto à esquerda com espaçamento como dois Tabs
+        c.setFont("Helvetica", 10)
+        c.drawString(x_margin - 20, page_height - 40, f"Organização: {organizacao}")
+        c.drawString(x_margin - 20, page_height - 55, f"Data de Início: {data_inicio.strftime('%d/%m/%Y')}")
+        c.drawString(x_margin - 20, page_height - 70, f"Data Final: {data_final.strftime('%d/%m/%Y')}")
 
-        # Desenhar organização e datas em três linhas
-        c.drawString(x_margin, y_position, f"Organização: {organizacao}")
-        y_position -= 15  # Espaçamento entre linhas
-        c.drawString(x_margin, y_position, f"Data de Início: {data_inicio.strftime('%d/%m/%Y')}")
-        y_position -= 15  # Espaçamento entre linhas
-        c.drawString(x_margin, y_position, f"Data Final: {data_final.strftime('%d/%m/%Y')}")
+    page_num = 1
+    graph_index = 0
 
-    for i, fig in enumerate(figures):
+    while graph_index < len(figures):
+        fig = figures[graph_index]
+
         if not isinstance(fig, plt.Figure):
             print(f"Skipping non-Matplotlib figure: {type(fig)}")
             continue
 
-        if i % 2 == 0 and i != 0:
-            c.showPage()
-            page_num += 1
-            set_background(page_num)
-            y_position = page_height - y_margin - header_space_other_pages
-            graph_height = graph_height_other_pages
-        else:
-            if i == 0:
-                y_position = page_height - y_margin - header_space_first_page
-                graph_height = graph_height_first_page
-            else:
-                y_position -= graph_height + y_margin / 2
-
+        # Salvar gráfico como imagem
         img_data = BytesIO()
         fig.savefig(img_data, format='png', bbox_inches='tight')
         img_data.seek(0)
 
-        x_position = x_margin
-        c.drawImage(ImageReader(img_data), x_position, y_position - graph_height, width=graph_width, height=graph_height)
+        # Centralizar o gráfico e movê-lo um pouco mais para cima
+        c.drawImage(ImageReader(img_data), x_margin, y_margin + 20, width=graph_width, height=graph_height)  # Aumentar para subir
+        graph_index += 1
+
+        if graph_index < len(figures):
+            c.showPage()
+            page_num += 1
+            set_background(page_num)
 
     c.showPage()
     c.save()
@@ -115,8 +112,155 @@ def generate_pdf(df_tractors, figures, background_image_first_page=None, backgro
     return pdf_buffer
 
 # Caminho para as imagens de fundo
-background_image_first_page = 'background_pdf_first_page.jpg'
+background_image_first_page_tratores = 'background_pdf_first_page_tratores.jpg'
 background_image_other_pages = 'background_pdf_other_pages.jpg'
+
+def generate_pdf_pulverizador(df_sprayers, figures, background_image_first_page_pulverizador=None, background_image_other_pages=None):
+    pdf_buffer = BytesIO()
+    c = canvas.Canvas(pdf_buffer, pagesize=landscape(A4))
+
+    page_width, page_height = landscape(A4)
+    x_margin = 60  # Margem lateral
+    y_margin = 40  # Margem vertical ajustada para subir o gráfico
+    header_space_other_pages = 70  # Espaço para a organização e datas
+
+    # Tamanho do gráfico
+    graph_width = page_width - 2 * x_margin  # Largura do gráfico
+    graph_height = page_height - header_space_other_pages - 2 * y_margin  # Altura do gráfico
+
+    def set_background(page_num):
+        if page_num == 0 and background_image_first_page_pulverizador:
+            background = ImageReader(background_image_first_page_pulverizador)
+        elif background_image_other_pages:
+            background = ImageReader(background_image_other_pages)
+        else:
+            return
+        c.drawImage(background, 0, 0, width=page_width, height=page_height)
+
+    # Primeira página (capa)
+    set_background(0)
+    c.showPage()
+
+    # Segunda página com organização, datas e gráficos
+    set_background(1)
+
+    # Adicionando informações da organização e datas na segunda página
+    if 'Data de Início' in df_sprayers.columns and 'Data Final' in df_sprayers.columns and 'Organização' in df_sprayers.columns:
+        data_inicio = pd.to_datetime(df_sprayers['Data de Início'].iloc[0])
+        data_final = pd.to_datetime(df_sprayers['Data Final'].iloc[0])
+        organizacao = df_sprayers['Organização'].iloc[0]
+
+        # Texto à esquerda com espaçamento como dois Tabs
+        c.setFont("Helvetica", 10)
+        c.drawString(x_margin - 20, page_height - 40, f"Organização: {organizacao}")
+        c.drawString(x_margin - 20, page_height - 55, f"Data de Início: {data_inicio.strftime('%d/%m/%Y')}")
+        c.drawString(x_margin - 20, page_height - 70, f"Data Final: {data_final.strftime('%d/%m/%Y')}")
+
+    page_num = 1
+    graph_index = 0
+
+    while graph_index < len(figures):
+        fig = figures[graph_index]
+
+        if not isinstance(fig, plt.Figure):
+            print(f"Skipping non-Matplotlib figure: {type(fig)}")
+            continue
+
+        # Salvar gráfico como imagem
+        img_data = BytesIO()
+        fig.savefig(img_data, format='png', bbox_inches='tight')
+        img_data.seek(0)
+
+        # Centralizar o gráfico e movê-lo um pouco mais para cima
+        c.drawImage(ImageReader(img_data), x_margin, y_margin + 20, width=graph_width, height=graph_height)  # Aumentar para subir
+        graph_index += 1
+
+        if graph_index < len(figures):
+            c.showPage()
+            page_num += 1
+            set_background(page_num)
+
+    c.showPage()
+    c.save()
+    pdf_buffer.seek(0)
+    return pdf_buffer
+
+# Caminho para as imagens de fundo
+background_image_first_page_pulverizador = 'background_pdf_first_page_pulverizador.jpg'
+
+def generate_pdf_colheitadeira(df_colheitadeira, figures, background_image_first_page_colheitadeira=None, background_image_other_pages=None):
+    pdf_buffer = BytesIO()
+    c = canvas.Canvas(pdf_buffer, pagesize=landscape(A4))
+
+    page_width, page_height = landscape(A4)
+    x_margin = 60  # Margem lateral
+    y_margin = 40  # Margem vertical ajustada para subir o gráfico
+    header_space_other_pages = 70  # Espaço para a organização e datas
+
+    # Tamanho do gráfico
+    graph_width = page_width - 2 * x_margin  # Largura do gráfico
+    graph_height = page_height - header_space_other_pages - 2 * y_margin  # Altura do gráfico
+
+    def set_background(page_num):
+        if page_num == 0 and background_image_first_page_colheitadeira:
+            background = ImageReader(background_image_first_page_colheitadeira)
+        elif background_image_other_pages:
+            background = ImageReader(background_image_other_pages)
+        else:
+            return
+        c.drawImage(background, 0, 0, width=page_width, height=page_height)
+
+    # Primeira página (capa)
+    set_background(0)
+    c.showPage()
+
+    # Segunda página com organização, datas e gráficos
+    set_background(1)
+
+    # Adicionando informações da organização e datas na segunda página
+    if 'Data de Início' in df_colheitadeira.columns and 'Data Final' in df_colheitadeira.columns and 'Organização' in df_colheitadeira.columns:
+        data_inicio = pd.to_datetime(df_colheitadeira['Data de Início'].iloc[0])
+        data_final = pd.to_datetime(df_colheitadeira['Data Final'].iloc[0])
+        organizacao = df_colheitadeira['Organização'].iloc[0]
+
+        # Texto à esquerda com espaçamento como dois Tabs
+        c.setFont("Helvetica", 10)
+        c.drawString(x_margin - 20, page_height - 40, f"Organização: {organizacao}")
+        c.drawString(x_margin - 20, page_height - 55, f"Data de Início: {data_inicio.strftime('%d/%m/%Y')}")
+        c.drawString(x_margin - 20, page_height - 70, f"Data Final: {data_final.strftime('%d/%m/%Y')}")
+
+    page_num = 1
+    graph_index = 0
+
+    while graph_index < len(figures):
+        fig = figures[graph_index]
+
+        if not isinstance(fig, plt.Figure):
+            print(f"Skipping non-Matplotlib figure: {type(fig)}")
+            continue
+
+        # Salvar gráfico como imagem
+        img_data = BytesIO()
+        fig.savefig(img_data, format='png', bbox_inches='tight')
+        img_data.seek(0)
+
+        # Centralizar o gráfico e movê-lo um pouco mais para cima
+        c.drawImage(ImageReader(img_data), x_margin, y_margin + 20, width=graph_width, height=graph_height)  # Aumentar para subir
+        graph_index += 1
+
+        if graph_index < len(figures):
+            c.showPage()
+            page_num += 1
+            set_background(page_num)
+
+    c.showPage()
+    c.save()
+    pdf_buffer.seek(0)
+    return pdf_buffer
+
+# Caminho para as imagens de fundo
+background_image_first_page_colheitadeira = 'background_pdf_first_page_colheitadeira.jpg'
+
 
 # Menu dropdown na barra superior
 selected = option_menu(
@@ -207,7 +351,7 @@ if selected == "🌱Tratores":
                     ax_utilizacao.barh(bar_positions_tractors_utilizacao[i], percent, height=bar_height_utilizacao, 
                                     left=left, label=labels_utilizacao[j] if i == 0 else "", color=color)
                     ax_utilizacao.text(left + percent / 2, bar_positions_tractors_utilizacao[i], 
-                                    f'{percent:.1f}%', ha='center', va='center', color='black', fontsize=10)
+                                    f'{percent:.1f}%', ha='center', va='center', color='black', fontsize=10, fontweight='bold')
                     left += percent
 
             # Configurar os eixos e título
@@ -230,7 +374,6 @@ if selected == "🌱Tratores":
 
 
             #############################################################
-
             # Definir colunas para análise de fator de carga média do motor
             selected_columns_fator = ["Máquina", 
                                     "Fator de Carga Média do Motor (Ag) Trabalho (%)",
@@ -240,49 +383,75 @@ if selected == "🌱Tratores":
             # Filtrar o DataFrame para as colunas de fator de carga selecionadas
             df_selected_tractors_fator = df_tractors[selected_columns_fator].copy()
 
+            # Identificar linhas onde os valores são todos zero
+            zeros_mask = (df_selected_tractors_fator.iloc[:, 1:] == 0).all(axis=1)
+
+            # Separar máquinas com todos os valores zero e as que têm valores diferentes de zero
+            df_non_zeros = df_selected_tractors_fator[~zeros_mask]
+            df_zeros = df_selected_tractors_fator[zeros_mask]
+
+            # Concatenar os DataFrames, primeiro os não-zero, depois os zero
+            df_selected_tractors_fator = pd.concat([df_non_zeros, df_zeros])
+
             # Nomes das máquinas e porcentagens de fator de carga
             maquinas_tractors_fator = df_selected_tractors_fator["Máquina"]
             fatores_percentual_tractors = df_selected_tractors_fator.iloc[:, 1:] * 100
-            wrapped_labels = wrap_labels(maquinas_tractors_fator, width=10)
+
             # Plotar gráfico de barras horizontais para % de Fator de Carga
             fig_fator, ax_fator = plt.subplots(figsize=(12, 8))
 
             # Cores e labels para as barras de Fator de Carga
             colors_fator = ['tab:green', 'tab:gray', 'tab:orange']
             labels_fator = ['Trabalhando', 'Transporte', 'Marcha Lenta']
-            bar_height_fator = 0.33  # Altura das barras de Fator de Carga
-            bar_positions_tractors_fator = np.arange(len(maquinas_tractors_fator))
+            bar_height_fator = 0.32  # Altura das barras de Fator de Carga
 
             # Ajustar as posições das barras para que fiquem separadas
-            offset = 0.35
+            bar_positions_tractors_fator = np.arange(len(maquinas_tractors_fator)) * 1.5  # Aumentar o fator de multiplicação para espaçamento maior
+            offset = 0.35  # Espaçamento entre as categorias dentro de cada máquina
+
+            # Iterar sobre as categorias para criar as barras
             for j in range(len(labels_fator)):
-                ax_fator.barh(bar_positions_tractors_fator + j * offset, 
-                            fatores_percentual_tractors.iloc[:, j], 
+                # Desenhar barras apenas para as máquinas que não têm todos os valores zerados
+                ax_fator.barh(bar_positions_tractors_fator[:len(df_non_zeros)] + j * offset, 
+                            fatores_percentual_tractors.iloc[:len(df_non_zeros), j], 
                             height=bar_height_fator, 
                             label=labels_fator[j], 
                             color=colors_fator[j])
 
-                # Adicionar rótulos às barras
-                for i in range(len(bar_positions_tractors_fator)):
+                # Adicionar rótulos às barras na ponta
+                for i in range(len(bar_positions_tractors_fator[:len(df_non_zeros)])):
                     percent = fatores_percentual_tractors.iloc[i, j]
-                    ax_fator.text((percent / 2) + 2,  # Ajuste para mover o texto mais para a direita
-                                bar_positions_tractors_fator[i] + j * offset, 
-                                f'{percent:.1f}%', 
-                                ha='center', 
-                                va='center', 
-                                color='black', 
-                                fontsize=10)
+                    
+                    # Verificar se o valor é zero e ajustar a posição do texto
+                    if percent == 0:
+                        ax_fator.text(2,  # Posição no início da barra se for zero
+                                    bar_positions_tractors_fator[i] + j * offset, 
+                                    f'{percent:.1f}%', 
+                                    ha='left', 
+                                    va='center', 
+                                    color='black', 
+                                    fontsize=10, 
+                                    fontweight='bold')
+                    else:
+                        ax_fator.text(fatores_percentual_tractors.iloc[i, j] + 2,  # Posição na ponta da barra
+                                    bar_positions_tractors_fator[i] + j * offset, 
+                                    f'{percent:.1f}%', 
+                                    ha='left', 
+                                    va='center', 
+                                    color='black', 
+                                    fontsize=10, 
+                                    fontweight='bold')
 
             # Configurar os eixos e título
-            ax_fator.set_xlabel('')
+            ax_fator.set_xlabel('')  # Eixo x em negrito
             ax_fator.set_yticks(bar_positions_tractors_fator + offset)
-            ax_fator.set_yticklabels(maquinas_tractors_fator)
-            ax_fator.set_title('% de Fator de Carga por Máquina - Tratores')
-            ax_fator.set_xticklabels(wrapped_labels)
+            ax_fator.set_yticklabels(maquinas_tractors_fator)  # Nomes das máquinas em negrito
+            ax_fator.set_title('% de Fator de Carga por Máquina - Tratores')  # Título em negrito
+
             # Definir os limites e marcas do eixo x
             ax_fator.set_xlim([0, 100])
             ax_fator.set_xticks([0, 50, 100])
-            ax_fator.set_xticklabels(['0%', '50%', '100%'])
+            ax_fator.set_xticklabels(['0%', '50%', '100%'])  # Valores do eixo x em negrito
 
             # Adicionar legenda única para Fator de Carga
             ax_fator.legend(labels_fator, loc='upper right', bbox_to_anchor=(1.23, 1.0))
@@ -306,6 +475,7 @@ if selected == "🌱Tratores":
             maquinas_tractors_combust = df_selected_tractors_combust["Máquina"]
             percentual_tractors_combust = df_selected_tractors_combust.iloc[:, 1:] 
             wrapped_labels = wrap_labels(maquinas_tractors_combust, width=10)
+
             # Plotar gráfico de barras verticais
             fig_combust, ax_combust = plt.subplots(figsize=(12, 8))
 
@@ -321,28 +491,28 @@ if selected == "🌱Tratores":
             for i, (maquina, row) in enumerate(zip(maquinas_tractors_combust, percentual_tractors_combust.values)):
                 for j, (percent, color) in enumerate(zip(row, colors_combust)):
                     ax_combust.bar(bar_positions_tractors_combust[i] + j * bar_width_combust, percent, width=bar_width_combust, label=labels_combust[j] if i == 0 else "", color=color)
-                    ax_combust.text(bar_positions_tractors_combust[i] + j * bar_width_combust, percent + 1, f'{percent:.1f}', ha='center', va='bottom', color='black', fontsize=10)
+                    ax_combust.text(bar_positions_tractors_combust[i] + j * bar_width_combust, percent + 1, f'{percent:.1f}', ha='center', va='bottom', color='black', fontsize=10, fontweight='bold')  # Negrito para os valores
 
             # Configurar rótulos e título
-            ax_combust.set_xlabel('')  # Texto do eixo x
-            ax_combust.set_ylabel('')  # Texto do eixo y
+            ax_combust.set_xlabel('')  # Eixo X em negrito
+            ax_combust.set_ylabel('')  # Eixo Y em negrito
             ax_combust.set_xticks(bar_positions_tractors_combust + bar_width_combust)
-            ax_combust.set_xticklabels(maquinas_tractors_combust)
-            ax_combust.set_xticklabels(wrapped_labels)
-            ax_combust.set_title('Consumo de Combustível')
+            ax_combust.set_xticklabels(wrapped_labels)  # Rótulos em negrito
+            ax_combust.set_title('Consumo de Combustível')  # Título em negrito
 
             # Definir as numerações do eixo y
             yticks_values = np.arange(0, 51, 5)  # Ajuste conforme necessário
             yticks_labels = [f'{val:.1f}' for val in yticks_values]
             ax_combust.set_yticks(yticks_values)
-            ax_combust.set_yticklabels(yticks_labels)
+            ax_combust.set_yticklabels(yticks_labels)  # Rótulos do eixo Y em negrito
 
             # Adicionar legenda única
-            ax_combust.legend(loc='upper right', bbox_to_anchor=(1.24, 1.0))
+            ax_combust.legend(loc='upper right', bbox_to_anchor=(1.24, 1.0))  # Legenda em negrito
 
             # Mostrar o gráfico
             col6, col7 = st.columns(2)
             col6.pyplot(fig_combust)
+
 
         ###################################################################################################
 
@@ -362,43 +532,44 @@ if selected == "🌱Tratores":
             maquinas_tractors_rotacao = df_selected_tractors_rotacao["Máquina"]
             rotacoes_tractors = df_selected_tractors_rotacao.iloc[:, 1:]
             wrapped_labels = wrap_labels(maquinas_tractors_rotacao, width=10)  # Ajuste a largura conforme necessário
+
             # Plotar gráfico de barras horizontais para rotação média
             fig_rotacao, ax_rotacao = plt.subplots(figsize=(12, 8))  # Ajustar o tamanho da figura para evitar erro
 
             # Cores e labels para as barras de rotação média
             colors_rotacao = ['tab:green', 'tab:gray', 'tab:orange']
-            labels_rotacao = ['Trabalhando', 'Transporte','Ocioso']
-            bar_height_rotacao = 0.3  # Altura das barras de rotação média
-            bar_positions_rotacao = np.arange(len(maquinas_tractors_rotacao))
+            labels_rotacao = ['Trabalhando', 'Transporte', 'Ocioso']
+            bar_height_rotacao = 0.32  # Altura das barras de rotação média
+            bar_positions_rotacao = np.arange(len(maquinas_tractors_rotacao)) * 1.5  # Aumentar o fator de multiplicação para espaçamento maior
+            offset = 0.35  # Espaçamento entre as categorias dentro de cada máquina
 
-            # Ajustar as posições das barras para que fiquem separadas
-            offset = 0.32
+            # Iterar sobre as categorias para criar as barras
             for j in range(len(labels_rotacao)):
-                # Usar np.nan para valores NaN para que apareçam em branco
-                ax_rotacao.barh(bar_positions_rotacao + j * offset, 
+                # Desenhar barras apenas para as máquinas que não têm todos os valores zerados
+                ax_rotacao.barh(bar_positions_rotacao[:len(df_selected_tractors_rotacao)] + j * offset, 
                                 rotacoes_tractors.iloc[:, j].fillna(np.nan), 
                                 height=bar_height_rotacao, 
-                                label=labels_rotacao[j] if j == 0 else "", 
+                                label=labels_rotacao[j], 
                                 color=colors_rotacao[j])
 
-                # Adicionar rótulos às barras
-                for i in range(len(bar_positions_rotacao)):
+                # Adicionar rótulos às barras na ponta
+                for i in range(len(bar_positions_rotacao[:len(df_selected_tractors_rotacao)])):
                     rotacao = rotacoes_tractors.iloc[i, j]
                     if pd.notna(rotacao):  # Apenas adicionar texto se não for NaN
-                        ax_rotacao.text((rotacao / 2) + 3,  # Ajuste para mover o texto mais para a direita
+                        ax_rotacao.text(rotacao + 2,  # Posição na ponta da barra
                                         bar_positions_rotacao[i] + j * offset, 
                                         f'{rotacao:.0f}', 
-                                        ha='center', 
+                                        ha='left', 
                                         va='center', 
                                         color='black', 
-                                        fontsize=10)
+                                        fontsize=10, 
+                                        fontweight='bold')  # Texto em negrito
 
             # Configurar os eixos e título
             ax_rotacao.set_xlabel('')
             ax_rotacao.set_yticks(bar_positions_rotacao + offset)
-            ax_rotacao.set_yticklabels(maquinas_tractors_rotacao)
-            ax_rotacao.set_title('Rotação Média do Motor por Máquina - Tratores')
-            ax_rotacao.set_yticklabels(wrapped_labels)
+            ax_rotacao.set_yticklabels(wrapped_labels)  # Nomes das máquinas em negrito
+            ax_rotacao.set_title('Rotação Média do Motor por Máquina - Tratores')  # Título em negrito
 
             # Verificar se os valores para definir os limites do eixo são válidos
             max_value = rotacoes_tractors.stack().max() if not rotacoes_tractors.empty else 0
@@ -407,9 +578,9 @@ if selected == "🌱Tratores":
             # Adicionar legenda única para rotação média
             ax_rotacao.legend(labels_rotacao, loc='upper right', bbox_to_anchor=(1.2, 1.0))
 
-
             # Mostrar o gráfico de rotação média
             col7.pyplot(fig_rotacao)
+
 
         ###################################################################################################
 
@@ -429,7 +600,7 @@ if selected == "🌱Tratores":
             wrapped_labels = wrap_labels(maquinas_tractors_hrmotor, width=10)  # Ajuste a largura conforme necessário
 
             # Ajustar a altura das barras dinamicamente
-            bar_height_hrmotor = 0.6
+            bar_height_hrmotor = 0.4
             if len(maquinas_tractors_hrmotor) == 1:
                 bar_height_hrmotor = 0.2  # Barra mais fina
 
@@ -439,8 +610,8 @@ if selected == "🌱Tratores":
 
             # Adicionar os números de horas formatados no final de cada barra
             for bar, hora in zip(bars, horas_operacao_hrmotor):
-                ax_hrmotor.text(bar.get_width() + 0.5, bar.get_y() + bar.get_height() / 2, f'{hora:.2f} h',
-                                va='center', ha='left', fontsize=10)
+                ax_hrmotor.text(bar.get_width() + 0.3, bar.get_y() + bar.get_height() / 2, f'{hora:.2f} h',
+                                va='center', ha='left', fontsize=10, fontweight='bold')
 
             # Configurar os eixos e título
             ax_hrmotor.set_xlabel('')
@@ -507,7 +678,8 @@ if selected == "🌱Tratores":
                             ha='center', 
                             va='bottom', 
                             color='black', 
-                            fontsize=10
+                            fontsize=10,
+                            fontweight='bold'
                         )
 
            # Configurar os eixos e título
@@ -565,7 +737,7 @@ if selected == "🌱Tratores":
 
             bar_width = 4  # Largura das barras
             space_between_bars = 2  # Espaço entre as barras coloridas
-            machine_offset = 2  # Espaço entre cada máquina
+            machine_offset = 4  # Espaço entre cada máquina
 
             for i, (maquina, row) in enumerate(zip(maquinas_tractors_patinagem3, patinagem_tractors3.values)):
                 base_position = i * (len(colors_patinagem3) * (bar_width + space_between_bars) + machine_offset)
@@ -602,11 +774,11 @@ if selected == "🌱Tratores":
 
             if st.button('Gerar PDF para Tratores'):
                         figures = [ fig_utilizacao, fig_fator, fig_combust, fig_rotacao, fig_hrmotor,fig_desloc, fig_patinagem4]  
-                        pdf_buffer = generate_pdf( df_tractors, figures, background_image_first_page, background_image_other_pages)
+                        pdf_buffer = generate_pdf_tratores( df_tractors, figures, background_image_first_page_tratores, background_image_other_pages)
                         st.download_button(
                             label="Baixar PDF",
                             data=pdf_buffer,
-                            file_name="relatorio.pdf",
+                            file_name="relatorio_tratores.pdf",
                             mime="application/pdf"
                         )
 # Lógica para Pulverizadores
@@ -680,7 +852,7 @@ elif selected == "🌱Pulverizadores":
                     for i, (maquina, row) in enumerate(zip(maquinas_colheitadeira_combus, percentual_colheitadeira_combus.values)):
                         for j, (percent, color) in enumerate(zip(row, colors_colheitadeira_combus)):
                             ax_colheitadeira_combus.bar(bar_positions_colheitadeira_combus[i] + j * bar_width_colheitadeira_combus, percent, width=bar_width_colheitadeira_combus, label=labels_colheitadeira_combus[j] if i == 0 else "", color=color)
-                            ax_colheitadeira_combus.text(bar_positions_colheitadeira_combus[i] + j * bar_width_colheitadeira_combus, percent + 1, f'{percent:.1f}', ha='center', va='bottom', color='black', fontsize=10)
+                            ax_colheitadeira_combus.text(bar_positions_colheitadeira_combus[i] + j * bar_width_colheitadeira_combus, percent + 1, f'{percent:.1f}', ha='center', va='bottom', color='black', fontsize=10, fontweight='bold')
 
                     # Configurar rótulos e título
                     ax_colheitadeira_combus.set_xlabel('Máquinas')  # Texto do eixo x
@@ -701,58 +873,92 @@ elif selected == "🌱Pulverizadores":
                     col4.pyplot(fig_pulverizador_combus)
                     #####################################################################################################
                     
-                     #fator de carga média
+                    # Definir colunas para análise de fator de carga média do pulverizador
                     selected_columns_pulverizador_factor = ["Máquina", 
-                                    "Fator de Carga Média do Motor (Ag) Marcha Lenta (%)",
-                                    "Fator de Carga Média do Motor (Ag) Trabalho (%)",
-                                    "Fator de Carga Média do Motor (Ag) Transporte (%)"
-                                    ]
+                                                            "Fator de Carga Média do Motor (Ag) Marcha Lenta (%)",
+                                                            "Fator de Carga Média do Motor (Ag) Trabalho (%)",
+                                                            "Fator de Carga Média do Motor (Ag) Transporte (%)"]
 
                     # Filtrar o DataFrame para as colunas selecionadas
                     df_selected_pulverizador_factor = df_sprayers[selected_columns_pulverizador_factor].copy()
 
-                    # Nomes das máquinas e porcentagens
+                    # Identificar linhas onde os valores são todos zero
+                    zeros_mask = (df_selected_pulverizador_factor.iloc[:, 1:] == 0).all(axis=1)
+
+                    # Separar máquinas com todos os valores zero e as que têm valores diferentes de zero
+                    df_non_zeros = df_selected_pulverizador_factor[~zeros_mask]
+                    df_zeros = df_selected_pulverizador_factor[zeros_mask]
+
+                    # Concatenar os DataFrames, primeiro os não-zero, depois os zero
+                    df_selected_pulverizador_factor = pd.concat([df_non_zeros, df_zeros])
+
+                    # Nomes das máquinas e porcentagens de fator de carga
                     maquinas_pulverizador_factor = df_selected_pulverizador_factor["Máquina"]
-                    percentual_pulverizador_factor = df_selected_pulverizador_factor.iloc[:, 1:] *100
+                    percentual_pulverizador_factor = df_selected_pulverizador_factor.iloc[:, 1:] * 100
 
                     # Aplicar quebra de linha nos nomes das máquinas
                     wrapped_labels = wrap_labels(maquinas_pulverizador_factor, width=10)  # Ajuste a largura conforme necessário
 
-                    # Plotar gráfico de barras verticais
+                    # Plotar gráfico de barras horizontais para % de Fator de Carga
                     fig_pulverizador_factor, ax_pulverizador_factor = plt.subplots(figsize=(12, 8))
 
-                    # Cores e labels para as barras
+                    # Cores e labels para as barras de Fator de Carga
                     colors_pulverizador_factor = ['tab:green', 'tab:blue', 'tab:red']
                     labels_pulverizador_factor = ['Marcha Lenta (%)', 'Trabalho (%)', 'Transporte (%)']
-                    bar_width_pulverizador_factor = 0.1  # Largura das barras
+                    bar_height_pulverizador_factor = 0.32  # Altura das barras de Fator de Carga
+                    bar_positions_pulverizador_factor = np.arange(len(maquinas_pulverizador_factor)) * 1.5  # Aumentar o fator de multiplicação para espaçamento maior
+                    offset = 0.35  # Espaçamento entre as categorias dentro de cada máquina
 
-                    # Definir posições das barras para cada grupo de dados
-                    bar_positions_pulverizador_factor = np.arange(len(maquinas_pulverizador_factor))
+                    # Iterar sobre as categorias para criar as barras
+                    for j in range(len(labels_pulverizador_factor)):
+                        # Desenhar barras apenas para as máquinas que não têm todos os valores zerados
+                        ax_pulverizador_factor.barh(bar_positions_pulverizador_factor[:len(df_non_zeros)] + j * offset, 
+                                                    percentual_pulverizador_factor.iloc[:len(df_non_zeros), j], 
+                                                    height=bar_height_pulverizador_factor, 
+                                                    label=labels_pulverizador_factor[j], 
+                                                    color=colors_pulverizador_factor[j])
 
-                    # Plotar as barras verticais combinadas para cada máquina
-                    for i, (maquina, row) in enumerate(zip(maquinas_pulverizador_factor, percentual_pulverizador_factor.values)):
-                        for j, (percent, color) in enumerate(zip(row, colors_pulverizador_factor)):
-                            ax_pulverizador_factor.bar(bar_positions_pulverizador_factor[i] + j * bar_width_pulverizador_factor, percent, width=bar_width_pulverizador_factor, label=labels_pulverizador_factor[j] if i == 0 else "", color=color)
-                            ax_pulverizador_factor.text(bar_positions_pulverizador_factor[i] + j * bar_width_pulverizador_factor, percent + 1, f'{percent:.1f}%', ha='center', va='bottom', color='black', fontsize=10)
+                        # Adicionar rótulos às barras na ponta
+                        for i in range(len(bar_positions_pulverizador_factor[:len(df_non_zeros)])):
+                            percent = percentual_pulverizador_factor.iloc[i, j]
+                            
+                            # Verificar se o valor é zero e ajustar a posição do texto
+                            if percent == 0:
+                                ax_pulverizador_factor.text(2,  # Posição no início da barra se for zero
+                                                            bar_positions_pulverizador_factor[i] + j * offset, 
+                                                            f'{percent:.1f}%', 
+                                                            ha='left', 
+                                                            va='center', 
+                                                            color='black', 
+                                                            fontsize=10, 
+                                                            fontweight='bold')
+                            else:
+                                ax_pulverizador_factor.text(percent + 2,  # Posição na ponta da barra
+                                                            bar_positions_pulverizador_factor[i] + j * offset, 
+                                                            f'{percent:.1f}%', 
+                                                            ha='left', 
+                                                            va='center', 
+                                                            color='black', 
+                                                            fontsize=10, 
+                                                            fontweight='bold')
 
-                    # Configurar rótulos e título
-                    ax_pulverizador_factor.set_xlabel('Máquinas')  # Texto do eixo x
-                    ax_pulverizador_factor.set_ylabel('Percentual de Utilização (%)')  # Texto do eixo y
-                    ax_pulverizador_factor.set_xticks(bar_positions_pulverizador_factor + bar_width_pulverizador_factor)
-                    ax_pulverizador_factor.set_xticklabels(maquinas_pulverizador_factor)
-                    ax_pulverizador_factor.set_xticklabels(wrapped_labels)  # Usar labels com quebra de linha
-                    ax_pulverizador_factor.set_title('Fator de caga %')
+                    # Configurar os eixos e título
+                    ax_pulverizador_factor.set_xlabel('')
+                    ax_pulverizador_factor.set_yticks(bar_positions_pulverizador_factor + offset)
+                    ax_pulverizador_factor.set_yticklabels(wrapped_labels)  # Nomes das máquinas em negrito
+                    ax_pulverizador_factor.set_title('Fator de Carga % por Máquina - Pulverizadores')  # Título em negrito
 
-                    # Definir as numerações do eixo y
-                    yticks_values = np.arange(0, 101, 10)  # Ajuste conforme necessário
-                    yticks_labels = [f'{val:.1f}' for val in yticks_values]
-                    ax_pulverizador_factor.set_yticks(yticks_values)
-                    ax_pulverizador_factor.set_yticklabels(yticks_labels)
+                    # Definir os limites e marcas do eixo x
+                    ax_pulverizador_factor.set_xlim([0, 100])
+                    ax_pulverizador_factor.set_xticks([0, 50, 100])
+                    ax_pulverizador_factor.set_xticklabels(['0%', '50%', '100%'])  # Valores do eixo x em negrito
 
-                    # Adicionar legenda única
-                    ax_pulverizador_factor.legend(loc='upper right', bbox_to_anchor=(1.24, 1.0))
+                    # Adicionar legenda única para Fator de Carga
+                    ax_pulverizador_factor.legend(loc='upper right', bbox_to_anchor=(1.23, 1.0))
 
+                    # Mostrar o gráfico de Fator de Carga
                     col5.pyplot(fig_pulverizador_factor)
+
 
                     ############################################################################################################
                     # Definir colunas para análise de rotação média do motor
@@ -762,64 +968,69 @@ elif selected == "🌱Pulverizadores":
                                                 "Rotação Média do Motor Ocioso (rpm)"]
 
                     # Filtrar o DataFrame para as colunas de rotação selecionadas
-                    df_selected_tractors_rotacao = df_sprayers[selected_columns_rotacao].copy()
+                    df_selected_rotacao = df_sprayers[selected_columns_rotacao].copy()
 
                     # Manter linhas com NaN para visualização em branco
-                    df_selected_tractors_rotacao.replace([np.inf, -np.inf], np.nan, inplace=True)
+                    df_selected_rotacao.replace([np.inf, -np.inf], np.nan, inplace=True)
 
                     # Nomes das máquinas e rotação média
-                    maquinas_tractors_rotacao = df_selected_tractors_rotacao["Máquina"]
-                    rotacoes_tractors = df_selected_tractors_rotacao.iloc[:, 1:]
+                    maquinas_rotacao = df_selected_rotacao["Máquina"]
+                    rotacoes = df_selected_rotacao.iloc[:, 1:]
 
                     # Plotar gráfico de barras horizontais para rotação média
                     fig_pulverizador_rotacao, ax_rotacao = plt.subplots(figsize=(12, 8))  # Ajustar o tamanho da figura para evitar erro
 
                     # Aplicar quebra de linha nos nomes das máquinas
-                    wrapped_labels = wrap_labels(maquinas_tractors_rotacao, width=10)  # Ajuste a largura conforme necessário
+                    wrapped_labels = wrap_labels(maquinas_rotacao, width=10)  # Ajuste a largura conforme necessário
+
                     # Cores e labels para as barras de rotação média
                     colors_rotacao = ['tab:green', 'tab:gray', 'tab:orange']
-                    labels_rotacao = ['Trabalhando', 'Transporte','Ocioso']
-                    bar_height_rotacao = 0.2  # Altura das barras de rotação média
-                    bar_positions_rotacao = np.arange(len(maquinas_tractors_rotacao))
+                    labels_rotacao = ['Trabalhando', 'Transporte', 'Ocioso']
+                    bar_height_rotacao = 0.32  # Altura das barras de rotação média
+                    bar_positions_rotacao = np.arange(len(maquinas_rotacao)) * 2  # Aumentar o fator de multiplicação para espaçamento maior
+                    offset = 0.35  # Espaçamento entre as categorias dentro de cada máquina
 
-                    # Ajustar as posições das barras para que fiquem separadas
-                    offset = 0.32
+                    # Iterar sobre as categorias para criar as barras
                     for j in range(len(labels_rotacao)):
-                        # Usar np.nan para valores NaN para que apareçam em branco
+                        # Desenhar barras e garantir que valores NaN sejam visualizados como em branco
                         ax_rotacao.barh(bar_positions_rotacao + j * offset, 
-                                        rotacoes_tractors.iloc[:, j].fillna(np.nan), 
+                                        rotacoes.iloc[:, j].fillna(np.nan), 
                                         height=bar_height_rotacao, 
-                                        label=labels_rotacao[j] if j == 0 else "", 
+                                        label=labels_rotacao[j], 
                                         color=colors_rotacao[j])
 
                         # Adicionar rótulos às barras
                         for i in range(len(bar_positions_rotacao)):
-                            rotacao = rotacoes_tractors.iloc[i, j]
+                            rotacao = rotacoes.iloc[i, j]
                             if pd.notna(rotacao):  # Apenas adicionar texto se não for NaN
-                                ax_rotacao.text((rotacao / 2) + 3,  # Ajuste para mover o texto mais para a direita
+                                ax_rotacao.text(rotacao + 2,  # Ajuste para mover o texto mais para a direita
                                                 bar_positions_rotacao[i] + j * offset, 
                                                 f'{rotacao:.0f}', 
-                                                ha='center', 
+                                                ha='left', 
                                                 va='center', 
                                                 color='black', 
-                                                fontsize=10)
+                                                fontsize=10,
+                                                fontweight='bold')
 
                     # Configurar os eixos e título
                     ax_rotacao.set_xlabel('')
                     ax_rotacao.set_yticks(bar_positions_rotacao + offset)
-                    ax_rotacao.set_yticklabels(maquinas_tractors_rotacao)
                     ax_rotacao.set_yticklabels(wrapped_labels)  # Usar labels com quebra de linha
                     ax_rotacao.set_title('Rotação Média do Motor RPM')
 
-                    # Verificar se os valores para definir os limites do eixo são válidos
-                    max_value = rotacoes_tractors.stack().max() if not rotacoes_tractors.empty else 0
+                    # Definir os limites e marcas do eixo x
+                    max_value = rotacoes.stack().max() if not rotacoes.empty else 0
                     ax_rotacao.set_xlim([0, max_value * 1.1])
+                    ax_rotacao.set_xticks([0, max_value * 0.5, max_value])
+                    ax_rotacao.set_xticklabels(['0', f'{int(max_value * 0.5)}', f'{int(max_value)}'])
 
                     # Adicionar legenda única para rotação média
-                    ax_rotacao.legend(labels_rotacao, loc='upper right', bbox_to_anchor=(1.2, 1.0))
-                    col6, col7 = st.columns(2)
+                    ax_rotacao.legend(loc='upper right', bbox_to_anchor=(1.2, 1.0))
+
                     # Mostrar o gráfico de rotação média
+                    col6, col7 = st.columns(2)
                     col6.pyplot(fig_pulverizador_rotacao)
+
                     ##########################################################################################################
                     selected_columns_colheitadeira_autotrac = ["Máquina", 
                                'AutoTrac™ Ativo (%)'
@@ -850,7 +1061,7 @@ elif selected == "🌱Pulverizadores":
                     for i, (maquina, row) in enumerate(zip(maquinas_colheitadeira_autotrac, percentual_colheitadeira_autotrac.values)):
                         for j, (percent, color) in enumerate(zip(row, colors_colheitadeira_autotrac)):
                             ax_colheitadeira_autotrac.bar(bar_positions_colheitadeira_autotrac[i] + j * bar_width_colheitadeira_autotrac, percent, width=bar_width_colheitadeira_autotrac, label=labels_colheitadeira_autotrac[j] if i == 0 else "", color=color)
-                            ax_colheitadeira_autotrac.text(bar_positions_colheitadeira_autotrac[i] + j * bar_width_colheitadeira_autotrac, percent + 1, f'{percent:.1f}%', ha='center', va='bottom', color='black', fontsize=10)
+                            ax_colheitadeira_autotrac.text(bar_positions_colheitadeira_autotrac[i] + j * bar_width_colheitadeira_autotrac, percent + 1, f'{percent:.1f}%', ha='center', va='bottom', color='black', fontsize=10, fontweight='bold')
 
                     # Configurar rótulos e título
                     ax_colheitadeira_autotrac.set_xlabel('Máquinas')  # Texto do eixo x
@@ -901,7 +1112,7 @@ elif selected == "🌱Pulverizadores":
                     for i, (maquina, row) in enumerate(zip(maquinas_colheitadeira_desloc, percentual_colheitadeira_desloc.values)):
                         for j, (percent, color) in enumerate(zip(row, colors_colheitadeira_desloc)):
                             ax_colheitadeira_desloc.bar(bar_positions_colheitadeira_desloc[i] + j * bar_width_colheitadeira_desloc, percent, width=bar_width_colheitadeira_desloc, label=labels_colheitadeira_desloc[j] if i == 0 else "", color=color)
-                            ax_colheitadeira_desloc.text(bar_positions_colheitadeira_desloc[i] + j * bar_width_colheitadeira_desloc, percent + 1, f'{percent:.1f}', ha='center', va='bottom', color='black', fontsize=10)
+                            ax_colheitadeira_desloc.text(bar_positions_colheitadeira_desloc[i] + j * bar_width_colheitadeira_desloc, percent + 1, f'{percent:.1f}', ha='center', va='bottom', color='black', fontsize=10, fontweight='bold')
 
                     # Configurar rótulos e título
                     ax_colheitadeira_desloc.set_xlabel('Máquinas')  # Texto do eixo x
@@ -923,7 +1134,7 @@ elif selected == "🌱Pulverizadores":
                     col8.pyplot(fig_pulverizador_desloc)
 
                     #########################################################################################################################
-                    # Definir os dados
+
                     selected_columns_hrmotor = ["Máquina", "Horas de Operação do Motor Período (h)"]
                     df_selected_tractors_hrmotor = df_sprayers[selected_columns_hrmotor].copy()
 
@@ -936,35 +1147,41 @@ elif selected == "🌱Pulverizadores":
                     # Extrair dados para plotagem
                     maquinas_tractors_hrmotor = df_selected_tractors_hrmotor["Máquina"]
                     horas_operacao_hrmotor = df_selected_tractors_hrmotor["Horas de Operação do Motor Período (h)"]
-
-                    # Aplicar quebra de linha nos nomes das máquinas
                     wrapped_labels = wrap_labels(maquinas_tractors_hrmotor, width=10)  # Ajuste a largura conforme necessário
+
+                    # Ajustar a altura das barras dinamicamente
+                    bar_height_hrmotor = 0.3
+                    if len(maquinas_tractors_hrmotor) == 1:
+                        bar_height_hrmotor = 0.2  # Barra mais fina
+
                     # Plotar barras horizontais com cor verde musgo claro
-                    bars = ax_hrmotor.barh(maquinas_tractors_hrmotor, horas_operacao_hrmotor, height=0.4, color='green')
+                    bars = ax_hrmotor.barh(maquinas_tractors_hrmotor, horas_operacao_hrmotor, height=bar_height_hrmotor, color='green')
                     labels_hrmotor = ['Hr de operação']
 
                     # Adicionar os números de horas formatados no final de cada barra
                     for bar, hora in zip(bars, horas_operacao_hrmotor):
-                        ax_hrmotor.text(bar.get_width() + 0.5, bar.get_y() + bar.get_height() / 2, f'{hora:.2f} h',
-                                        va='center', ha='left', fontsize=10)
+                        ax_hrmotor.text(bar.get_width() + 0.3, bar.get_y() + bar.get_height() / 2, f'{hora:.2f} h',
+                                        va='center', ha='left', fontsize=10, fontweight='bold')
 
                     # Configurar os eixos e título
                     ax_hrmotor.set_xlabel('')
                     ax_hrmotor.set_ylabel('')
                     ax_hrmotor.set_title('Horas de Operação do Motor por Máquina')
-                    ax_hrmotor.set_yticklabels(wrapped_labels)  # Usar labels com quebra de linha
-                    xticks_values = np.arange(0, 120, 20)  # Ajuste conforme necessário
-                    ax_hrmotor.set_xticks(xticks_values)
-                    # Adicionar legenda única para Fator de Carga
+                    ax_hrmotor.set_yticklabels(wrapped_labels)
+
+                    # Centralizar a barra única
+                    if len(maquinas_tractors_hrmotor) == 1:
+                        ax_hrmotor.set_ylim(-0.5, 0.5)  # Centralizar a barra no meio do gráfico
+
+                    # Adicionar legenda única para Horas de Operação
                     ax_hrmotor.legend(labels_hrmotor, loc='upper right', bbox_to_anchor=(1.22, 1.0))
 
-                    # Mostrar o gráfico de barras horizontais
                     col9.pyplot(fig_pulverizador_hrmotor)
                     #############################################################################################################
                     
-                    if st.button('Gerar PDF para Tratores'):
+                    if st.button('Gerar PDF para Pulverizador'):
                         figures = [fig_pulverizador_combus, fig_pulverizador_factor,  fig_pulverizador_rotacao, fig_pulverizador_autotrac, fig_pulverizador_desloc,fig_pulverizador_hrmotor ]  
-                        pdf_buffer = generate_pdf( df_sprayers, figures, background_image_first_page, background_image_other_pages)
+                        pdf_buffer = generate_pdf_pulverizador( df_sprayers, figures, background_image_first_page_pulverizador, background_image_other_pages)
                         st.download_button(
                             label="Baixar PDF",
                             data=pdf_buffer,
@@ -1042,7 +1259,7 @@ elif selected == "🌱Colheitadeira":
             for i, (maquina, row) in enumerate(zip(maquinas_colheitadeira_util, percentual_colheitadeira_util.values)):
                 for j, (percent, color) in enumerate(zip(row, colors_colheitadeira_util)):
                     ax_colheitadeira_util.bar(bar_positions_colheitadeira_util[i] + j * bar_width_colheitadeira_util, percent, width=bar_width_colheitadeira_util, label=labels_colheitadeira_util[j] if i == 0 else "", color=color)
-                    ax_colheitadeira_util.text(bar_positions_colheitadeira_util[i] + j * bar_width_colheitadeira_util, percent + 1, f'{percent:.1f}%', ha='center', va='bottom', color='black', fontsize=10)
+                    ax_colheitadeira_util.text(bar_positions_colheitadeira_util[i] + j * bar_width_colheitadeira_util, percent + 1, f'{percent:.1f}%', ha='center', va='bottom', color='black', fontsize=10, fontweight='bold')
 
             # Configurar rótulos e título
             ax_colheitadeira_util.set_xlabel('Máquinas')  # Texto do eixo x
@@ -1098,7 +1315,7 @@ elif selected == "🌱Colheitadeira":
             for i, (maquina, row) in enumerate(zip(maquinas_colheitadeira_factor, percentual_colheitadeira_factor.values)):
                 for j, (percent, color) in enumerate(zip(row, colors_colheitadeira_util)):
                     ax_colheitadeira_factor.bar(bar_positions_colheitadeira_factor[i] + j * bar_width_colheitadeira_factor, percent, width=bar_width_colheitadeira_factor, label=labels_colheitadeira_factor[j] if i == 0 else "", color=color)
-                    ax_colheitadeira_factor.text(bar_positions_colheitadeira_factor[i] + j * bar_width_colheitadeira_factor, percent + 1, f'{percent:.1f}%', ha='center', va='bottom', color='black', fontsize=10)
+                    ax_colheitadeira_factor.text(bar_positions_colheitadeira_factor[i] + j * bar_width_colheitadeira_factor, percent + 1, f'{percent:.1f}%', ha='center', va='bottom', color='black', fontsize=10,fontweight='bold')
 
             # Configurar rótulos e título
             ax_colheitadeira_factor.set_xlabel('Máquinas')  # Texto do eixo x
@@ -1151,7 +1368,7 @@ elif selected == "🌱Colheitadeira":
             for i, (maquina, row) in enumerate(zip(maquinas_colheitadeira_combus, percentual_colheitadeira_combus.values)):
                 for j, (percent, color) in enumerate(zip(row, colors_colheitadeira_util)):
                     ax_colheitadeira_combus.bar(bar_positions_colheitadeira_combus[i] + j * bar_width_colheitadeira_combus, percent, width=bar_width_colheitadeira_combus, label=labels_colheitadeira_combus[j] if i == 0 else "", color=color)
-                    ax_colheitadeira_combus.text(bar_positions_colheitadeira_combus[i] + j * bar_width_colheitadeira_combus, percent + 1, f'{percent:.1f}', ha='center', va='bottom', color='black', fontsize=10)
+                    ax_colheitadeira_combus.text(bar_positions_colheitadeira_combus[i] + j * bar_width_colheitadeira_combus, percent + 1, f'{percent:.1f}', ha='center', va='bottom', color='black', fontsize=10, fontweight='bold')
 
             # Configurar rótulos e título
             ax_colheitadeira_combus.set_xlabel('Máquinas')  # Texto do eixo x
@@ -1172,84 +1389,88 @@ elif selected == "🌱Colheitadeira":
             col6, col7 = st.columns(2)
             col6.pyplot(fig_colheitadeira_combus)
             ###################################################################################################################################################
-            # Definir colunas para análise de rotação média do motor
+           # Definir colunas para análise de rotação média do motor
             selected_columns_rotacao = ["Máquina", 
                                         "Rotação Média do Motor Ocioso (rpm)",
                                         "Rotação Média do Motor Trabalhando (rpm)",
                                         "Rotação Média do Motor Transporte (rpm)"]
 
             # Filtrar o DataFrame para as colunas de rotação selecionadas
-            df_selected_tractors_rotacao = df_colheitadeira[selected_columns_rotacao].copy()
+            df_selected_rotacao = df_colheitadeira[selected_columns_rotacao].copy()
 
             # Manter linhas com NaN para visualização em branco
-            df_selected_tractors_rotacao.replace([np.inf, -np.inf], np.nan, inplace=True)
+            df_selected_rotacao.replace([np.inf, -np.inf], np.nan, inplace=True)
 
             # Nomes das máquinas e rotação média
-            maquinas_tractors_rotacao = df_selected_tractors_rotacao["Máquina"]
-            rotacoes_tractors = df_selected_tractors_rotacao.iloc[:, 1:]
+            maquinas_rotacao = df_selected_rotacao["Máquina"]
+            rotacoes = df_selected_rotacao.iloc[:, 1:]
 
             # Plotar gráfico de barras horizontais para rotação média
             fig_rotacao, ax_rotacao = plt.subplots(figsize=(12, 8))  # Ajustar o tamanho da figura para evitar erro
 
             # Aplicar quebra de linha nos nomes das máquinas
-            wrapped_labels = wrap_labels(maquinas_tractors_rotacao, width=10)  # Ajuste a largura conforme necessário
+            wrapped_labels = wrap_labels(maquinas_rotacao, width=10)  # Ajuste a largura conforme necessário
+
             # Cores e labels para as barras de rotação média
             colors_rotacao = ['tab:green', 'tab:gray', 'tab:orange']
-            labels_rotacao = ['Trabalhando', 'Transporte','Ocioso']
-            bar_height_rotacao = 0.2  # Altura das barras de rotação média
-            bar_positions_rotacao = np.arange(len(maquinas_tractors_rotacao))
+            labels_rotacao = ['Ocioso', 'Trabalhando', 'Transporte']
+            bar_height_rotacao = 0.32  # Altura das barras de rotação média
+            bar_positions_rotacao = np.arange(len(maquinas_rotacao)) * 2  # Aumentar o fator de multiplicação para espaçamento maior
+            offset = 0.35  # Espaçamento entre as categorias dentro de cada máquina
 
-            # Ajustar as posições das barras para que fiquem separadas
-            offset = 0.32
+            # Iterar sobre as categorias para criar as barras
             for j in range(len(labels_rotacao)):
-                # Usar np.nan para valores NaN para que apareçam em branco
+                # Desenhar barras e garantir que valores NaN sejam visualizados como em branco
                 ax_rotacao.barh(bar_positions_rotacao + j * offset, 
-                                rotacoes_tractors.iloc[:, j].fillna(np.nan), 
+                                rotacoes.iloc[:, j].fillna(np.nan), 
                                 height=bar_height_rotacao, 
-                                label=labels_rotacao[j] if j == 0 else "", 
+                                label=labels_rotacao[j], 
                                 color=colors_rotacao[j])
 
                 # Adicionar rótulos às barras
                 for i in range(len(bar_positions_rotacao)):
-                    rotacao = rotacoes_tractors.iloc[i, j]
+                    rotacao = rotacoes.iloc[i, j]
                     if pd.notna(rotacao):  # Apenas adicionar texto se não for NaN
-                        ax_rotacao.text((rotacao / 2) + 3,  # Ajuste para mover o texto mais para a direita
+                        ax_rotacao.text(rotacao + 2,  # Ajuste para mover o texto mais para a direita
                                         bar_positions_rotacao[i] + j * offset, 
                                         f'{rotacao:.0f}', 
-                                        ha='center', 
+                                        ha='left', 
                                         va='center', 
                                         color='black', 
-                                        fontsize=10)
+                                        fontsize=10,
+                                        fontweight='bold')
 
             # Configurar os eixos e título
             ax_rotacao.set_xlabel('')
             ax_rotacao.set_yticks(bar_positions_rotacao + offset)
-            ax_rotacao.set_yticklabels(maquinas_tractors_rotacao)
             ax_rotacao.set_yticklabels(wrapped_labels)  # Usar labels com quebra de linha
             ax_rotacao.set_title('Rotação Média do Motor RPM')
 
-            # Verificar se os valores para definir os limites do eixo são válidos
-            max_value = rotacoes_tractors.stack().max() if not rotacoes_tractors.empty else 0
+            # Definir os limites e marcas do eixo x
+            max_value = rotacoes.stack().max() if not rotacoes.empty else 0
             ax_rotacao.set_xlim([0, max_value * 1.1])
+            ax_rotacao.set_xticks([0, max_value * 0.5, max_value])
+            ax_rotacao.set_xticklabels(['0', f'{int(max_value * 0.5)}', f'{int(max_value)}'])
 
             # Adicionar legenda única para rotação média
-            ax_rotacao.legend(labels_rotacao, loc='upper right', bbox_to_anchor=(1.2, 1.0))
+            ax_rotacao.legend(loc='upper right', bbox_to_anchor=(1.2, 1.0))
 
             # Mostrar o gráfico de rotação média
             col7.pyplot(fig_rotacao)
 
+
             #####################################################################################################################
+            # Definir colunas para análise de velocidade de deslocamento
             selected_columns_colheitadeira_desloc = ["Máquina", 
-                               "Velocidade Média de Deslocamento (km/h)",
-                               "Velocidade Média de Deslocamento Trabalhando (km/h)"
-                               ]
+                                        "Velocidade Média de Deslocamento (km/h)",
+                                        "Velocidade Média de Deslocamento Trabalhando (km/h)"]
 
             # Filtrar o DataFrame para as colunas selecionadas
             df_selected_colheitadeira_desloc = df_colheitadeira[selected_columns_colheitadeira_desloc].copy()
 
             # Nomes das máquinas e porcentagens
             maquinas_colheitadeira_desloc = df_selected_colheitadeira_desloc["Máquina"]
-            percentual_colheitadeira_desloc = df_selected_colheitadeira_desloc.iloc[:, 1:] 
+            percentual_colheitadeira_desloc = df_selected_colheitadeira_desloc.iloc[:, 1:]
 
             # Aplicar quebra de linha nos nomes das máquinas
             wrapped_labels = wrap_labels(maquinas_colheitadeira_desloc, width=10)  # Ajuste a largura conforme necessário
@@ -1259,7 +1480,7 @@ elif selected == "🌱Colheitadeira":
 
             # Cores e labels para as barras
             colors_colheitadeira_desloc = ['tab:green', 'tab:orange']
-            labels_colheitadeira_desloc = [ 'Trabalhando (km/h)','Deslocamento (km/h)']
+            labels_colheitadeira_desloc = ['Trabalhando (km/h)', 'Deslocamento (km/h)']
             bar_width_colheitadeira_desloc = 0.1  # Largura das barras
 
             # Definir posições das barras para cada grupo de dados
@@ -1269,13 +1490,12 @@ elif selected == "🌱Colheitadeira":
             for i, (maquina, row) in enumerate(zip(maquinas_colheitadeira_desloc, percentual_colheitadeira_desloc.values)):
                 for j, (percent, color) in enumerate(zip(row, colors_colheitadeira_desloc)):
                     ax_colheitadeira_desloc.bar(bar_positions_colheitadeira_desloc[i] + j * bar_width_colheitadeira_desloc, percent, width=bar_width_colheitadeira_desloc, label=labels_colheitadeira_desloc[j] if i == 0 else "", color=color)
-                    ax_colheitadeira_desloc.text(bar_positions_colheitadeira_desloc[i] + j * bar_width_colheitadeira_desloc, percent + 1, f'{percent:.1f}', ha='center', va='bottom', color='black', fontsize=10)
+                    ax_colheitadeira_desloc.text(bar_positions_colheitadeira_desloc[i] + j * bar_width_colheitadeira_desloc, percent + 0.5, f'{percent:.1f}', ha='center', va='bottom', color='black', fontsize=10, fontweight='bold')  # Ajuste para o número mais próximo da barra
 
             # Configurar rótulos e título
             ax_colheitadeira_desloc.set_xlabel('Máquinas')  # Texto do eixo x
             ax_colheitadeira_desloc.set_ylabel('')  # Texto do eixo y
-            ax_colheitadeira_desloc.set_xticks(bar_positions_colheitadeira_desloc + bar_width_colheitadeira_desloc)
-            ax_colheitadeira_desloc.set_xticklabels(maquinas_colheitadeira_desloc)
+            ax_colheitadeira_desloc.set_xticks(bar_positions_colheitadeira_desloc + bar_width_colheitadeira_desloc / 2)
             ax_colheitadeira_desloc.set_xticklabels(wrapped_labels)  # Usar labels com quebra de linha
             ax_colheitadeira_desloc.set_title('Velocidade de Deslocamento km/h')
 
@@ -1287,8 +1507,11 @@ elif selected == "🌱Colheitadeira":
 
             # Adicionar legenda única
             ax_colheitadeira_desloc.legend(loc='upper right', bbox_to_anchor=(1.24, 1.0))
+
+            # Mostrar o gráfico
             col8, col9 = st.columns(2)
             col9.pyplot(fig_colheitadeira_desloc)
+
             ######################################################################################################################################################################################
 
             selected_columns_colheitadeira_autotrac = ["Máquina", 
@@ -1320,7 +1543,7 @@ elif selected == "🌱Colheitadeira":
             for i, (maquina, row) in enumerate(zip(maquinas_colheitadeira_autotrac, percentual_colheitadeira_autotrac.values)):
                 for j, (percent, color) in enumerate(zip(row, colors_colheitadeira_autotrac)):
                     ax_colheitadeira_autotrac.bar(bar_positions_colheitadeira_autotrac[i] + j * bar_width_colheitadeira_autotrac, percent, width=bar_width_colheitadeira_autotrac, label=labels_colheitadeira_autotrac[j] if i == 0 else "", color=color)
-                    ax_colheitadeira_autotrac.text(bar_positions_colheitadeira_autotrac[i] + j * bar_width_colheitadeira_autotrac, percent + 1, f'{percent:.1f}%', ha='center', va='bottom', color='black', fontsize=10)
+                    ax_colheitadeira_autotrac.text(bar_positions_colheitadeira_autotrac[i] + j * bar_width_colheitadeira_autotrac, percent + 1, f'{percent:.1f}%', ha='center', va='bottom', color='black', fontsize=10, fontweight='bold')
 
             # Configurar rótulos e título
             ax_colheitadeira_autotrac.set_xlabel('Máquinas')  # Texto do eixo x
@@ -1328,7 +1551,7 @@ elif selected == "🌱Colheitadeira":
             ax_colheitadeira_autotrac.set_xticks(bar_positions_colheitadeira_desloc + bar_width_colheitadeira_desloc)
             ax_colheitadeira_autotrac.set_xticklabels(maquinas_colheitadeira_desloc)
             ax_colheitadeira_autotrac.set_xticklabels(wrapped_labels)  # Usar labels com quebra de linha
-            ax_colheitadeira_autotrac.set_title('Velocidade de Deslocamento km/h')
+            ax_colheitadeira_autotrac.set_title('Uso de Autotrac %')
 
             # Definir as numerações do eixo y
             yticks_values = np.arange(0, 101, 10)  # Ajuste conforme necessário
@@ -1341,7 +1564,7 @@ elif selected == "🌱Colheitadeira":
             col8.pyplot(fig_colheitadeira_autotrac)
 
             ######################################################################################################################################################
-            # Definir os dados
+            ## Definir os dados
             selected_columns_hrmotor = ["Máquina", "Horas de Operação do Motor Período (h)"]
             df_selected_tractors_hrmotor = df_colheitadeira[selected_columns_hrmotor].copy()
 
@@ -1358,13 +1581,13 @@ elif selected == "🌱Colheitadeira":
              # Aplicar quebra de linha nos nomes das máquinas
             wrapped_labels = wrap_labels(maquinas_tractors_hrmotor, width=10)  # Ajuste a largura conforme necessário
             # Plotar barras horizontais com cor verde musgo claro
-            bars = ax_hrmotor.barh(maquinas_tractors_hrmotor, horas_operacao_hrmotor, height=0.4, color='green')
+            bars = ax_hrmotor.barh(maquinas_tractors_hrmotor, horas_operacao_hrmotor, height=0.2, color='green')
             labels_hrmotor = ['Hr de operação']
 
             # Adicionar os números de horas formatados no final de cada barra
             for bar, hora in zip(bars, horas_operacao_hrmotor):
-                ax_hrmotor.text(bar.get_width() + 0.5, bar.get_y() + bar.get_height() / 2, f'{hora:.2f} h',
-                                va='center', ha='left', fontsize=10)
+                ax_hrmotor.text(bar.get_width() + 0.2, bar.get_y() + bar.get_height() / 2, f'{hora:.2f} h',
+                                va='center', ha='left', fontsize=10, fontweight='bold')
 
             # Configurar os eixos e título
             ax_hrmotor.set_xlabel('')
@@ -1380,9 +1603,9 @@ elif selected == "🌱Colheitadeira":
             # Mostrar o gráfico de barras horizontais
             col10.pyplot(fig_hrmotor)
 
-            if st.button('Gerar PDF para Tratores'):
+            if st.button('Gerar PDF para Colheitadeira'):
                         figures = [ fig_colheitadeira_util, fig_colheitadeira_factor, fig_colheitadeira_combus, fig_rotacao, fig_colheitadeira_autotrac, fig_colheitadeira_desloc, fig_hrmotor]  
-                        pdf_buffer = generate_pdf( df_colheitadeira, figures, background_image_first_page, background_image_other_pages)
+                        pdf_buffer = generate_pdf_colheitadeira( df_colheitadeira, figures, background_image_first_page_colheitadeira, background_image_other_pages)
                         st.download_button(
                             label="Baixar PDF",
                             data=pdf_buffer,
