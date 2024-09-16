@@ -501,7 +501,7 @@ if selected == "🌱Tratores":
             ax_combust.set_title('Consumo de Combustível')  # Título em negrito
 
             # Definir as numerações do eixo y
-            yticks_values = np.arange(0, 51, 5)  # Ajuste conforme necessário
+            yticks_values = np.arange(0, 101, 10)  # Ajuste conforme necessário
             yticks_labels = [f'{val:.1f}' for val in yticks_values]
             ax_combust.set_yticks(yticks_values)
             ax_combust.set_yticklabels(yticks_labels)  # Rótulos do eixo Y em negrito
@@ -636,7 +636,7 @@ if selected == "🌱Tratores":
             selected_columns_desloc = [
                 "Máquina", 
                 "Velocidade Média de Deslocamento Trabalhando (km/h)",
-                "Velocidade Média de Deslocamento Transporte (km/h)"
+                "Velocidade Média de Deslocamento (km/h)"
             ]
             df_selected_tractors_desloc = df_tractors[selected_columns_desloc].copy()
 
@@ -700,7 +700,8 @@ if selected == "🌱Tratores":
             col9.pyplot(fig_desloc)
 
             ################################################################
-            selected_columns_patinagem3 = [
+            # Seleciona as colunas de patinagem na ordem exata da planilha
+            selected_columns_patinagem = [
                 "Máquina", 
                 "Tempo de Patinagem das Rodas no Nível 0,00–2,00% (h)",
                 "Tempo de Patinagem das Rodas no Nível 2,01–4,00% (h)",
@@ -714,23 +715,25 @@ if selected == "🌱Tratores":
                 "Tempo de Patinagem das Rodas no Nível 18,01–100,00% (h)"
             ]
 
-            df_selected_tractors_patinagem3 = df_tractors[selected_columns_patinagem3].copy()
+            # Copia o DataFrame mantendo a ordem das colunas
+            df_selected_patinagem = df_tractors[selected_columns_patinagem].copy()
 
-            # Manter linhas com NaN para visualização em branco
-            df_selected_tractors_patinagem3.replace([np.inf, -np.inf], np.nan, inplace=True)
+            # Substitui valores infinitos por NaN
+            df_selected_patinagem.replace([np.inf, -np.inf], np.nan, inplace=True)
 
-            # Nomes das máquinas e tempo de patinagem
-            maquinas_tractors_patinagem3 = df_selected_tractors_patinagem3["Máquina"]
-            patinagem_tractors3 = df_selected_tractors_patinagem3.iloc[:, 1:]
-            wrapped_labels = wrap_labels(maquinas_tractors_patinagem3, width=10)  # Ajuste a largura conforme necessário
+            # Define máquinas e valores de patinagem
+            maquinas = df_selected_patinagem["Máquina"]
+            patinagem_values = df_selected_patinagem.iloc[:, 1:]
 
-            # Plotar gráfico de barras verticais para tempo de patinagem
-            fig_patinagem4, ax_patinagem3 = plt.subplots(figsize=(12, 8))
+            # Ajusta os rótulos das máquinas para caberem no gráfico
+            wrapped_labels = wrap_labels(maquinas, width=10)
 
-            # Cores e labels para as barras de Patinagem
-            colors_patinagem3 = ['tab:blue', 'tab:red', 'tab:green', 'tab:pink', 'tab:cyan',
-                                'tab:orange', 'tab:brown', 'tab:gray', 'tab:olive', 'tab:purple']
-            labels_patinagem3 = [
+            # Configura o gráfico de barras
+            fig_patinagem, ax_patinagem = plt.subplots(figsize=(12, 8))
+
+            # Cores e labels correspondentes
+            colors = ['tab:blue', 'tab:red', 'tab:green', 'tab:pink', 'tab:cyan', 'tab:orange', 'tab:brown', 'tab:gray', 'tab:olive', 'tab:purple']
+            labels = [
                 '0,00–2,00% (h)', '2,01–4,00% (h)', '4,01–6,00% (h)', '6,01–8,00% (h)', '8,01–10,00% (h)',
                 '10,01–12,00% (h)', '12,01–14,00% (h)', '14,01–16,00% (h)', '16,01–18,00% (h)', '18,01–100,00% (h)'
             ]
@@ -739,41 +742,50 @@ if selected == "🌱Tratores":
             space_between_bars = 2  # Espaço entre as barras coloridas
             machine_offset = 4  # Espaço entre cada máquina
 
-            for i, (maquina, row) in enumerate(zip(maquinas_tractors_patinagem3, patinagem_tractors3.values)):
-                base_position = i * (len(colors_patinagem3) * (bar_width + space_between_bars) + machine_offset)
-                sorted_row = sorted(zip(row, colors_patinagem3, labels_patinagem3), key=lambda x: x[0])
-                for j, (value, color, label) in enumerate(sorted_row):
-                    if value >= 0.1 or value == 0:  # Exibe valores maiores ou iguais a 0.1, ou valores zero
+            # Gera as barras sem alterar a ordem dos dados
+            for i, (maquina, row) in enumerate(zip(maquinas, patinagem_values.values)):
+                base_position = i * (len(colors) * (bar_width + space_between_bars) + machine_offset)
+                
+                for j, (value, color, label) in enumerate(zip(row, colors, labels)):
+                    # Arredonda o valor para uma casa decimal (formato 9.8)
+                    value_arredondado = round(value, 1)
+                    
+                    # Verifica se o valor arredondado é maior ou igual a 0.1 ou igual a 0
+                    if value_arredondado >= 0.1 or value_arredondado == 0:
                         bar_position = base_position + j * (bar_width + space_between_bars)
-                        ax_patinagem3.bar(bar_position, value, width=bar_width, label=label if i == 0 else "", color=color)
+                        ax_patinagem.bar(bar_position, value_arredondado, width=bar_width, label=label if i == 0 else "", color=color)
+
+            # Ajuste da escala do eixo Y de 0 a 100
+            ax_patinagem.set_ylim(0, 100)
 
             # Adicionar linhas horizontais de referência para todos os valores de y
-            max_y_value = patinagem_tractors3.values.max()
-            max_y = min(max_y_value + 5, 25) if not np.isnan(max_y_value) and not np.isinf(max_y_value) else 25  # Garantir valor máximo de 25
-            ax_patinagem3.set_ylim(0, max_y)
-
-            y_ticks = np.arange(0, max_y + 1, 1)  # Gera ticks de 1 em 1 hora
-            ax_patinagem3.set_yticks(y_ticks)
+            y_ticks = np.arange(0, 101, 10)  # Gera ticks de 10 em 10 unidades até 100
+            ax_patinagem.set_yticks(y_ticks)
 
             for y in y_ticks:
-                ax_patinagem3.axhline(y, color='gray', linestyle='--', linewidth=0.5)
+                ax_patinagem.axhline(y, color='gray', linestyle='--', linewidth=0.5)
 
             # Configurar os eixos e título
-            ax_patinagem3.set_ylabel('Tempo de Patinagem (h)')
-            ax_patinagem3.set_xticks([i * (len(colors_patinagem3) * (bar_width + space_between_bars) + machine_offset) + (len(colors_patinagem3) * (bar_width + space_between_bars) - space_between_bars) / 2 for i in range(len(maquinas_tractors_patinagem3))])
-            ax_patinagem3.set_xticklabels(maquinas_tractors_patinagem3, rotation=45, ha='right')
-            ax_patinagem3.set_title('Tempo de Patinagem das Rodas por Máquina - Tratores')
-            ax_patinagem3.set_xticklabels(wrapped_labels)
+            ax_patinagem.set_ylabel('Tempo de Patinagem (%)')
+            ax_patinagem.set_xticks([i * (len(colors) * (bar_width + space_between_bars) + machine_offset) + (len(colors) * (bar_width + space_between_bars) - space_between_bars) / 2 for i in range(len(maquinas))])
+            ax_patinagem.set_xticklabels(maquinas, rotation=45, ha='right')
+            ax_patinagem.set_title('Tempo de Patinagem das Rodas por Máquina - Tratores')
+            ax_patinagem.set_xticklabels(wrapped_labels)
 
             # Adicionar legenda única para Patinagem na ordem correta
-            handles3, labels3 = zip(*sorted(zip(ax_patinagem3.get_legend_handles_labels()[0], labels_patinagem3), key=lambda x: labels_patinagem3.index(x[1])))
-            ax_patinagem3.legend(handles3, labels_patinagem3, loc='upper right', bbox_to_anchor=(1.25, 1.0))
+            handles, labels = zip(*sorted(zip(ax_patinagem.get_legend_handles_labels()[0], labels), key=lambda x: labels.index(x[1])))
+            ax_patinagem.legend(handles, labels, loc='upper right', bbox_to_anchor=(1.25, 1.0))
 
-            st.pyplot(fig_patinagem4)
+            # Exibe o gráfico no Streamlit
+            st.pyplot(fig_patinagem)
+
+
+
+
             #########################################################################################################
 
             if st.button('Gerar PDF para Tratores'):
-                        figures = [ fig_utilizacao, fig_fator, fig_combust, fig_rotacao, fig_hrmotor,fig_desloc, fig_patinagem4]  
+                        figures = [ fig_utilizacao, fig_fator, fig_combust, fig_rotacao, fig_hrmotor,fig_desloc, fig_patinagem]  
                         pdf_buffer = generate_pdf_tratores( df_tractors, figures, background_image_first_page_tratores, background_image_other_pages)
                         st.download_button(
                             label="Baixar PDF",
