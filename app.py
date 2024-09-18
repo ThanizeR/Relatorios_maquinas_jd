@@ -700,7 +700,6 @@ if selected == "🌱Tratores":
             col9.pyplot(fig_desloc)
 
             ################################################################
-    
             # Seleciona as colunas de patinagem na ordem exata da planilha
             selected_columns_patinagem = [
                 "Máquina", 
@@ -716,7 +715,7 @@ if selected == "🌱Tratores":
                 "Tempo de Patinagem das Rodas no Nível 18,01–100,00% (h)"
             ]
 
-            # Suponha que df_tractors seja o DataFrame que contém os dados
+            # Copia o DataFrame mantendo a ordem das colunas
             df_selected_patinagem = df_tractors[selected_columns_patinagem].copy()
 
             # Substitui valores infinitos por NaN
@@ -724,10 +723,7 @@ if selected == "🌱Tratores":
 
             # Define máquinas e valores de patinagem
             maquinas = df_selected_patinagem["Máquina"]
-            patinagem_values = df_selected_patinagem.iloc[:, 1:]
-
-            # Multiplica os valores de patinagem por 100 para porcentagem
-            patinagem_values_percent = patinagem_values * 100
+            patinagem_values = df_selected_patinagem.iloc[:, 1:]*100
 
             # Ajusta os rótulos das máquinas para caberem no gráfico
             wrapped_labels = wrap_labels(maquinas, width=10)
@@ -747,11 +743,11 @@ if selected == "🌱Tratores":
             machine_offset = 4  # Espaço entre cada máquina
 
             # Gera as barras sem alterar a ordem dos dados
-            for i, (maquina, row) in enumerate(zip(maquinas, patinagem_values_percent.values)):
+            for i, (maquina, row) in enumerate(zip(maquinas, patinagem_values.values)):
                 base_position = i * (len(colors) * (bar_width + space_between_bars) + machine_offset)
                 
                 for j, (value, color, label) in enumerate(zip(row, colors, labels)):
-                    # Arredonda o valor para duas casas decimais
+                    # Arredonda o valor para duas casas decimais (formato 9.80)
                     value_arredondado = round(value, 2)
                     
                     # Verifica se o valor arredondado é maior ou igual a 0.01 ou igual a 0
@@ -759,13 +755,12 @@ if selected == "🌱Tratores":
                         bar_position = base_position + j * (bar_width + space_between_bars)
                         ax_patinagem.bar(bar_position, value_arredondado, width=bar_width, label=label if i == 0 else "", color=color)
 
-            # Define o limite superior do eixo Y com base no valor máximo
-            max_value = patinagem_values_percent.max().max()  # Maior valor no dataset de patinagem
-            y_limit = min(100, (max_value // 10 + 1) * 10)  # Arredonda o valor para o próximo múltiplo de 10
-            ax_patinagem.set_ylim(0, y_limit)
+            # Ajuste da escala do eixo Y para acomodar os valores
+            max_value = patinagem_values.max().max()  # Obtém o valor máximo dos dados
+            ax_patinagem.set_ylim(0, max(100, np.ceil(max_value)))  # Ajusta o eixo Y para no mínimo 100 ou o valor máximo arredondado
 
             # Adicionar linhas horizontais de referência para todos os valores de y
-            y_ticks = np.arange(0, y_limit + 1, 10)  # Gera ticks de 10 em 10 unidades até o valor arredondado
+            y_ticks = np.arange(0, ax_patinagem.get_ylim()[1] + 10, 10)  # Gera ticks de 10 em 10 unidades até o máximo
             ax_patinagem.set_yticks(y_ticks)
 
             for y in y_ticks:
@@ -774,8 +769,9 @@ if selected == "🌱Tratores":
             # Configurar os eixos e título
             ax_patinagem.set_ylabel('Tempo de Patinagem (%)')
             ax_patinagem.set_xticks([i * (len(colors) * (bar_width + space_between_bars) + machine_offset) + (len(colors) * (bar_width + space_between_bars) - space_between_bars) / 2 for i in range(len(maquinas))])
-            ax_patinagem.set_xticklabels(wrapped_labels, rotation=45, ha='right')
+            ax_patinagem.set_xticklabels(maquinas, rotation=45, ha='right')
             ax_patinagem.set_title('Tempo de Patinagem das Rodas por Máquina - Tratores')
+            ax_patinagem.set_xticklabels(wrapped_labels)
 
             # Adicionar legenda única para Patinagem na ordem correta
             handles, labels = zip(*sorted(zip(ax_patinagem.get_legend_handles_labels()[0], labels), key=lambda x: labels.index(x[1])))
@@ -783,6 +779,7 @@ if selected == "🌱Tratores":
 
             # Exibe o gráfico no Streamlit
             st.pyplot(fig_patinagem)
+
 
             #########################################################################################################
 
