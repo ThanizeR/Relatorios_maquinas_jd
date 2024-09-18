@@ -759,8 +759,10 @@ if selected == "🌱Tratores":
             # Ajuste da escala do eixo Y para acomodar os valores
             max_value = patinagem_values.max().max()  # Obtém o valor máximo dos dados
 
-            # Definir o limite superior do eixo Y
-            if max_value <= 50:
+            # Definir o limite superior do eixo Y de forma adaptativa
+            if max_value <= 25:
+                ax_patinagem.set_ylim(0, 25)  # Define até 25 se o valor máximo for menor ou igual a 25
+            elif max_value <= 50:
                 ax_patinagem.set_ylim(0, 50)  # Define até 50 se o valor máximo for menor ou igual a 50
             else:
                 ax_patinagem.set_ylim(0, 100)  # Define até 100 se o valor máximo for maior que 50
