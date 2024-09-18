@@ -734,8 +734,8 @@ if selected == "🌱Tratores":
             # Cores e labels correspondentes
             colors = ['tab:blue', 'tab:red', 'tab:green', 'tab:pink', 'tab:cyan', 'tab:orange', 'tab:brown', 'tab:gray', 'tab:olive', 'tab:purple']
             labels = [
-                '0,00–2,00% (h)', '2,01–4,00% (h)', '4,01–6,00% (h)', '6,01–8,00% (h)', '8,01–10,00% (h)',
-                '10,01–12,00% (h)', '12,01–14,00% (h)', '14,01–16,00% (h)', '16,01–18,00% (h)', '18,01–100,00% (h)'
+                '0,00–2,00%', '2,01–4,00%', '4,01–6,00%', '6,01–8,00%', '8,01–10,00%',
+                '10,01–12,00%', '12,01–14,00%', '14,01–16,00%', '16,01–18,00%', '18,01–100,00%'
             ]
 
             bar_width = 4  # Largura das barras
@@ -766,7 +766,7 @@ if selected == "🌱Tratores":
                 ax_patinagem.axhline(y, color='gray', linestyle='--', linewidth=0.5)
 
             # Configurar os eixos e título
-            ax_patinagem.set_ylabel('Tempo de Patinagem (%)')
+            ax_patinagem.set_ylabel('Tempo de Patinagem (h)')
             ax_patinagem.set_xticks([i * (len(colors) * (bar_width + space_between_bars) + machine_offset) + (len(colors) * (bar_width + space_between_bars) - space_between_bars) / 2 for i in range(len(maquinas))])
             ax_patinagem.set_xticklabels(maquinas, rotation=45, ha='right')
             ax_patinagem.set_title('Tempo de Patinagem das Rodas por Máquina - Tratores')
