@@ -700,6 +700,7 @@ if selected == "🌱Tratores":
             col9.pyplot(fig_desloc)
 
             ################################################################
+
             # Seleciona as colunas de patinagem na ordem exata da planilha
             selected_columns_patinagem = [
                 "Máquina", 
@@ -723,7 +724,7 @@ if selected == "🌱Tratores":
 
             # Define máquinas e valores de patinagem
             maquinas = df_selected_patinagem["Máquina"]
-            patinagem_values = df_selected_patinagem.iloc[:, 1:]*100
+            patinagem_values = df_selected_patinagem.iloc[:, 1:]
 
             # Ajusta os rótulos das máquinas para caberem no gráfico
             wrapped_labels = wrap_labels(maquinas, width=10)
