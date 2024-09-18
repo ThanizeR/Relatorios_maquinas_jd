@@ -735,8 +735,8 @@ if selected == "🌱Tratores":
             # Cores e labels correspondentes
             colors = ['tab:blue', 'tab:red', 'tab:green', 'tab:pink', 'tab:cyan', 'tab:orange', 'tab:brown', 'tab:gray', 'tab:olive', 'tab:purple']
             labels = [
-                '0,00–2,00% (h)', '2,01–4,00% (h)', '4,01–6,00% (h)', '6,01–8,00% (h)', '8,01–10,00% (h)',
-                '10,01–12,00% (h)', '12,01–14,00% (h)', '14,01–16,00% (h)', '16,01–18,00% (h)', '18,01–100,00% (h)'
+                '0,00–2,00', '2,01–4,00', '4,01–6,00', '6,01–8,00', '8,01–10,00',
+                '10,01–12,00', '12,01–14,00', '14,01–16,00', '16,01–18,00', '18,01–100,00'
             ]
 
             bar_width = 4  # Largura das barras
@@ -758,9 +758,14 @@ if selected == "🌱Tratores":
 
             # Ajuste da escala do eixo Y para acomodar os valores
             max_value = patinagem_values.max().max()  # Obtém o valor máximo dos dados
-            ax_patinagem.set_ylim(0, max(100, np.ceil(max_value)))  # Ajusta o eixo Y para no mínimo 100 ou o valor máximo arredondado
 
-            # Adicionar linhas horizontais de referência para todos os valores de y
+            # Definir o limite superior do eixo Y
+            if max_value <= 50:
+                ax_patinagem.set_ylim(0, 50)  # Define até 50 se o valor máximo for menor ou igual a 50
+            else:
+                ax_patinagem.set_ylim(0, 100)  # Define até 100 se o valor máximo for maior que 50
+
+            # Adicionar linhas horizontais de referência para os valores de y
             y_ticks = np.arange(0, ax_patinagem.get_ylim()[1] + 10, 10)  # Gera ticks de 10 em 10 unidades até o máximo
             ax_patinagem.set_yticks(y_ticks)
 
@@ -768,7 +773,7 @@ if selected == "🌱Tratores":
                 ax_patinagem.axhline(y, color='gray', linestyle='--', linewidth=0.5)
 
             # Configurar os eixos e título
-            ax_patinagem.set_ylabel('Tempo de Patinagem (%)')
+            ax_patinagem.set_ylabel('Tempo de Patinagem (h)')
             ax_patinagem.set_xticks([i * (len(colors) * (bar_width + space_between_bars) + machine_offset) + (len(colors) * (bar_width + space_between_bars) - space_between_bars) / 2 for i in range(len(maquinas))])
             ax_patinagem.set_xticklabels(maquinas, rotation=45, ha='right')
             ax_patinagem.set_title('Tempo de Patinagem das Rodas por Máquina - Tratores')
