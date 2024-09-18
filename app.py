@@ -700,6 +700,7 @@ if selected == "🌱Tratores":
             col9.pyplot(fig_desloc)
 
             ################################################################
+    
             # Seleciona as colunas de patinagem na ordem exata da planilha
             selected_columns_patinagem = [
                 "Máquina", 
@@ -747,19 +748,20 @@ if selected == "🌱Tratores":
                 base_position = i * (len(colors) * (bar_width + space_between_bars) + machine_offset)
                 
                 for j, (value, color, label) in enumerate(zip(row, colors, labels)):
-                    # Arredonda o valor para uma casa decimal (formato 9.8)
-                    value_arredondado = round(value, 1)
+                    # Arredonda o valor para duas casas decimais (formato 9.80)
+                    value_arredondado = round(value, 2)
                     
-                    # Verifica se o valor arredondado é maior ou igual a 0.1 ou igual a 0
-                    if value_arredondado >= 0.1 or value_arredondado == 0:
+                    # Verifica se o valor arredondado é maior ou igual a 0.01 ou igual a 0
+                    if value_arredondado >= 0.01 or value_arredondado == 0:
                         bar_position = base_position + j * (bar_width + space_between_bars)
                         ax_patinagem.bar(bar_position, value_arredondado, width=bar_width, label=label if i == 0 else "", color=color)
 
-            # Ajuste da escala do eixo Y de 0 a 100
-            ax_patinagem.set_ylim(0, 100)
+            # Ajuste da escala do eixo Y para acomodar os valores
+            max_value = patinagem_values.max().max()  # Obtém o valor máximo dos dados
+            ax_patinagem.set_ylim(0, max(100, np.ceil(max_value)))  # Ajusta o eixo Y para no mínimo 100 ou o valor máximo arredondado
 
             # Adicionar linhas horizontais de referência para todos os valores de y
-            y_ticks = np.arange(0, 101, 10)  # Gera ticks de 10 em 10 unidades até 100
+            y_ticks = np.arange(0, ax_patinagem.get_ylim()[1] + 10, 10)  # Gera ticks de 10 em 10 unidades até o máximo
             ax_patinagem.set_yticks(y_ticks)
 
             for y in y_ticks:
@@ -778,8 +780,6 @@ if selected == "🌱Tratores":
 
             # Exibe o gráfico no Streamlit
             st.pyplot(fig_patinagem)
-
-
 
 
             #########################################################################################################
