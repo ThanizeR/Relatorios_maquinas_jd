@@ -748,7 +748,7 @@ if selected == "🌱Tratores":
                 base_position = i * (len(colors) * (bar_width + space_between_bars) + machine_offset)
                 
                 for j, (value, color, label) in enumerate(zip(row, colors, labels)):
-                    # Arredonda o valor para duas casas decimais (formato 9.80)
+                    # Arredonda o valor para duas casas decimais
                     value_arredondado = round(value, 2)
                     
                     # Verifica se o valor arredondado é maior ou igual a 0.01 ou igual a 0
@@ -761,14 +761,19 @@ if selected == "🌱Tratores":
 
             # Definir o limite superior do eixo Y de forma adaptativa
             if max_value <= 25:
-                ax_patinagem.set_ylim(0, 25)  # Define até 25 se o valor máximo for menor ou igual a 25
+                y_limit = 25
             elif max_value <= 50:
-                ax_patinagem.set_ylim(0, 50)  # Define até 50 se o valor máximo for menor ou igual a 50
+                y_limit = 50
+            elif max_value <= 75:
+                y_limit = 75
             else:
-                ax_patinagem.set_ylim(0, 100)  # Define até 100 se o valor máximo for maior que 50
+                y_limit = 100
+
+            # Define o limite do eixo Y
+            ax_patinagem.set_ylim(0, y_limit)
 
             # Adicionar linhas horizontais de referência para os valores de y
-            y_ticks = np.arange(0, ax_patinagem.get_ylim()[1] + 10, 10)  # Gera ticks de 10 em 10 unidades até o máximo
+            y_ticks = np.arange(0, y_limit + 10, 10)  # Gera ticks de 10 em 10 unidades até o máximo
             ax_patinagem.set_yticks(y_ticks)
 
             for y in y_ticks:
