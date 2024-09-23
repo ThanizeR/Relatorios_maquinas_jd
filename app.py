@@ -320,7 +320,7 @@ if selected == "🌱Tratores":
             selected_columns_utilizacao = ["Máquina", 
                                         "Utilização (Agricultura) Trabalho (%)",
                                         "Utilização (Agricultura) Transporte (%)",
-                                        "Utilização (Agricultura) Marcha Lenta (%)"]
+                                        "Utilização (Agricultura) Ocioso (%)"]
 
             df_selected_tractors_utilizacao = df_tractors[selected_columns_utilizacao].copy()
 
