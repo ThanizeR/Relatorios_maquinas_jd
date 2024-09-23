@@ -316,18 +316,23 @@ if selected == "🌱Tratores":
                         'Other Event': 'rgb(255, 127, 14)'
                     }
             #######################################################################################
-                    # Definir colunas para análise de utilização
-            selected_columns_utilizacao = ["Máquina", 
-                                        "Utilização (Agricultura) Trabalho (%)",
-                                        "Utilização (Agricultura) Transporte (%)"]
+            # Definir as colunas principais e opcionais para análise de utilização
+            selected_columns_utilizacao = ["Máquina"]
 
-            # Verificar se a coluna "Marcha Lenta" ou "Ocioso" está presente e adicionar à lista de colunas
+            # Verificar se as colunas opcionais existem e adicioná-las
+            if "Utilização (Agricultura) Trabalho (%)" in df_tractors.columns:
+                selected_columns_utilizacao.append("Utilização (Agricultura) Trabalho (%)")
+
+            if "Utilização (Agricultura) Transporte (%)" in df_tractors.columns:
+                selected_columns_utilizacao.append("Utilização (Agricultura) Transporte (%)")
+
             if "Utilização (Agricultura) Marcha Lenta (%)" in df_tractors.columns:
                 selected_columns_utilizacao.append("Utilização (Agricultura) Marcha Lenta (%)")
-            elif "Ocioso (%)" in df_tractors.columns:
+
+            if "Utilização (Agricultura) Ocioso (%)" in df_tractors.columns:
                 selected_columns_utilizacao.append("Utilização (Agricultura) Ocioso (%)")
 
-            # Filtrar o DataFrame com as colunas selecionadas
+            # Selecionar os dados com as colunas presentes
             df_selected_tractors_utilizacao = df_tractors[selected_columns_utilizacao].copy()
 
             # Nomes das máquinas e porcentagens de utilização
@@ -346,15 +351,23 @@ if selected == "🌱Tratores":
             # Plotar gráfico de barras horizontais para % de Utilização
             fig_utilizacao, ax_utilizacao = plt.subplots(figsize=(12, 8))
 
-            # Cores e labels para as barras de Utilização
-            colors_utilizacao = ['tab:green', 'tab:gray', 'tab:orange']
-            labels_utilizacao = ['Trabalhando', 'Transporte']
+            # Definir as cores e labels dinamicamente com base nas colunas disponíveis
+            colors_utilizacao = []
+            labels_utilizacao = []
 
-            # Adicionar "Marcha Lenta" ou "Ocioso" ao label e cor, dependendo de qual coluna está presente
+            if "Utilização (Agricultura) Trabalho (%)" in df_selected_tractors_utilizacao.columns:
+                colors_utilizacao.append('tab:green')
+                labels_utilizacao.append('Trabalhando')
+
+            if "Utilização (Agricultura) Transporte (%)" in df_selected_tractors_utilizacao.columns:
+                colors_utilizacao.append('tab:gray')
+                labels_utilizacao.append('Transporte')
+
             if "Utilização (Agricultura) Marcha Lenta (%)" in df_selected_tractors_utilizacao.columns:
                 colors_utilizacao.append('tab:orange')
                 labels_utilizacao.append('Marcha Lenta')
-            elif "Ocioso (%)" in df_selected_tractors_utilizacao.columns:
+
+            if "Utilização (Agricultura) Ocioso (%)" in df_selected_tractors_utilizacao.columns:
                 colors_utilizacao.append('tab:orange')
                 labels_utilizacao.append('Ocioso')
 
@@ -386,15 +399,21 @@ if selected == "🌱Tratores":
             col4, col5 = st.columns(2)
             col4.pyplot(fig_utilizacao)
 
-            #############################################################
-            # Definir colunas para análise de fator de carga média do motor
-            selected_columns_fator = ["Máquina", 
-                                    "Fator de Carga Média do Motor (Ag) Trabalho (%)",
-                                    "Fator de Carga Média do Motor (Ag) Transporte (%)",
-                                    "Fator de Carga Média do Motor (Ag) Marcha Lenta (%)"]
 
-            # Filtrar o DataFrame para as colunas de fator de carga selecionadas
-            df_selected_tractors_fator = df_tractors[selected_columns_fator].copy()
+            #############################################################
+           # Verificar se as colunas existem no DataFrame antes de selecioná-las
+            colunas_disponiveis = ["Máquina", 
+                                "Fator de Carga Média do Motor (Ag) Trabalho (%)",
+                                "Fator de Carga Média do Motor (Ag) Transporte (%)"]
+
+            # Adicionar colunas opcionais apenas se existirem
+            if "Fator de Carga Média do Motor (Ag) Marcha Lenta (%)" in df_tractors.columns:
+                colunas_disponiveis.append("Fator de Carga Média do Motor (Ag) Marcha Lenta (%)")
+            if "Fator de Carga Média do Motor (Ag) Ocioso (%)" in df_tractors.columns:
+                colunas_disponiveis.append("Fator de Carga Média do Motor (Ag) Ocioso (%)")
+
+            # Filtrar o DataFrame para as colunas de fator de carga disponíveis
+            df_selected_tractors_fator = df_tractors[colunas_disponiveis].copy()
 
             # Identificar linhas onde os valores são todos zero
             zeros_mask = (df_selected_tractors_fator.iloc[:, 1:] == 0).all(axis=1)
@@ -413,13 +432,28 @@ if selected == "🌱Tratores":
             # Plotar gráfico de barras horizontais para % de Fator de Carga
             fig_fator, ax_fator = plt.subplots(figsize=(12, 8))
 
-            # Cores e labels para as barras de Fator de Carga
-            colors_fator = ['tab:green', 'tab:gray', 'tab:orange']
-            labels_fator = ['Trabalhando', 'Transporte', 'Marcha Lenta']
-            bar_height_fator = 0.32  # Altura das barras de Fator de Carga
+            # Definir as cores e labels dinamicamente
+            colors_fator = []
+            labels_fator = []
 
-            # Ajustar as posições das barras para que fiquem separadas
-            bar_positions_tractors_fator = np.arange(len(maquinas_tractors_fator)) * 1.5  # Aumentar o fator de multiplicação para espaçamento maior
+            if "Fator de Carga Média do Motor (Ag) Trabalho (%)" in df_selected_tractors_fator.columns:
+                colors_fator.append('tab:green')
+                labels_fator.append('Trabalhando')
+
+            if "Fator de Carga Média do Motor (Ag) Transporte (%)" in df_selected_tractors_fator.columns:
+                colors_fator.append('tab:gray')
+                labels_fator.append('Transporte')
+
+            if "Fator de Carga Média do Motor (Ag) Marcha Lenta (%)" in df_selected_tractors_fator.columns:
+                colors_fator.append('tab:orange')
+                labels_fator.append('Marcha Lenta')
+
+            if "Fator de Carga Média do Motor (Ag) Ocioso (%)" in df_selected_tractors_fator.columns:
+                colors_fator.append('tab:orange')
+                labels_fator.append('Ocioso')
+
+            bar_height_fator = 0.32  # Altura das barras de Fator de Carga
+            bar_positions_tractors_fator = np.arange(len(maquinas_tractors_fator)) * 1.5  # Aumentar o espaçamento
             offset = 0.35  # Espaçamento entre as categorias dentro de cada máquina
 
             # Iterar sobre as categorias para criar as barras
@@ -431,40 +465,28 @@ if selected == "🌱Tratores":
                             label=labels_fator[j], 
                             color=colors_fator[j])
 
-                # Adicionar rótulos às barras na ponta
+                # Adicionar rótulos às barras
                 for i in range(len(bar_positions_tractors_fator[:len(df_non_zeros)])):
                     percent = fatores_percentual_tractors.iloc[i, j]
-                    
-                    # Verificar se o valor é zero e ajustar a posição do texto
-                    if percent == 0:
-                        ax_fator.text(2,  # Posição no início da barra se for zero
-                                    bar_positions_tractors_fator[i] + j * offset, 
-                                    f'{percent:.1f}%', 
-                                    ha='left', 
-                                    va='center', 
-                                    color='black', 
-                                    fontsize=10, 
-                                    fontweight='bold')
-                    else:
-                        ax_fator.text(fatores_percentual_tractors.iloc[i, j] + 2,  # Posição na ponta da barra
-                                    bar_positions_tractors_fator[i] + j * offset, 
-                                    f'{percent:.1f}%', 
-                                    ha='left', 
-                                    va='center', 
-                                    color='black', 
-                                    fontsize=10, 
-                                    fontweight='bold')
+                    ax_fator.text(fatores_percentual_tractors.iloc[i, j] + 2,  
+                                bar_positions_tractors_fator[i] + j * offset, 
+                                f'{percent:.1f}%', 
+                                ha='left', 
+                                va='center', 
+                                color='black', 
+                                fontsize=10, 
+                                fontweight='bold')
 
             # Configurar os eixos e título
-            ax_fator.set_xlabel('')  # Eixo x em negrito
+            ax_fator.set_xlabel('% de Fator de Carga')
             ax_fator.set_yticks(bar_positions_tractors_fator + offset)
-            ax_fator.set_yticklabels(maquinas_tractors_fator)  # Nomes das máquinas em negrito
-            ax_fator.set_title('% de Fator de Carga por Máquina - Tratores')  # Título em negrito
+            ax_fator.set_yticklabels(maquinas_tractors_fator)  # Nomes das máquinas
+            ax_fator.set_title('% de Fator de Carga por Máquina - Tratores')
 
             # Definir os limites e marcas do eixo x
             ax_fator.set_xlim([0, 100])
             ax_fator.set_xticks([0, 50, 100])
-            ax_fator.set_xticklabels(['0%', '50%', '100%'])  # Valores do eixo x em negrito
+            ax_fator.set_xticklabels(['0%', '50%', '100%'])  # Valores do eixo x
 
             # Adicionar legenda única para Fator de Carga
             ax_fator.legend(labels_fator, loc='upper right', bbox_to_anchor=(1.23, 1.0))
