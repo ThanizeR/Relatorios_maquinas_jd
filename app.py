@@ -496,19 +496,20 @@ if selected == "🌱Tratores":
 
 
             ################################################################################################
-
             # Definir colunas para análise de taxa média de combustível
-            selected_columns_combust = ["Máquina",
-                                        "Taxa Média de Combustível (Ag) Trabalhando (l/h)",
-                                        "Taxa Média de Combustível (Ag) Transporte (l/h)",
-                                        "Taxa Média de Combustível (Ag) Ocioso (l/h)"]
+            selected_columns_combust = [
+                "Máquina",
+                "Taxa Média de Combustível (Ag) Trabalhando (l/h)",
+                "Taxa Média de Combustível (Ag) Transporte (l/h)",
+                "Taxa Média de Combustível (Ag) Ocioso (l/h)"
+            ]
 
             # Filtrar o DataFrame para as colunas selecionadas
             df_selected_tractors_combust = df_tractors[selected_columns_combust].copy()
 
             # Nomes das máquinas e porcentagens
             maquinas_tractors_combust = df_selected_tractors_combust["Máquina"]
-            percentual_tractors_combust = df_selected_tractors_combust.iloc[:, 1:] 
+            percentual_tractors_combust = df_selected_tractors_combust.iloc[:, 1:]
             wrapped_labels = wrap_labels(maquinas_tractors_combust, width=10)
 
             # Plotar gráfico de barras verticais
@@ -525,8 +526,10 @@ if selected == "🌱Tratores":
             # Plotar as barras verticais combinadas para cada máquina
             for i, (maquina, row) in enumerate(zip(maquinas_tractors_combust, percentual_tractors_combust.values)):
                 for j, (percent, color) in enumerate(zip(row, colors_combust)):
-                    ax_combust.bar(bar_positions_tractors_combust[i] + j * bar_width_combust, percent, width=bar_width_combust, label=labels_combust[j] if i == 0 else "", color=color)
-                    ax_combust.text(bar_positions_tractors_combust[i] + j * bar_width_combust, percent + 1, f'{percent:.1f}', ha='center', va='bottom', color='black', fontsize=10, fontweight='bold')  # Negrito para os valores
+                    ax_combust.bar(bar_positions_tractors_combust[i] + j * bar_width_combust, percent, width=bar_width_combust,
+                                label=labels_combust[j] if i == 0 else "", color=color)
+                    ax_combust.text(bar_positions_tractors_combust[i] + j * bar_width_combust, percent + 1,
+                                    f'{percent:.1f}', ha='center', va='bottom', color='black', fontsize=10, fontweight='bold')
 
             # Configurar rótulos e título
             ax_combust.set_xlabel('')  # Eixo X em negrito
@@ -535,8 +538,23 @@ if selected == "🌱Tratores":
             ax_combust.set_xticklabels(wrapped_labels)  # Rótulos em negrito
             ax_combust.set_title('Consumo de Combustível')  # Título em negrito
 
+            # Definir os limites do eixo Y de forma adaptativa
+            max_value_combust = percentual_tractors_combust.max().max()  # Obtém o valor máximo dos dados
+            if max_value_combust <= 15:
+                y_limit_combust = 15
+            elif max_value_combust <= 25:
+                y_limit_combust = 25
+            elif max_value_combust <= 50:
+                y_limit_combust = 50
+            elif max_value_combust <= 75:
+                y_limit_combust = 75
+            else:
+                y_limit_combust = 100
+
+            ax_combust.set_ylim(0, y_limit_combust)  # Define o limite do eixo Y
+
             # Definir as numerações do eixo y
-            yticks_values = np.arange(0, 101, 10)  # Ajuste conforme necessário
+            yticks_values = np.arange(0, y_limit_combust + 1, 10)  # Ajusta conforme necessário
             yticks_labels = [f'{val:.1f}' for val in yticks_values]
             ax_combust.set_yticks(yticks_values)
             ax_combust.set_yticklabels(yticks_labels)  # Rótulos do eixo Y em negrito
@@ -547,7 +565,6 @@ if selected == "🌱Tratores":
             # Mostrar o gráfico
             col6, col7 = st.columns(2)
             col6.pyplot(fig_combust)
-
 
         ###################################################################################################
 
