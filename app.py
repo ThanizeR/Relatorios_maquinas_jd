@@ -320,7 +320,7 @@ if selected == "🌱Tratores":
             selected_columns_utilizacao = ["Máquina", 
                                         "Utilização (Agricultura) Trabalho (%)",
                                         "Utilização (Agricultura) Transporte (%)",
-                                        "Utilização (Agricultura) Ocioso (%)"]
+                                        "Utilização (Agricultura) Marcha Lenta (%)"]
 
             df_selected_tractors_utilizacao = df_tractors[selected_columns_utilizacao].copy()
 
@@ -371,6 +371,7 @@ if selected == "🌱Tratores":
             # Mostrar o gráfico de Utilização
             col4, col5 = st.columns(2)
             col4.pyplot(fig_utilizacao)
+
             #############################################################
             # Definir colunas para análise de fator de carga média do motor
             selected_columns_fator = ["Máquina", 
