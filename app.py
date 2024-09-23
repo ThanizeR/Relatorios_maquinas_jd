@@ -371,8 +371,6 @@ if selected == "🌱Tratores":
             # Mostrar o gráfico de Utilização
             col4, col5 = st.columns(2)
             col4.pyplot(fig_utilizacao)
-
-
             #############################################################
             # Definir colunas para análise de fator de carga média do motor
             selected_columns_fator = ["Máquina", 
