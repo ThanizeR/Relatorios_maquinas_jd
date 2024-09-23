@@ -316,12 +316,18 @@ if selected == "🌱Tratores":
                         'Other Event': 'rgb(255, 127, 14)'
                     }
             #######################################################################################
-            # Definir colunas para análise de utilização
+                    # Definir colunas para análise de utilização
             selected_columns_utilizacao = ["Máquina", 
                                         "Utilização (Agricultura) Trabalho (%)",
-                                        "Utilização (Agricultura) Transporte (%)",
-                                        "Utilização (Agricultura) Marcha Lenta (%)"]
+                                        "Utilização (Agricultura) Transporte (%)"]
 
+            # Verificar se a coluna "Marcha Lenta" ou "Ocioso" está presente e adicionar à lista de colunas
+            if "Utilização (Agricultura) Marcha Lenta (%)" in df_tractors.columns:
+                selected_columns_utilizacao.append("Utilização (Agricultura) Marcha Lenta (%)")
+            elif "Ocioso (%)" in df_tractors.columns:
+                selected_columns_utilizacao.append("Utilização (Agricultura) Ocioso (%)")
+
+            # Filtrar o DataFrame com as colunas selecionadas
             df_selected_tractors_utilizacao = df_tractors[selected_columns_utilizacao].copy()
 
             # Nomes das máquinas e porcentagens de utilização
@@ -330,7 +336,7 @@ if selected == "🌱Tratores":
             velocidades_percentual_tractors = df_selected_tractors_utilizacao.iloc[:, 1:].div(velocidades_total_tractors, axis=0) * 100
             wrapped_labels = wrap_labels(maquinas_tractors, width=10)  # Ajuste a largura conforme necessário
 
-            ## Ajustar a altura das barras dinamicamente
+            # Ajustar a altura das barras dinamicamente
             bar_height_utilizacao = 0.6
             if len(maquinas_tractors) == 1:
                 bar_height_utilizacao = 0.2  # Barra mais fina
@@ -342,7 +348,15 @@ if selected == "🌱Tratores":
 
             # Cores e labels para as barras de Utilização
             colors_utilizacao = ['tab:green', 'tab:gray', 'tab:orange']
-            labels_utilizacao = ['Trabalhando', 'Transporte', 'Marcha Lenta']
+            labels_utilizacao = ['Trabalhando', 'Transporte']
+
+            # Adicionar "Marcha Lenta" ou "Ocioso" ao label e cor, dependendo de qual coluna está presente
+            if "Utilização (Agricultura) Marcha Lenta (%)" in df_selected_tractors_utilizacao.columns:
+                colors_utilizacao.append('tab:orange')
+                labels_utilizacao.append('Marcha Lenta')
+            elif "Ocioso (%)" in df_selected_tractors_utilizacao.columns:
+                colors_utilizacao.append('tab:orange')
+                labels_utilizacao.append('Ocioso')
 
             # Plotar as barras horizontais combinadas para cada máquina (utilização)
             for i, (maquina, row) in enumerate(zip(maquinas_tractors, velocidades_percentual_tractors.values)):
