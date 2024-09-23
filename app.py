@@ -315,6 +315,52 @@ if selected == "🌱Tratores":
                         'Event': 'rgb(31, 119, 180)',
                         'Other Event': 'rgb(255, 127, 14)'
                     }
+
+            # Definir os dados
+            selected_columns_hrmotor = ["Máquina", "Horas de Operação do Motor Período (h)"]
+            df_selected_tractors_hrmotor = df_tractors[selected_columns_hrmotor].copy()
+
+            # Ordenar o DataFrame com base nas horas de operação do motor usando sort_values
+            df_selected_tractors_hrmotor = df_selected_tractors_hrmotor.sort_values(by="Horas de Operação do Motor Período (h)", ascending=False)
+
+            # Configurar o gráfico
+            fig_hrmotor, ax_hrmotor = plt.subplots(figsize=(12, 8))
+
+            # Extrair dados para plotagem
+            maquinas_tractors_hrmotor = df_selected_tractors_hrmotor["Máquina"]
+            horas_operacao_hrmotor = df_selected_tractors_hrmotor["Horas de Operação do Motor Período (h)"]
+            wrapped_labels = wrap_labels(maquinas_tractors_hrmotor, width=10)  # Ajuste a largura conforme necessário
+
+            # Ajustar a altura das barras dinamicamente
+            bar_height_hrmotor = 0.4
+            if len(maquinas_tractors_hrmotor) == 1:
+                bar_height_hrmotor = 0.2  # Barra mais fina
+
+            # Plotar barras horizontais com cor verde musgo claro
+            bars = ax_hrmotor.barh(maquinas_tractors_hrmotor, horas_operacao_hrmotor, height=bar_height_hrmotor, color='green')
+            labels_hrmotor = ['Hr de operação']
+
+            # Adicionar os números de horas formatados no final de cada barra
+            for bar, hora in zip(bars, horas_operacao_hrmotor):
+                ax_hrmotor.text(bar.get_width() + 0.3, bar.get_y() + bar.get_height() / 2, f'{hora:.2f} h',
+                                va='center', ha='left', fontsize=10, fontweight='bold')
+
+            # Configurar os eixos e título
+            ax_hrmotor.set_xlabel('')
+            ax_hrmotor.set_ylabel('')
+            ax_hrmotor.set_title('Horas de Operação do Motor por Máquina')
+            ax_hrmotor.set_yticklabels(wrapped_labels)
+
+            # Centralizar a barra única
+            if len(maquinas_tractors_hrmotor) == 1:
+                ax_hrmotor.set_ylim(-0.5, 0.5)  # Centralizar a barra no meio do gráfico
+
+            # Adicionar legenda única para Horas de Operação
+            ax_hrmotor.legend(labels_hrmotor, loc='upper right', bbox_to_anchor=(1.22, 1.0))
+
+            # Mostrar o gráfico
+            col8, col9 = st.columns(2)
+            col8.pyplot(fig_hrmotor)
             #######################################################################################
             # Definir as colunas principais e opcionais para análise de utilização
             selected_columns_utilizacao = ["Máquina"]
@@ -632,56 +678,6 @@ if selected == "🌱Tratores":
 
             # Mostrar o gráfico de rotação média
             col7.pyplot(fig_rotacao)
-
-
-        ###################################################################################################
-
-            # Definir os dados
-            selected_columns_hrmotor = ["Máquina", "Horas de Operação do Motor Período (h)"]
-            df_selected_tractors_hrmotor = df_tractors[selected_columns_hrmotor].copy()
-
-            # Ordenar o DataFrame com base nas horas de operação do motor usando sort_values
-            df_selected_tractors_hrmotor = df_selected_tractors_hrmotor.sort_values(by="Horas de Operação do Motor Período (h)", ascending=False)
-
-            # Configurar o gráfico
-            fig_hrmotor, ax_hrmotor = plt.subplots(figsize=(12, 8))
-
-            # Extrair dados para plotagem
-            maquinas_tractors_hrmotor = df_selected_tractors_hrmotor["Máquina"]
-            horas_operacao_hrmotor = df_selected_tractors_hrmotor["Horas de Operação do Motor Período (h)"]
-            wrapped_labels = wrap_labels(maquinas_tractors_hrmotor, width=10)  # Ajuste a largura conforme necessário
-
-            # Ajustar a altura das barras dinamicamente
-            bar_height_hrmotor = 0.4
-            if len(maquinas_tractors_hrmotor) == 1:
-                bar_height_hrmotor = 0.2  # Barra mais fina
-
-            # Plotar barras horizontais com cor verde musgo claro
-            bars = ax_hrmotor.barh(maquinas_tractors_hrmotor, horas_operacao_hrmotor, height=bar_height_hrmotor, color='green')
-            labels_hrmotor = ['Hr de operação']
-
-            # Adicionar os números de horas formatados no final de cada barra
-            for bar, hora in zip(bars, horas_operacao_hrmotor):
-                ax_hrmotor.text(bar.get_width() + 0.3, bar.get_y() + bar.get_height() / 2, f'{hora:.2f} h',
-                                va='center', ha='left', fontsize=10, fontweight='bold')
-
-            # Configurar os eixos e título
-            ax_hrmotor.set_xlabel('')
-            ax_hrmotor.set_ylabel('')
-            ax_hrmotor.set_title('Horas de Operação do Motor por Máquina')
-            ax_hrmotor.set_yticklabels(wrapped_labels)
-
-            # Centralizar a barra única
-            if len(maquinas_tractors_hrmotor) == 1:
-                ax_hrmotor.set_ylim(-0.5, 0.5)  # Centralizar a barra no meio do gráfico
-
-            # Adicionar legenda única para Horas de Operação
-            ax_hrmotor.legend(labels_hrmotor, loc='upper right', bbox_to_anchor=(1.22, 1.0))
-
-            # Mostrar o gráfico
-            col8, col9 = st.columns(2)
-            col8.pyplot(fig_hrmotor)
-
 
             ########################################################################################
             # Definir colunas para análise de velocidade média de deslocamento
