@@ -848,8 +848,6 @@ if selected == "🌱Tratores":
             # Exibe o gráfico no Streamlit
             st.pyplot(fig_patinagem)
 
-
-
             #########################################################################################################
 
             if st.button('Gerar PDF para Tratores'):
@@ -953,89 +951,96 @@ elif selected == "🌱Pulverizadores":
                     col4.pyplot(fig_pulverizador_combus)
                     #####################################################################################################
                     
-                    # Definir colunas para análise de fator de carga média do pulverizador
-                    selected_columns_pulverizador_factor = ["Máquina", 
-                                                            "Fator de Carga Média do Motor (Ag) Marcha Lenta (%)",
-                                                            "Fator de Carga Média do Motor (Ag) Trabalho (%)",
-                                                            "Fator de Carga Média do Motor (Ag) Transporte (%)"]
+                    # Verificar se as colunas existem no DataFrame antes de selecioná-las
+                    colunas_disponiveis = ["Máquina", 
+                                        "Fator de Carga Média do Motor (Ag) Trabalho (%)",
+                                        "Fator de Carga Média do Motor (Ag) Transporte (%)"]
 
-                    # Filtrar o DataFrame para as colunas selecionadas
-                    df_selected_pulverizador_factor = df_sprayers[selected_columns_pulverizador_factor].copy()
+                    # Adicionar colunas opcionais apenas se existirem
+                    if "Fator de Carga Média do Motor (Ag) Marcha Lenta (%)" in df_sprayers.columns:
+                        colunas_disponiveis.append("Fator de Carga Média do Motor (Ag) Marcha Lenta (%)")
+                    if "Fator de Carga Média do Motor (Ag) Ocioso (%)" in df_sprayers.columns:
+                        colunas_disponiveis.append("Fator de Carga Média do Motor (Ag) Ocioso (%)")
+
+                    # Filtrar o DataFrame para as colunas de fator de carga disponíveis
+                    df_selected_tractors_fator = df_sprayers[colunas_disponiveis].copy()
 
                     # Identificar linhas onde os valores são todos zero
-                    zeros_mask = (df_selected_pulverizador_factor.iloc[:, 1:] == 0).all(axis=1)
+                    zeros_mask = (df_selected_tractors_fator.iloc[:, 1:] == 0).all(axis=1)
 
                     # Separar máquinas com todos os valores zero e as que têm valores diferentes de zero
-                    df_non_zeros = df_selected_pulverizador_factor[~zeros_mask]
-                    df_zeros = df_selected_pulverizador_factor[zeros_mask]
+                    df_non_zeros = df_selected_tractors_fator[~zeros_mask]
+                    df_zeros = df_selected_tractors_fator[zeros_mask]
 
                     # Concatenar os DataFrames, primeiro os não-zero, depois os zero
-                    df_selected_pulverizador_factor = pd.concat([df_non_zeros, df_zeros])
+                    df_selected_tractors_fator = pd.concat([df_non_zeros, df_zeros])
 
                     # Nomes das máquinas e porcentagens de fator de carga
-                    maquinas_pulverizador_factor = df_selected_pulverizador_factor["Máquina"]
-                    percentual_pulverizador_factor = df_selected_pulverizador_factor.iloc[:, 1:] * 100
-
-                    # Aplicar quebra de linha nos nomes das máquinas
-                    wrapped_labels = wrap_labels(maquinas_pulverizador_factor, width=10)  # Ajuste a largura conforme necessário
+                    maquinas_tractors_fator = df_selected_tractors_fator["Máquina"]
+                    fatores_percentual_tractors = df_selected_tractors_fator.iloc[:, 1:] * 100
 
                     # Plotar gráfico de barras horizontais para % de Fator de Carga
-                    fig_pulverizador_factor, ax_pulverizador_factor = plt.subplots(figsize=(12, 8))
+                    fig_pulverizador_factor, ax_fator = plt.subplots(figsize=(12, 8))
 
-                    # Cores e labels para as barras de Fator de Carga
-                    colors_pulverizador_factor = ['tab:green', 'tab:blue', 'tab:red']
-                    labels_pulverizador_factor = ['Marcha Lenta (%)', 'Trabalho (%)', 'Transporte (%)']
-                    bar_height_pulverizador_factor = 0.32  # Altura das barras de Fator de Carga
-                    bar_positions_pulverizador_factor = np.arange(len(maquinas_pulverizador_factor)) * 1.5  # Aumentar o fator de multiplicação para espaçamento maior
+                    # Definir as cores e labels dinamicamente
+                    colors_fator = []
+                    labels_fator = []
+
+                    if "Fator de Carga Média do Motor (Ag) Trabalho (%)" in df_selected_tractors_fator.columns:
+                        colors_fator.append('tab:green')
+                        labels_fator.append('Trabalhando')
+
+                    if "Fator de Carga Média do Motor (Ag) Transporte (%)" in df_selected_tractors_fator.columns:
+                        colors_fator.append('tab:gray')
+                        labels_fator.append('Transporte')
+
+                    if "Fator de Carga Média do Motor (Ag) Marcha Lenta (%)" in df_selected_tractors_fator.columns:
+                        colors_fator.append('tab:orange')
+                        labels_fator.append('Marcha Lenta')
+
+                    if "Fator de Carga Média do Motor (Ag) Ocioso (%)" in df_selected_tractors_fator.columns:
+                        colors_fator.append('tab:orange')
+                        labels_fator.append('Ocioso')
+
+                    bar_height_fator = 0.32  # Altura das barras de Fator de Carga
+                    bar_positions_tractors_fator = np.arange(len(maquinas_tractors_fator)) * 1.5  # Aumentar o espaçamento
                     offset = 0.35  # Espaçamento entre as categorias dentro de cada máquina
 
                     # Iterar sobre as categorias para criar as barras
-                    for j in range(len(labels_pulverizador_factor)):
+                    for j in range(len(labels_fator)):
                         # Desenhar barras apenas para as máquinas que não têm todos os valores zerados
-                        ax_pulverizador_factor.barh(bar_positions_pulverizador_factor[:len(df_non_zeros)] + j * offset, 
-                                                    percentual_pulverizador_factor.iloc[:len(df_non_zeros), j], 
-                                                    height=bar_height_pulverizador_factor, 
-                                                    label=labels_pulverizador_factor[j], 
-                                                    color=colors_pulverizador_factor[j])
+                        ax_fator.barh(bar_positions_tractors_fator[:len(df_non_zeros)] + j * offset, 
+                                    fatores_percentual_tractors.iloc[:len(df_non_zeros), j], 
+                                    height=bar_height_fator, 
+                                    label=labels_fator[j], 
+                                    color=colors_fator[j])
 
-                        # Adicionar rótulos às barras na ponta
-                        for i in range(len(bar_positions_pulverizador_factor[:len(df_non_zeros)])):
-                            percent = percentual_pulverizador_factor.iloc[i, j]
-                            
-                            # Verificar se o valor é zero e ajustar a posição do texto
-                            if percent == 0:
-                                ax_pulverizador_factor.text(2,  # Posição no início da barra se for zero
-                                                            bar_positions_pulverizador_factor[i] + j * offset, 
-                                                            f'{percent:.1f}%', 
-                                                            ha='left', 
-                                                            va='center', 
-                                                            color='black', 
-                                                            fontsize=10, 
-                                                            fontweight='bold')
-                            else:
-                                ax_pulverizador_factor.text(percent + 2,  # Posição na ponta da barra
-                                                            bar_positions_pulverizador_factor[i] + j * offset, 
-                                                            f'{percent:.1f}%', 
-                                                            ha='left', 
-                                                            va='center', 
-                                                            color='black', 
-                                                            fontsize=10, 
-                                                            fontweight='bold')
+                        # Adicionar rótulos às barras
+                        for i in range(len(bar_positions_tractors_fator[:len(df_non_zeros)])):
+                            percent = fatores_percentual_tractors.iloc[i, j]
+                            ax_fator.text(fatores_percentual_tractors.iloc[i, j] + 2,  
+                                        bar_positions_tractors_fator[i] + j * offset, 
+                                        f'{percent:.1f}%', 
+                                        ha='left', 
+                                        va='center', 
+                                        color='black', 
+                                        fontsize=10, 
+                                        fontweight='bold')
 
                     # Configurar os eixos e título
-                    ax_pulverizador_factor.set_xlabel('')
-                    ax_pulverizador_factor.set_yticks(bar_positions_pulverizador_factor + offset)
-                    ax_pulverizador_factor.set_yticklabels(wrapped_labels)  # Nomes das máquinas em negrito
-                    ax_pulverizador_factor.set_title('Fator de Carga % por Máquina - Pulverizadores')  # Título em negrito
+                    ax_fator.set_xlabel('% de Fator de Carga')
+                    ax_fator.set_yticks(bar_positions_tractors_fator + offset)
+                    ax_fator.set_yticklabels(maquinas_tractors_fator)  # Nomes das máquinas
+                    ax_fator.set_title('% de Fator de Carga por Máquina - Tratores')
 
                     # Definir os limites e marcas do eixo x
-                    ax_pulverizador_factor.set_xlim([0, 100])
-                    ax_pulverizador_factor.set_xticks([0, 50, 100])
-                    ax_pulverizador_factor.set_xticklabels(['0%', '50%', '100%'])  # Valores do eixo x em negrito
+                    ax_fator.set_xlim([0, 100])
+                    ax_fator.set_xticks([0, 50, 100])
+                    ax_fator.set_xticklabels(['0%', '50%', '100%'])  # Valores do eixo x
 
                     # Adicionar legenda única para Fator de Carga
-                    ax_pulverizador_factor.legend(loc='upper right', bbox_to_anchor=(1.23, 1.0))
-
+                    ax_fator.legend(labels_fator, loc='upper right', bbox_to_anchor=(1.23, 1.0))
+                    
                     # Mostrar o gráfico de Fator de Carga
                     col5.pyplot(fig_pulverizador_factor)
 
