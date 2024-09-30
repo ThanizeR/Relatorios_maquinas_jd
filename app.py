@@ -1387,58 +1387,99 @@ elif selected == "🌱Colheitadeira":
             col4.pyplot(fig_colheitadeira_util)
 
             ##############################################################################################################################################################################
-            #fator de carga média
-            selected_columns_colheitadeira_factor = ["Máquina", 
-                               "Fator de Carga Média do Motor (Ag) Marcha Lenta (%)",
-                               "Fator de Carga Média do Motor (Ag) Trabalho (%)",
-                               "Fator de Carga Média do Motor (Ag) Transporte (%)"
-                               ]
+            # Verificar se as colunas existem no DataFrame antes de selecioná-las
+            colunas_disponiveis = ["Máquina", 
+                                "Fator de Carga Média do Motor (Ag) Trabalho (%)",
+                                "Fator de Carga Média do Motor (Ag) Transporte (%)"]
 
-            # Filtrar o DataFrame para as colunas selecionadas
-            df_selected_colheitadeira_factor = df_colheitadeira[selected_columns_colheitadeira_factor].copy()
+            # Adicionar colunas opcionais apenas se existirem
+            if "Fator de Carga Média do Motor (Ag) Marcha Lenta (%)" in df_colheitadeira.columns:
+                colunas_disponiveis.append("Fator de Carga Média do Motor (Ag) Marcha Lenta (%)")
+            if "Fator de Carga Média do Motor (Ag) Ocioso (%)" in df_colheitadeira.columns:
+                colunas_disponiveis.append("Fator de Carga Média do Motor (Ag) Ocioso (%)")
 
-            # Nomes das máquinas e porcentagens
-            maquinas_colheitadeira_factor = df_selected_colheitadeira_factor["Máquina"]
-            percentual_colheitadeira_factor = df_selected_colheitadeira_factor.iloc[:, 1:] *100
+            # Filtrar o DataFrame para as colunas de fator de carga disponíveis
+            df_selected_tractors_fator = df_colheitadeira[colunas_disponiveis].copy()
 
-            # Aplicar quebra de linha nos nomes das máquinas
-            wrapped_labels = wrap_labels(maquinas_colheitadeira_factor, width=10)  # Ajuste a largura conforme necessário
+            # Identificar linhas onde os valores são todos zero
+            zeros_mask = (df_selected_tractors_fator.iloc[:, 1:] == 0).all(axis=1)
 
-            # Plotar gráfico de barras verticais
-            fig_colheitadeira_factor, ax_colheitadeira_factor = plt.subplots(figsize=(12, 8))
+            # Separar máquinas com todos os valores zero e as que têm valores diferentes de zero
+            df_non_zeros = df_selected_tractors_fator[~zeros_mask]
+            df_zeros = df_selected_tractors_fator[zeros_mask]
 
-            # Cores e labels para as barras
-            colors_colheitadeira_factor = ['tab:orange', 'tab:green', 'tab:gray']
-            labels_colheitadeira_factor = ['Marcha Lenta (%)', 'Trabalho (%)', 'Transporte (%)']
-            bar_width_colheitadeira_factor = 0.1  # Largura das barras
+            # Concatenar os DataFrames, primeiro os não-zero, depois os zero
+            df_selected_tractors_fator = pd.concat([df_non_zeros, df_zeros])
 
-            # Definir posições das barras para cada grupo de dados
-            bar_positions_colheitadeira_factor = np.arange(len(maquinas_colheitadeira_factor))
+            # Nomes das máquinas e porcentagens de fator de carga
+            maquinas_tractors_fator = df_selected_tractors_fator["Máquina"]
+            fatores_percentual_tractors = df_selected_tractors_fator.iloc[:, 1:] * 100
 
-            # Plotar as barras verticais combinadas para cada máquina
-            for i, (maquina, row) in enumerate(zip(maquinas_colheitadeira_factor, percentual_colheitadeira_factor.values)):
-                for j, (percent, color) in enumerate(zip(row, colors_colheitadeira_util)):
-                    ax_colheitadeira_factor.bar(bar_positions_colheitadeira_factor[i] + j * bar_width_colheitadeira_factor, percent, width=bar_width_colheitadeira_factor, label=labels_colheitadeira_factor[j] if i == 0 else "", color=color)
-                    ax_colheitadeira_factor.text(bar_positions_colheitadeira_factor[i] + j * bar_width_colheitadeira_factor, percent + 1, f'{percent:.1f}%', ha='center', va='bottom', color='black', fontsize=10,fontweight='bold')
+            # Plotar gráfico de barras horizontais para % de Fator de Carga
+            fig_fator, ax_fator = plt.subplots(figsize=(12, 8))
 
-            # Configurar rótulos e título
-            ax_colheitadeira_factor.set_xlabel('Máquinas')  # Texto do eixo x
-            ax_colheitadeira_factor.set_ylabel('Percentual de Utilização (%)')  # Texto do eixo y
-            ax_colheitadeira_factor.set_xticks(bar_positions_colheitadeira_factor + bar_width_colheitadeira_factor)
-            ax_colheitadeira_factor.set_xticklabels(maquinas_colheitadeira_factor)
-            ax_colheitadeira_factor.set_xticklabels(wrapped_labels)  # Usar labels com quebra de linha
-            ax_colheitadeira_factor.set_title('Fator de caga %')
+            # Definir as cores e labels dinamicamente
+            colors_fator = []
+            labels_fator = []
 
-            # Definir as numerações do eixo y
-            yticks_values = np.arange(0, 101, 10)  # Ajuste conforme necessário
-            yticks_labels = [f'{val:.1f}' for val in yticks_values]
-            ax_colheitadeira_factor.set_yticks(yticks_values)
-            ax_colheitadeira_factor.set_yticklabels(yticks_labels)
+            if "Fator de Carga Média do Motor (Ag) Trabalho (%)" in df_selected_tractors_fator.columns:
+                colors_fator.append('tab:green')
+                labels_fator.append('Trabalhando')
 
-            # Adicionar legenda única
-            ax_colheitadeira_factor.legend(loc='upper right', bbox_to_anchor=(1.24, 1.0))
+            if "Fator de Carga Média do Motor (Ag) Transporte (%)" in df_selected_tractors_fator.columns:
+                colors_fator.append('tab:gray')
+                labels_fator.append('Transporte')
 
-            col5.pyplot(fig_colheitadeira_factor)
+            if "Fator de Carga Média do Motor (Ag) Marcha Lenta (%)" in df_selected_tractors_fator.columns:
+                colors_fator.append('tab:orange')
+                labels_fator.append('Marcha Lenta')
+
+            if "Fator de Carga Média do Motor (Ag) Ocioso (%)" in df_selected_tractors_fator.columns:
+                colors_fator.append('tab:orange')
+                labels_fator.append('Ocioso')
+
+            bar_height_fator = 0.32  # Altura das barras de Fator de Carga
+            bar_positions_tractors_fator = np.arange(len(maquinas_tractors_fator)) * 1.5  # Aumentar o espaçamento
+            offset = 0.35  # Espaçamento entre as categorias dentro de cada máquina
+
+            # Iterar sobre as categorias para criar as barras
+            for j in range(len(labels_fator)):
+                # Desenhar barras apenas para as máquinas que não têm todos os valores zerados
+                ax_fator.barh(bar_positions_tractors_fator[:len(df_non_zeros)] + j * offset, 
+                            fatores_percentual_tractors.iloc[:len(df_non_zeros), j], 
+                            height=bar_height_fator, 
+                            label=labels_fator[j], 
+                            color=colors_fator[j])
+
+                # Adicionar rótulos às barras
+                for i in range(len(bar_positions_tractors_fator[:len(df_non_zeros)])):
+                    percent = fatores_percentual_tractors.iloc[i, j]
+                    ax_fator.text(fatores_percentual_tractors.iloc[i, j] + 2,  
+                                bar_positions_tractors_fator[i] + j * offset, 
+                                f'{percent:.1f}%', 
+                                ha='left', 
+                                va='center', 
+                                color='black', 
+                                fontsize=10, 
+                                fontweight='bold')
+
+            # Configurar os eixos e título
+            ax_fator.set_xlabel('% de Fator de Carga')
+            ax_fator.set_yticks(bar_positions_tractors_fator + offset)
+            ax_fator.set_yticklabels(maquinas_tractors_fator)  # Nomes das máquinas
+            ax_fator.set_title('% de Fator de Carga por Máquina - Tratores')
+
+            # Definir os limites e marcas do eixo x
+            ax_fator.set_xlim([0, 100])
+            ax_fator.set_xticks([0, 50, 100])
+            ax_fator.set_xticklabels(['0%', '50%', '100%'])  # Valores do eixo x
+
+            # Adicionar legenda única para Fator de Carga
+            ax_fator.legend(labels_fator, loc='upper right', bbox_to_anchor=(1.23, 1.0))
+
+            # Mostrar o gráfico de Fator de Carga
+            col5.pyplot(fig_fator)
+
             ###################################################################################################################################################
             #combustivel
             selected_columns_colheitadeira_combus = ["Máquina", 
@@ -1470,7 +1511,7 @@ elif selected == "🌱Colheitadeira":
 
             # Plotar as barras verticais combinadas para cada máquina
             for i, (maquina, row) in enumerate(zip(maquinas_colheitadeira_combus, percentual_colheitadeira_combus.values)):
-                for j, (percent, color) in enumerate(zip(row, colors_colheitadeira_util)):
+                for j, (percent, color) in enumerate(zip(row, colors_colheitadeira_combus)):
                     ax_colheitadeira_combus.bar(bar_positions_colheitadeira_combus[i] + j * bar_width_colheitadeira_combus, percent, width=bar_width_colheitadeira_combus, label=labels_colheitadeira_combus[j] if i == 0 else "", color=color)
                     ax_colheitadeira_combus.text(bar_positions_colheitadeira_combus[i] + j * bar_width_colheitadeira_combus, percent + 1, f'{percent:.1f}', ha='center', va='bottom', color='black', fontsize=10, fontweight='bold')
 
@@ -1708,7 +1749,7 @@ elif selected == "🌱Colheitadeira":
             col10.pyplot(fig_hrmotor)
 
             if st.button('Gerar PDF para Colheitadeira'):
-                        figures = [ fig_colheitadeira_util, fig_colheitadeira_factor, fig_colheitadeira_combus, fig_rotacao, fig_colheitadeira_autotrac, fig_colheitadeira_desloc, fig_hrmotor]  
+                        figures = [ fig_colheitadeira_util, fig_fator, fig_colheitadeira_combus, fig_rotacao, fig_colheitadeira_autotrac, fig_colheitadeira_desloc, fig_hrmotor]  
                         pdf_buffer = generate_pdf_colheitadeira( df_colheitadeira, figures, background_image_first_page_colheitadeira, background_image_other_pages)
                         st.download_button(
                             label="Baixar PDF",
