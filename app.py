@@ -1303,54 +1303,84 @@ elif selected == "🌱Colheitadeira":
                     }
     ##############################################################################################################################################################################
     # Definir colunas para análise de utilização da colheitadeira
-            selected_columns_utilização = ["Máquina", 
-                               "Utilização (Agricultura) Marcha Lenta (%)",
-                               "Utilização (Agricultura) Trabalho (%)",
-                               "Utilização (Agricultura) Transporte (%)"]
+    # Definir as colunas principais e opcionais para análise de utilização
+            selected_columns_utilizacao = ["Máquina"]
 
-            # Filtrar o DataFrame para as colunas selecionadas
-            df_selected_colheitadeira_utilizacao = df_colheitadeira[selected_columns_utilização].copy()
+            # Verificar se as colunas opcionais existem e adicioná-las
+            if "Utilização (Agricultura) Trabalho (%)" in df_colheitadeira.columns:
+                selected_columns_utilizacao.append("Utilização (Agricultura) Trabalho (%)")
 
-            # Nomes das máquinas e porcentagens
-            maquinas_colheitadeira_util = df_selected_colheitadeira_utilizacao["Máquina"]
-            percentual_colheitadeira_util = df_selected_colheitadeira_utilizacao.iloc[:, 1:] * 100
+            if "Utilização (Agricultura) Transporte (%)" in df_colheitadeira.columns:
+                selected_columns_utilizacao.append("Utilização (Agricultura) Transporte (%)")
 
-            # Aplicar quebra de linha nos nomes das máquinas
-            wrapped_labels = wrap_labels(maquinas_colheitadeira_util, width=10)  # Ajuste a largura conforme necessário
+            if "Utilização (Agricultura) Marcha Lenta (%)" in df_colheitadeira.columns:
+                selected_columns_utilizacao.append("Utilização (Agricultura) Marcha Lenta (%)")
 
-            # Plotar gráfico de barras verticais
-            fig_colheitadeira_util, ax_colheitadeira_util = plt.subplots(figsize=(12, 8))
+            if "Utilização (Agricultura) Ocioso (%)" in df_colheitadeira.columns:
+                selected_columns_utilizacao.append("Utilização (Agricultura) Ocioso (%)")
 
-            # Cores e labels para as barras
-            colors_colheitadeira_util = ['tab:orange', 'tab:green', 'tab:gray']
-            labels_colheitadeira_util = ['Marcha Lenta (%)', 'Trabalho (%)', 'Transporte (%)']
-            bar_width_colheitadeira_util = 0.1  # Largura das barras
+            # Selecionar os dados com as colunas presentes
+            df_selected_tractors_utilizacao = df_colheitadeira[selected_columns_utilizacao].copy()
 
-            # Definir posições das barras para cada grupo de dados
-            bar_positions_colheitadeira_util = np.arange(len(maquinas_colheitadeira_util))
+            # Nomes das máquinas e porcentagens de utilização
+            maquinas_tractors = df_selected_tractors_utilizacao["Máquina"]
+            velocidades_total_tractors = df_selected_tractors_utilizacao.iloc[:, 1:].sum(axis=1)
+            velocidades_percentual_tractors = df_selected_tractors_utilizacao.iloc[:, 1:].div(velocidades_total_tractors, axis=0) * 100
+            wrapped_labels = wrap_labels(maquinas_tractors, width=10)  # Ajuste a largura conforme necessário
 
-            # Plotar as barras verticais combinadas para cada máquina
-            for i, (maquina, row) in enumerate(zip(maquinas_colheitadeira_util, percentual_colheitadeira_util.values)):
-                for j, (percent, color) in enumerate(zip(row, colors_colheitadeira_util)):
-                    ax_colheitadeira_util.bar(bar_positions_colheitadeira_util[i] + j * bar_width_colheitadeira_util, percent, width=bar_width_colheitadeira_util, label=labels_colheitadeira_util[j] if i == 0 else "", color=color)
-                    ax_colheitadeira_util.text(bar_positions_colheitadeira_util[i] + j * bar_width_colheitadeira_util, percent + 1, f'{percent:.1f}%', ha='center', va='bottom', color='black', fontsize=10, fontweight='bold')
+            # Ajustar a altura das barras dinamicamente
+            bar_height_utilizacao = 0.6
+            if len(maquinas_tractors) == 1:
+                bar_height_utilizacao = 0.2  # Barra mais fina
 
-            # Configurar rótulos e título
-            ax_colheitadeira_util.set_xlabel('Máquinas')  # Texto do eixo x
-            ax_colheitadeira_util.set_ylabel('Percentual de Utilização (%)')  # Texto do eixo y
-            ax_colheitadeira_util.set_xticks(bar_positions_colheitadeira_util + bar_width_colheitadeira_util)
-            ax_colheitadeira_util.set_xticklabels(wrapped_labels)  # Usar labels com quebra de linha
-            ax_colheitadeira_util.set_title('Utilização das Colheitadeiras')
+            bar_positions_tractors_utilizacao = np.arange(len(maquinas_tractors))
 
-            # Definir as numerações do eixo y
-            yticks_values = np.arange(0, 101, 10)  # Ajuste conforme necessário
-            yticks_labels = [f'{val:.1f}' for val in yticks_values]
-            ax_colheitadeira_util.set_yticks(yticks_values)
-            ax_colheitadeira_util.set_yticklabels(yticks_labels)
+            # Plotar gráfico de barras horizontais para % de Utilização
+            fig_colheitadeira_util, ax_utilizacao = plt.subplots(figsize=(12, 8))
 
-            # Adicionar legenda única
-            ax_colheitadeira_util.legend(loc='upper right', bbox_to_anchor=(1.24, 1.0))
+            # Definir as cores e labels dinamicamente com base nas colunas disponíveis
+            colors_utilizacao = []
+            labels_utilizacao = []
 
+            if "Utilização (Agricultura) Trabalho (%)" in df_selected_tractors_utilizacao.columns:
+                colors_utilizacao.append('tab:green')
+                labels_utilizacao.append('Trabalhando')
+
+            if "Utilização (Agricultura) Transporte (%)" in df_selected_tractors_utilizacao.columns:
+                colors_utilizacao.append('tab:gray')
+                labels_utilizacao.append('Transporte')
+
+            if "Utilização (Agricultura) Marcha Lenta (%)" in df_selected_tractors_utilizacao.columns:
+                colors_utilizacao.append('tab:orange')
+                labels_utilizacao.append('Marcha Lenta')
+
+            if "Utilização (Agricultura) Ocioso (%)" in df_selected_tractors_utilizacao.columns:
+                colors_utilizacao.append('tab:orange')
+                labels_utilizacao.append('Ocioso')
+
+            # Plotar as barras horizontais combinadas para cada máquina (utilização)
+            for i, (maquina, row) in enumerate(zip(maquinas_tractors, velocidades_percentual_tractors.values)):
+                left = 0
+                for j, (percent, color) in enumerate(zip(row, colors_utilizacao)):
+                    ax_utilizacao.barh(bar_positions_tractors_utilizacao[i], percent, height=bar_height_utilizacao, 
+                                    left=left, label=labels_utilizacao[j] if i == 0 else "", color=color)
+                    ax_utilizacao.text(left + percent / 2, bar_positions_tractors_utilizacao[i], 
+                                    f'{percent:.1f}%', ha='center', va='center', color='black', fontsize=10, fontweight='bold')
+                    left += percent
+
+            # Configurar os eixos e título
+            ax_utilizacao.set_xlabel('')
+            ax_utilizacao.set_yticks(bar_positions_tractors_utilizacao)
+            ax_utilizacao.set_yticklabels(wrapped_labels)
+            ax_utilizacao.set_xticks([])  
+            ax_utilizacao.set_title('% de Utilização por Máquina - Tratores')
+
+            # Centralizar a barra única
+            if len(maquinas_tractors) == 1:
+                ax_utilizacao.set_ylim(-0.5, 0.5)  # Centralizar a barra no meio do gráfico
+
+            # Adicionar legenda única para Utilização
+            ax_utilizacao.legend(labels_utilizacao, loc='upper right', bbox_to_anchor=(1.21, 1.0))
 
             # Mostrar o gráfico
             col4, col5 = st.columns(2)
