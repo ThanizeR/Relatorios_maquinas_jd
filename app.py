@@ -838,10 +838,12 @@ if selected == "🌱Tratores":
 
             # Adicionar legenda única para Patinagem na ordem correta
             handles, legend_labels = ax_patinagem.get_legend_handles_labels()
-            # Filtro para garantir que todos os labels da legenda estão em ordem correta
-            sorted_handles_labels = sorted(zip(handles, legend_labels), key=lambda x: labels.index(x[1]) if x[1] in labels else -1)
-            handles, legend_labels = zip(*sorted_handles_labels)
-            ax_patinagem.legend(handles, legend_labels, loc='upper right', bbox_to_anchor=(1.25, 1.0))
+
+            # Garante que a legenda e os rótulos estão corretos e pareados
+            if handles and legend_labels:
+                sorted_handles_labels = sorted(zip(handles, labels), key=lambda x: labels.index(x[1]))
+                handles, legend_labels = zip(*sorted_handles_labels)
+                ax_patinagem.legend(handles, legend_labels, loc='upper right', bbox_to_anchor=(1.25, 1.0))
 
             # Exibe o gráfico no Streamlit
             st.pyplot(fig_patinagem)
