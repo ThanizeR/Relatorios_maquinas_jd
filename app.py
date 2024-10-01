@@ -146,8 +146,8 @@ def generate_pdf_pulverizador(df_sprayers, figures, background_image_first_page_
 
     # Adicionando informações da organização e datas na segunda página
     if 'Data de Início' in df_sprayers.columns and 'Data Final' in df_sprayers.columns and 'Organização' in df_sprayers.columns:
-        data_inicio = pd.to_datetime(df_sprayers['Data de Início'].iloc[0])
-        data_final = pd.to_datetime(df_sprayers['Data Final'].iloc[0])
+        data_inicio = pd.to_datetime(df_sprayers['Data de Início'].iloc[0], dayfirst=True)
+        data_final = pd.to_datetime(df_sprayers['Data Final'].iloc[0], dayfirst=True)
         organizacao = df_sprayers['Organização'].iloc[0]
 
         # Texto à esquerda com espaçamento como dois Tabs
@@ -219,8 +219,8 @@ def generate_pdf_colheitadeira(df_colheitadeira, figures, background_image_first
 
     # Adicionando informações da organização e datas na segunda página
     if 'Data de Início' in df_colheitadeira.columns and 'Data Final' in df_colheitadeira.columns and 'Organização' in df_colheitadeira.columns:
-        data_inicio = pd.to_datetime(df_colheitadeira['Data de Início'].iloc[0])
-        data_final = pd.to_datetime(df_colheitadeira['Data Final'].iloc[0])
+        data_inicio = pd.to_datetime(df_colheitadeira['Data de Início'].iloc[0], dayfirst=True)
+        data_final = pd.to_datetime(df_colheitadeira['Data Final'].iloc[0], dayfirst=True)
         organizacao = df_colheitadeira['Organização'].iloc[0]
 
         # Texto à esquerda com espaçamento como dois Tabs
