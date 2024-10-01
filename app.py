@@ -71,10 +71,10 @@ def generate_pdf_tratores(df_tractors, figures, background_image_first_page_trat
     set_background(1)
 
     # Adicionando informações da organização e datas na segunda página
-    if 'Data de Início' in df_sprayers.columns and 'Data Final' in df_sprayers.columns and 'Organização' in df_sprayers.columns:
-        data_inicio = pd.to_datetime(df_sprayers['Data de Início'].iloc[0])
-        data_final = pd.to_datetime(df_sprayers['Data Final'].iloc[0])
-        organizacao = df_sprayers['Organização'].iloc[0]
+    if 'Data de Início' in df_tractors.columns and 'Data Final' in df_tractors.columns and 'Organização' in df_tractors.columns:
+        data_inicio = pd.to_datetime(df_tractors['Data de Início'].iloc[0])
+        data_final = pd.to_datetime(df_tractors['Data Final'].iloc[0])
+        organizacao = df_tractors['Organização'].iloc[0]
 
         # Texto à esquerda com espaçamento como dois Tabs
         c.setFont("Helvetica", 10)
