@@ -72,8 +72,8 @@ def generate_pdf_tratores(df_tractors, figures, background_image_first_page_trat
 
     # Adicionando informações da organização e datas na segunda página
     if 'Data de Início' in df_tractors.columns and 'Data Final' in df_tractors.columns and 'Organização' in df_tractors.columns:
-        data_inicio = pd.to_datetime(df_tractors['Data de Início'].iloc[0])
-        data_final = pd.to_datetime(df_tractors['Data Final'].iloc[0])
+        data_inicio = pd.to_datetime(df_tractors['Data de Início'].iloc[0], dayfirst=True)
+        data_final = pd.to_datetime(df_tractors['Data Final'].iloc[0], dayfirst=True)
         organizacao = df_tractors['Organização'].iloc[0]
 
         # Texto à esquerda com espaçamento como dois Tabs
