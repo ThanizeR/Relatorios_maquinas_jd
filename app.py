@@ -294,27 +294,25 @@ if selected == "🌱Tratores":
             st.subheader('Dados do Arquivo Carregado para Tratores')
             # Exibir data de início e data final
             if 'Data de Início' in df_tractors.columns and 'Data Final' in df_tractors.columns and 'Organização' in df_tractors.columns:
-                    data_inicio = pd.to_datetime(df_tractors['Data de Início'].iloc[0])
-                    data_final = pd.to_datetime(df_tractors['Data Final'].iloc[0])
-                    organização = df_tractors['Organização'].iloc[0]
+                # Especificar que o dia vem primeiro
+                data_inicio = pd.to_datetime(df_tractors['Data de Início'].iloc[0], dayfirst=True)
+                data_final = pd.to_datetime(df_tractors['Data Final'].iloc[0], dayfirst=True)
+                organização = df_tractors['Organização'].iloc[0]
 
-                    col1, col2, col3 = st.columns(3)
-                    col1.write(f"Organização: {organização}")
-                    col2.write(f"Data de Início: {data_inicio}")
-                    col3.write(f"Data Final: {data_final}")
-                    
+                col1, col2, col3 = st.columns(3)
+                col1.write(f"Organização: {organização}")
+                col2.write(f"Data de Início: {data_inicio.strftime('%d/%m/%Y')}")
+                col3.write(f"Data Final: {data_final.strftime('%d/%m/%Y')}")
 
-                    # Exibir logo
-                    #st.image(Image.open('C:\Users\ThanizeRodrigues-Alv\OneDrive - Alvorada Sistemas Agrícolas Ltda\Área de Trabalho\Thanize\códigos\logo.jpg'), width=200)
+                # Criar lista de datas
+                dates = pd.date_range(start=data_inicio, end=data_final)
 
-                    # Criar lista de datas
-                    dates = pd.date_range(start=data_inicio, end=data_final)
+                # Criar dicionário para cores
+                colors = {
+                    'Event': 'rgb(31, 119, 180)',
+                    'Other Event': 'rgb(255, 127, 14)'
+                }
 
-                    # Criar dicionário para cores
-                    colors = {
-                        'Event': 'rgb(31, 119, 180)',
-                        'Other Event': 'rgb(255, 127, 14)'
-                    }
 
             # Definir os dados
             selected_columns_hrmotor = ["Máquina", "Horas de Operação do Motor Período (h)"]
