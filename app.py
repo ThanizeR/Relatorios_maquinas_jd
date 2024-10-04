@@ -1566,7 +1566,7 @@ elif selected == "🌱Colheitadeira":
             wrapped_labels = wrap_labels(maquinas_rotacao, width=10)  # Ajuste a largura conforme necessário
 
             # Cores e labels para as barras de rotação média
-            colors_rotacao = ['tab:green', 'tab:gray', 'tab:orange']
+            colors_rotacao = ['tab:orange', 'tab:green', 'tab:gray']
             labels_rotacao = ['Ocioso', 'Trabalhando', 'Transporte']
             bar_height_rotacao = 0.32  # Altura das barras de rotação média
             bar_positions_rotacao = np.arange(len(maquinas_rotacao)) * 2  # Aumentar o fator de multiplicação para espaçamento maior
