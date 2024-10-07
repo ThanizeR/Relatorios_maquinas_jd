@@ -850,7 +850,7 @@ if selected == "🌱Tratores":
 
             if st.button('Gerar PDF para Tratores'):
                 # Supondo que 'Nome_Organizacao' seja uma coluna no dataframe df_tractors
-                first_organization_name = df_tractors['Organizacao'].iloc[0].split()[0]
+                first_organization_name = df_tractors['Organização'].iloc[0].split()[0]
 
                 # Gerar o PDF
                 figures = [fig_hrmotor, fig_utilizacao, fig_fator, fig_combust, fig_rotacao, fig_desloc, fig_patinagem]
