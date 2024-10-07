@@ -20,7 +20,7 @@ import plotly.io as pio
 from reportlab.lib.colors import black
 import textwrap
 
-st.set_page_config("📊Análise de Trabalho", page_icon="", layout="wide")
+st.set_page_config("📊Analisador de Máquina", page_icon="", layout="wide")
 
 # Função para carregar o arquivo por tipo de máquina
 @st.cache_data
