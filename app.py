@@ -849,14 +849,23 @@ if selected == "🌱Tratores":
             #########################################################################################################
 
             if st.button('Gerar PDF para Tratores'):
-                        figures = [fig_hrmotor, fig_utilizacao, fig_fator, fig_combust, fig_rotacao,fig_desloc, fig_patinagem]  
-                        pdf_buffer = generate_pdf_tratores( df_tractors, figures, background_image_first_page_tratores, background_image_other_pages)
-                        st.download_button(
-                            label="Baixar PDF",
-                            data=pdf_buffer,
-                            file_name="relatorio_tratores.pdf",
-                            mime="application/pdf"
-                        )
+                # Supondo que 'Nome_Organizacao' seja uma coluna no dataframe df_tractors
+                first_organization_name = df_tractors['Organizacao'].iloc[0].split()[0]
+
+                # Gerar o PDF
+                figures = [fig_hrmotor, fig_utilizacao, fig_fator, fig_combust, fig_rotacao, fig_desloc, fig_patinagem]
+                pdf_buffer = generate_pdf_tratores(df_tractors, figures, background_image_first_page_tratores, background_image_other_pages)
+
+                # Configurar o nome do arquivo dinamicamente
+                file_name = f"relatorio_tratores_{first_organization_name}.pdf"
+
+                # Download do PDF
+                st.download_button(
+                    label="Baixar PDF",
+                    data=pdf_buffer,
+                    file_name=file_name,
+                    mime="application/pdf"
+                )
 # Lógica para Pulverizadores
 elif selected == "🌱Pulverizadores":
     st.subheader("Pulverizadores")
