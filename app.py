@@ -1272,14 +1272,25 @@ elif selected == "🌱Pulverizadores":
                     #############################################################################################################
                     
                     if st.button('Gerar PDF para Pulverizador'):
-                        figures = [fig_pulverizador_combus, fig_pulverizador_factor,  fig_pulverizador_rotacao, fig_pulverizador_autotrac, fig_pulverizador_desloc,fig_pulverizador_hrmotor ]  
-                        pdf_buffer = generate_pdf_pulverizador( df_sprayers, figures, background_image_first_page_pulverizador, background_image_other_pages)
+                        # Supondo que 'Nome_Organizacao' seja uma coluna no dataframe df_sprayers
+                        first_organization_name = df_sprayers['Organização'].iloc[0].split()[0]
+
+                        # Gerar o PDF
+                        figures = [fig_pulverizador_combus, fig_pulverizador_factor,  fig_pulverizador_rotacao, 
+                                fig_pulverizador_autotrac, fig_pulverizador_desloc, fig_pulverizador_hrmotor]
+                        pdf_buffer = generate_pdf_pulverizador(df_sprayers, figures, background_image_first_page_pulverizador, background_image_other_pages)
+
+                        # Configurar o nome do arquivo dinamicamente
+                        file_name = f"relatorio_pulverizador_{first_organization_name}.pdf"
+
+                        # Download do PDF
                         st.download_button(
                             label="Baixar PDF",
                             data=pdf_buffer,
-                            file_name="relatorio_pulverizador.pdf",
+                            file_name=file_name,
                             mime="application/pdf"
                         )
+
 
 # Lógica para Colheitadeira
 elif selected == "🌱Colheitadeira":
@@ -1767,13 +1778,23 @@ elif selected == "🌱Colheitadeira":
             col10.pyplot(fig_hrmotor)
 
             if st.button('Gerar PDF para Colheitadeira'):
-                        figures = [ fig_colheitadeira_util, fig_fator, fig_colheitadeira_combus, fig_rotacao, fig_colheitadeira_autotrac, fig_colheitadeira_desloc, fig_hrmotor]  
-                        pdf_buffer = generate_pdf_colheitadeira( df_colheitadeira, figures, background_image_first_page_colheitadeira, background_image_other_pages)
-                        st.download_button(
-                            label="Baixar PDF",
-                            data=pdf_buffer,
-                            file_name="relatorio_colheitadeira.pdf",
-                            mime="application/pdf"
-                        )
+                # Supondo que 'Nome_Organizacao' seja uma coluna no dataframe df_colheitadeira
+                first_organization_name = df_colheitadeira['Organização'].iloc[0].split()[0]
+
+                # Gerar o PDF
+                figures = [fig_colheitadeira_util, fig_fator, fig_colheitadeira_combus, fig_rotacao, fig_colheitadeira_autotrac, fig_colheitadeira_desloc, fig_hrmotor]
+                pdf_buffer = generate_pdf_colheitadeira(df_colheitadeira, figures, background_image_first_page_colheitadeira, background_image_other_pages)
+
+                # Configurar o nome do arquivo dinamicamente
+                file_name = f"relatorio_colheitadeira_{first_organization_name}.pdf"
+
+                # Download do PDF
+                st.download_button(
+                    label="Baixar PDF",
+                    data=pdf_buffer,
+                    file_name=file_name,
+                    mime="application/pdf"
+                )
+
 else:
     st.error("Página não encontrada.")
