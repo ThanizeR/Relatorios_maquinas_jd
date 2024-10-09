@@ -806,26 +806,34 @@ if selected == "🌱Tratores":
             max_value = patinagem_values.max().max()  # Obtém o valor máximo dos dados
 
             # Definir o limite superior do eixo Y de forma adaptativa
-            if max_value >= 10:
+            if max_value <= 5:  # Se o valor máximo for menor ou igual a 5
+                y_limit = 5
+                y_ticks = [0, 5]
+            elif max_value <= 10:  # Se o valor máximo estiver entre 5 e 10
                 y_limit = 10
-            elif max_value <= 10:
-                y_limit = 10
-            elif max_value <= 20:
+                y_ticks = [0, 5, 10]
+            elif max_value <= 20:  # Para valores entre 10 e 20
                 y_limit = 20
-            elif max_value <= 30:
+                y_ticks = np.arange(0, 21, 5)
+            elif max_value <= 30:  # Para valores entre 20 e 30
                 y_limit = 30
-            elif max_value <= 50:
+                y_ticks = np.arange(0, 31, 5)
+            elif max_value <= 50:  # Para valores entre 30 e 50
                 y_limit = 50
-            elif max_value <= 75:
+                y_ticks = np.arange(0, 51, 10)
+            elif max_value <= 75:  # Para valores entre 50 e 75
                 y_limit = 75
-            else:
+                y_ticks = np.arange(0, 76, 15)
+            else:  # Para valores maiores que 75
                 y_limit = 100
+                y_ticks = np.arange(0, 101, 20)
+
 
             # Define o limite do eixo Y
             ax_patinagem.set_ylim(0, y_limit)
 
             # Adicionar linhas horizontais de referência para os valores de y
-            y_ticks = np.arange(0, y_limit + 10, 10)  # Gera ticks de 10 em 10 unidades até o máximo
+           # y_ticks = np.arange(0, y_limit + 10, 10)  # Gera ticks de 10 em 10 unidades até o máximo
             ax_patinagem.set_yticks(y_ticks)
 
             for y in y_ticks:
