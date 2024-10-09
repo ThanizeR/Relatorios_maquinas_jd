@@ -806,7 +806,7 @@ if selected == "🌱Tratores":
             max_value = patinagem_values.max().max()  # Obtém o valor máximo dos dados
 
             # Definir o limite superior do eixo Y de forma adaptativa
-            if max_value <= 5:
+            if max_value >= 5:
                 y_limit = 5
             elif max_value <= 10:
                 y_limit = 10
