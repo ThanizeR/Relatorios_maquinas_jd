@@ -916,7 +916,51 @@ elif selected == "🌱Pulverizadores":
                     #####################################################################################################
                     #FAZER DO COMBUSTIVEL
                     # Mostrar o gráfico
+                    #########################################################################################################################
+
+                    selected_columns_hrmotor = ["Máquina", "Horas de Operação do Motor Período (h)"]
+                    df_selected_tractors_hrmotor = df_sprayers[selected_columns_hrmotor].copy()
+
+                    # Ordenar o DataFrame com base nas horas de operação do motor usando sort_values
+                    df_selected_tractors_hrmotor = df_selected_tractors_hrmotor.sort_values(by="Horas de Operação do Motor Período (h)", ascending=False)
+
+                    # Configurar o gráfico
+                    fig_pulverizador_hrmotor, ax_hrmotor = plt.subplots(figsize=(12, 8))
+
+                    # Extrair dados para plotagem
+                    maquinas_tractors_hrmotor = df_selected_tractors_hrmotor["Máquina"]
+                    horas_operacao_hrmotor = df_selected_tractors_hrmotor["Horas de Operação do Motor Período (h)"]
+                    wrapped_labels = wrap_labels(maquinas_tractors_hrmotor, width=10)  # Ajuste a largura conforme necessário
+
+                    # Ajustar a altura das barras dinamicamente
+                    bar_height_hrmotor = 0.3
+                    if len(maquinas_tractors_hrmotor) == 1:
+                        bar_height_hrmotor = 0.2  # Barra mais fina
+
+                    # Plotar barras horizontais com cor verde musgo claro
+                    bars = ax_hrmotor.barh(maquinas_tractors_hrmotor, horas_operacao_hrmotor, height=bar_height_hrmotor, color='green')
+                    labels_hrmotor = ['Hr de operação']
+
+                    # Adicionar os números de horas formatados no final de cada barra
+                    for bar, hora in zip(bars, horas_operacao_hrmotor):
+                        ax_hrmotor.text(bar.get_width() + 0.3, bar.get_y() + bar.get_height() / 2, f'{hora:.2f} h',
+                                        va='center', ha='left', fontsize=10, fontweight='bold')
+
+                    # Configurar os eixos e título
+                    ax_hrmotor.set_xlabel('')
+                    ax_hrmotor.set_ylabel('')
+                    ax_hrmotor.set_title('Horas de Operação do Motor por Máquina')
+                    ax_hrmotor.set_yticklabels(wrapped_labels)
+
+                    # Centralizar a barra única
+                    if len(maquinas_tractors_hrmotor) == 1:
+                        ax_hrmotor.set_ylim(-0.5, 0.5)  # Centralizar a barra no meio do gráfico
+
+                    # Adicionar legenda única para Horas de Operação
+                    ax_hrmotor.legend(labels_hrmotor, loc='upper right', bbox_to_anchor=(1.22, 1.0))
                     col4, col5 = st.columns(2)
+                    col4.pyplot(fig_pulverizador_hrmotor)
+
                     #combustivel
                     selected_columns_colheitadeira_combus = ["Máquina", 
                                     "Taxa Média de Combustível (Ag) Ocioso (l/h)",
@@ -967,7 +1011,7 @@ elif selected == "🌱Pulverizadores":
 
                     # Adicionar legenda única
                     ax_colheitadeira_combus.legend(loc='upper right', bbox_to_anchor=(1.24, 1.0))
-                    col4.pyplot(fig_pulverizador_combus)
+                    col5.pyplot(fig_pulverizador_combus)
                     #####################################################################################################
                     
                     # Verificar se as colunas existem no DataFrame antes de selecioná-las
@@ -1059,9 +1103,9 @@ elif selected == "🌱Pulverizadores":
 
                     # Adicionar legenda única para Fator de Carga
                     ax_fator.legend(labels_fator, loc='upper right', bbox_to_anchor=(1.23, 1.0))
-                    
+                    col6, col7 = st.columns(2)
                     # Mostrar o gráfico de Fator de Carga
-                    col5.pyplot(fig_pulverizador_factor)
+                    col6.pyplot(fig_pulverizador_factor)
 
 
                     ############################################################################################################
@@ -1132,8 +1176,8 @@ elif selected == "🌱Pulverizadores":
                     ax_rotacao.legend(loc='upper right', bbox_to_anchor=(1.2, 1.0))
 
                     # Mostrar o gráfico de rotação média
-                    col6, col7 = st.columns(2)
-                    col6.pyplot(fig_pulverizador_rotacao)
+                    
+                    col7.pyplot(fig_pulverizador_rotacao)
 
                     ##########################################################################################################
                     selected_columns_colheitadeira_autotrac = ["Máquina", 
@@ -1180,10 +1224,10 @@ elif selected == "🌱Pulverizadores":
                     yticks_labels = [f'{val:.1f}' for val in yticks_values]
                     ax_colheitadeira_autotrac.set_yticks(yticks_values)
                     ax_colheitadeira_autotrac.set_yticklabels(yticks_labels)
-
+                    col8, col9 = st.columns(2)
                     # Adicionar legenda única
                     ax_colheitadeira_autotrac.legend(loc='upper right', bbox_to_anchor=(1.24, 1.0))
-                    col7.pyplot(fig_pulverizador_autotrac)
+                    col8.pyplot(fig_pulverizador_autotrac)
 
                     ##############################################################################################################################
                     selected_columns_colheitadeira_desloc = ["Máquina", 
@@ -1234,53 +1278,8 @@ elif selected == "🌱Pulverizadores":
 
                     # Adicionar legenda única
                     ax_colheitadeira_desloc.legend(loc='upper right', bbox_to_anchor=(1.24, 1.0))
-                    col8, col9 = st.columns(2)
-                    col8.pyplot(fig_pulverizador_desloc)
+                    col9.pyplot(fig_pulverizador_desloc)
 
-                    #########################################################################################################################
-
-                    selected_columns_hrmotor = ["Máquina", "Horas de Operação do Motor Período (h)"]
-                    df_selected_tractors_hrmotor = df_sprayers[selected_columns_hrmotor].copy()
-
-                    # Ordenar o DataFrame com base nas horas de operação do motor usando sort_values
-                    df_selected_tractors_hrmotor = df_selected_tractors_hrmotor.sort_values(by="Horas de Operação do Motor Período (h)", ascending=False)
-
-                    # Configurar o gráfico
-                    fig_pulverizador_hrmotor, ax_hrmotor = plt.subplots(figsize=(12, 8))
-
-                    # Extrair dados para plotagem
-                    maquinas_tractors_hrmotor = df_selected_tractors_hrmotor["Máquina"]
-                    horas_operacao_hrmotor = df_selected_tractors_hrmotor["Horas de Operação do Motor Período (h)"]
-                    wrapped_labels = wrap_labels(maquinas_tractors_hrmotor, width=10)  # Ajuste a largura conforme necessário
-
-                    # Ajustar a altura das barras dinamicamente
-                    bar_height_hrmotor = 0.3
-                    if len(maquinas_tractors_hrmotor) == 1:
-                        bar_height_hrmotor = 0.2  # Barra mais fina
-
-                    # Plotar barras horizontais com cor verde musgo claro
-                    bars = ax_hrmotor.barh(maquinas_tractors_hrmotor, horas_operacao_hrmotor, height=bar_height_hrmotor, color='green')
-                    labels_hrmotor = ['Hr de operação']
-
-                    # Adicionar os números de horas formatados no final de cada barra
-                    for bar, hora in zip(bars, horas_operacao_hrmotor):
-                        ax_hrmotor.text(bar.get_width() + 0.3, bar.get_y() + bar.get_height() / 2, f'{hora:.2f} h',
-                                        va='center', ha='left', fontsize=10, fontweight='bold')
-
-                    # Configurar os eixos e título
-                    ax_hrmotor.set_xlabel('')
-                    ax_hrmotor.set_ylabel('')
-                    ax_hrmotor.set_title('Horas de Operação do Motor por Máquina')
-                    ax_hrmotor.set_yticklabels(wrapped_labels)
-
-                    # Centralizar a barra única
-                    if len(maquinas_tractors_hrmotor) == 1:
-                        ax_hrmotor.set_ylim(-0.5, 0.5)  # Centralizar a barra no meio do gráfico
-
-                    # Adicionar legenda única para Horas de Operação
-                    ax_hrmotor.legend(labels_hrmotor, loc='upper right', bbox_to_anchor=(1.22, 1.0))
-
-                    col9.pyplot(fig_pulverizador_hrmotor)
                     #############################################################################################################
                     
                     if st.button('Gerar PDF para Pulverizador'):
@@ -1288,8 +1287,8 @@ elif selected == "🌱Pulverizadores":
                         first_organization_name = df_sprayers['Organização'].iloc[0].split()[0]
 
                         # Gerar o PDF
-                        figures = [fig_pulverizador_combus, fig_pulverizador_factor,  fig_pulverizador_rotacao, 
-                                fig_pulverizador_autotrac, fig_pulverizador_desloc, fig_pulverizador_hrmotor]
+                        figures = [fig_pulverizador_hrmotor, fig_pulverizador_combus, fig_pulverizador_factor,  fig_pulverizador_rotacao, 
+                                fig_pulverizador_autotrac, fig_pulverizador_desloc]
                         pdf_buffer = generate_pdf_pulverizador(df_sprayers, figures, background_image_first_page_pulverizador, background_image_other_pages)
 
                         # Configurar o nome do arquivo dinamicamente
