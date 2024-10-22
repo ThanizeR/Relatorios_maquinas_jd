@@ -424,7 +424,7 @@ if selected == "🌱Tratores":
                 labels_utilizacao.append('Marcha Lenta')
 
             if "Utilização (Agricultura) Ocioso (%)" in df_selected_tractors_utilizacao.columns:
-                colors_utilizacao.append('tab:red')
+                colors_utilizacao.append('tab:orange')
                 labels_utilizacao.append('Ocioso')
 
             # Plotar as barras horizontais para cada máquina (utilização)
