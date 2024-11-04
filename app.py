@@ -639,46 +639,43 @@ if selected == "🌱Tratores":
 
         ###################################################################################################
 
-            # Verificar se as colunas existem no DataFrame antes de selecioná-las
+           # Filtrar colunas relevantes
             colunas_disponiveis_rotacao = [
                 "Máquina", 
                 "Rotação Média do Motor Trabalhando (rpm)",
                 "Rotação Média do Motor Transporte (rpm)"
             ]
 
-            # Adicionar colunas opcionais apenas se existirem
             if "Rotação Média do Motor Ocioso (rpm)" in df_tractors.columns:
                 colunas_disponiveis_rotacao.append("Rotação Média do Motor Ocioso (rpm)")
 
-            # Filtrar o DataFrame para as colunas de rotação disponíveis
             df_selected_tractors_rotacao = df_tractors[colunas_disponiveis_rotacao].copy()
 
-            # Identificar linhas onde os valores são todos zero
-            zeros_mask_rotacao = (df_selected_tractors_rotacao.iloc[:, 1:] == 0).all(axis=1)
+            # Filtrar máquinas com valores não-nulos
+            df_non_zeros_rotacao = df_selected_tractors_rotacao.dropna()
+            df_zeros_rotacao = df_selected_tractors_rotacao[df_selected_tractors_rotacao.isnull().all(axis=1)]
 
-            # Separar máquinas com todos os valores zero e as que têm valores diferentes de zero
-            df_non_zeros_rotacao = df_selected_tractors_rotacao[~zeros_mask_rotacao]
-            df_zeros_rotacao = df_selected_tractors_rotacao[zeros_mask_rotacao]
-
-            # Concatenar os DataFrames, primeiro os não-zero, depois os zero
+            # Concatenar DataFrames para manter a ordem
             df_selected_tractors_rotacao = pd.concat([df_non_zeros_rotacao, df_zeros_rotacao])
 
-            # Verificar se a coluna "Rotação Média do Motor Trabalhando (rpm)" está presente
-            if "Rotação Média do Motor Trabalhando (rpm)" in df_selected_tractors_rotacao.columns:
-                # Ordenar o DataFrame com base na "Rotação Média do Motor Trabalhando (rpm)" de forma decrescente
-                df_selected_tractors_rotacao = df_selected_tractors_rotacao.sort_values(by="Rotação Média do Motor Trabalhando (rpm)", ascending=False)
+            # Ordenar o DataFrame
+            df_selected_tractors_rotacao = df_selected_tractors_rotacao.sort_values(by="Rotação Média do Motor Trabalhando (rpm)", ascending=False)
 
-            # Reverter a ordem para o gráfico, de modo que o maior valor apareça no topo
+            # Reverter a ordem para o gráfico
             df_selected_tractors_rotacao = df_selected_tractors_rotacao[::-1]
 
             # Nomes das máquinas e rotações
             maquinas_tractors_rotacao = df_selected_tractors_rotacao["Máquina"]
             rotacoes_tractors = df_selected_tractors_rotacao.iloc[:, 1:]
 
+            # Garantir que rotacoes_tractors não tenha NaN ou Inf
+            rotacoes_tractors = rotacoes_tractors.apply(pd.to_numeric, errors='coerce').fillna(0)
+            rotacoes_tractors.replace([float('inf'), float('-inf')], 0, inplace=True)
+
             # Plotar gráfico de barras horizontais para rotação média
             fig_rotacao, ax_rotacao = plt.subplots(figsize=(12, 8))
 
-            # Definir as cores e labels dinamicamente
+            # Cores e rótulos dinâmicos
             colors_rotacao = []
             labels_rotacao = []
 
@@ -694,49 +691,47 @@ if selected == "🌱Tratores":
                 colors_rotacao.append('tab:orange')
                 labels_rotacao.append('Ocioso')
 
-            bar_height_rotacao = 0.32  # Altura das barras de rotação média
-            bar_positions_rotacao = np.arange(len(maquinas_tractors_rotacao)) * 1.5  # Aumentar o espaçamento
-            offset_rotacao = 0.35  # Espaçamento entre as categorias dentro de cada máquina
+            bar_height_rotacao = 0.32
+            bar_positions_rotacao = np.arange(len(maquinas_tractors_rotacao)) * 1.5
+            offset_rotacao = 0.35
 
-            # Iterar sobre as categorias para criar as barras
+            # Criar as barras
             for j in range(len(labels_rotacao)):
-                # Desenhar barras apenas para as máquinas que não têm todos os valores zerados
                 ax_rotacao.barh(bar_positions_rotacao[:len(df_non_zeros_rotacao)] + j * offset_rotacao, 
                                 rotacoes_tractors.iloc[:len(df_non_zeros_rotacao), j], 
                                 height=bar_height_rotacao, 
                                 label=labels_rotacao[j], 
                                 color=colors_rotacao[j])
 
-                # Adicionar rótulos às barras
                 for i in range(len(bar_positions_rotacao[:len(df_non_zeros_rotacao)])):
                     rotacao = rotacoes_tractors.iloc[i, j]
-                    if pd.notna(rotacao):  # Apenas adicionar texto se não for NaN
-                        ax_rotacao.text(rotacao + 2,  # Posição na ponta da barra
+                    if pd.notna(rotacao):
+                        ax_rotacao.text(rotacao + 2, 
                                         bar_positions_rotacao[i] + j * offset_rotacao, 
                                         f'{rotacao:.0f}', 
                                         ha='left', 
                                         va='center', 
                                         color='black', 
                                         fontsize=10, 
-                                        fontweight='bold')  # Texto em negrito
+                                        fontweight='bold')
 
-            # Configurar os eixos e título
+            # Configurar eixos e título
             ax_rotacao.set_xlabel('Rotação Média do Motor (rpm)')
             ax_rotacao.set_yticks(bar_positions_rotacao + offset_rotacao)
-            ax_rotacao.set_yticklabels(maquinas_tractors_rotacao)  # Nomes das máquinas
+            ax_rotacao.set_yticklabels(maquinas_tractors_rotacao)
             ax_rotacao.set_title('Rotação Média do Motor por Máquina - Tratores')
 
-            # Definir os limites do eixo x
-            max_value_rotacao = rotacoes_tractors.stack().max() if not rotacoes_tractors.empty else 0
-            ax_rotacao.set_xlim([0, max_value_rotacao * 1.1])
+            # Calcular o valor máximo e configurar os limites do eixo x
+            max_value_rotacao = rotacoes_tractors.max().max()  # Valor máximo geral
+            if pd.notna(max_value_rotacao) and max_value_rotacao > 0:  # Verifica se o valor máximo é válido
+                ax_rotacao.set_xlim([0, max_value_rotacao * 1.1])
 
-            # Adicionar legenda única para rotação média
+            # Adicionar legenda
             ax_rotacao.legend(labels_rotacao, loc='upper right', bbox_to_anchor=(1.2, 1.0))
+
 
             # Mostrar o gráfico de rotação média
             col7.pyplot(fig_rotacao)
-
-
             ########################################################################################
             # Definir colunas para análise de velocidade média de deslocamento
             selected_columns_desloc = [
@@ -788,7 +783,7 @@ if selected == "🌱Tratores":
                             ha='center', 
                             va='bottom', 
                             color='black', 
-                            fontsize=10,
+                            fontsize=10, 
                             fontweight='bold'
                         )
 
@@ -801,14 +796,17 @@ if selected == "🌱Tratores":
 
             # Verificar se os valores para definir os limites do eixo são válidos
             max_value = desloc_tractors.stack().max() if not desloc_tractors.empty else 0
-            ax_desloc.set_ylim([0, max_value * 1.1])
+            if pd.notna(max_value) and max_value > 0:  # Checar se max_value é válido
+                ax_desloc.set_ylim([0, max_value * 1.1])
+            else:
+                st.warning("")
+                ax_desloc.set_ylim([0, 10])  # Definir limite padrão ou outro
 
             # Adicionar legenda
             ax_desloc.legend(labels_desloc, loc='upper right', bbox_to_anchor=(1.2, 1.0))
 
             # Mostrar gráfico
             col9.pyplot(fig_desloc)
-
 
             ################################################################
 
@@ -827,15 +825,24 @@ if selected == "🌱Tratores":
                 "Tempo de Patinagem das Rodas no Nível 18,01–100,00% (h)"
             ]
 
-            # Copia o DataFrame mantendo a ordem das colunas
-            df_selected_patinagem = df_tractors[selected_columns_patinagem].copy()
+            # Verifica se há dados, caso contrário, cria DataFrame vazio com colunas definidas
+            # Verifica se o DataFrame existe e contém dados
+            try:
+                df_selected_patinagem = df_tractors[selected_columns_patinagem].copy()
+            except NameError:
+                df_selected_patinagem = pd.DataFrame(columns=selected_columns_patinagem)
 
-            # Substitui valores infinitos por NaN
+            # Substitui valores infinitos por NaN e preenche NaNs com zero para não quebrar o gráfico
             df_selected_patinagem.replace([np.inf, -np.inf], np.nan, inplace=True)
+            df_selected_patinagem.fillna(0, inplace=True)
 
-            # Define máquinas e valores de patinagem
-            maquinas = df_selected_patinagem["Máquina"]
-            patinagem_values = df_selected_patinagem.iloc[:, 1:]
+            # Define máquinas e valores de patinagem com dados padrão, caso não haja dados válidos
+            if df_selected_patinagem.empty or df_selected_patinagem.isnull().all().all():
+                maquinas = ["Máquina 1", "Máquina 2", "Máquina 3"]
+                patinagem_values = pd.DataFrame(0, index=range(len(maquinas)), columns=selected_columns_patinagem[1:])
+            else:
+                maquinas = df_selected_patinagem["Máquina"]
+                patinagem_values = df_selected_patinagem.iloc[:, 1:]
 
             # Ajusta os rótulos das máquinas para caberem no gráfico
             wrapped_labels = wrap_labels(maquinas, width=10)
@@ -850,6 +857,7 @@ if selected == "🌱Tratores":
                 '10,01–12,00', '12,01–14,00', '14,01–16,00', '16,01–18,00', '18,01–100,00'
             ]
 
+            # Configurações das barras
             bar_width = 4  # Largura das barras
             space_between_bars = 2  # Espaço entre as barras coloridas
             machine_offset = 4  # Espaço entre cada máquina
@@ -870,51 +878,47 @@ if selected == "🌱Tratores":
             # Ajuste da escala do eixo Y para acomodar os valores
             max_value = patinagem_values.max().max()  # Obtém o valor máximo dos dados
 
-            # Definir o limite superior do eixo Y de forma adaptativa
-            if max_value <= 5:  # Se o valor máximo for menor ou igual a 5
+            # Define limites do eixo Y com base em `max_value`, ou define padrão se `max_value` for inválido
+            if pd.notna(max_value) and max_value != 0:
+                if max_value <= 5:
+                    y_limit = 5
+                    y_ticks = [0, 5]
+                elif max_value <= 10:
+                    y_limit = 10
+                    y_ticks = [0, 5, 10]
+                elif max_value <= 20:
+                    y_limit = 20
+                    y_ticks = np.arange(0, 21, 5)
+                elif max_value <= 30:
+                    y_limit = 30
+                    y_ticks = np.arange(0, 31, 5)
+                elif max_value <= 50:
+                    y_limit = 50
+                    y_ticks = np.arange(0, 51, 10)
+                elif max_value <= 75:
+                    y_limit = 75
+                    y_ticks = np.arange(0, 76, 15)
+                else:
+                    y_limit = 100
+                    y_ticks = np.arange(0, 101, 20)
+            else:
                 y_limit = 5
-                y_ticks = [0, 5]
-            elif max_value <= 10:  # Se o valor máximo estiver entre 5 e 10
-                y_limit = 10
-                y_ticks = [0, 5, 10]
-            elif max_value <= 20:  # Para valores entre 10 e 20
-                y_limit = 20
-                y_ticks = np.arange(0, 21, 5)
-            elif max_value <= 30:  # Para valores entre 20 e 30
-                y_limit = 30
-                y_ticks = np.arange(0, 31, 5)
-            elif max_value <= 50:  # Para valores entre 30 e 50
-                y_limit = 50
-                y_ticks = np.arange(0, 51, 10)
-            elif max_value <= 75:  # Para valores entre 50 e 75
-                y_limit = 75
-                y_ticks = np.arange(0, 76, 15)
-            else:  # Para valores maiores que 75
-                y_limit = 100
-                y_ticks = np.arange(0, 101, 20)
-
+                y_ticks = [0, 5]  # Define limite padrão se `max_value` for NaN ou zero
 
             # Define o limite do eixo Y
             ax_patinagem.set_ylim(0, y_limit)
-
-            # Adicionar linhas horizontais de referência para os valores de y
-           # y_ticks = np.arange(0, y_limit + 10, 10)  # Gera ticks de 10 em 10 unidades até o máximo
             ax_patinagem.set_yticks(y_ticks)
-
             for y in y_ticks:
                 ax_patinagem.axhline(y, color='gray', linestyle='--', linewidth=0.5)
 
-            # Configurar os eixos e título
+            # Configuração dos eixos e título
             ax_patinagem.set_ylabel('Tempo de Patinagem (h)')
             ax_patinagem.set_xticks([i * (len(colors) * (bar_width + space_between_bars) + machine_offset) + (len(colors) * (bar_width + space_between_bars) - space_between_bars) / 2 for i in range(len(maquinas))])
-            ax_patinagem.set_xticklabels(maquinas, rotation=45, ha='right')
+            ax_patinagem.set_xticklabels(wrapped_labels, rotation=45, ha='right')
             ax_patinagem.set_title('Tempo de Patinagem das Rodas por Máquina - Tratores')
-            ax_patinagem.set_xticklabels(wrapped_labels)
 
             # Adicionar legenda única para Patinagem na ordem correta
             handles, legend_labels = ax_patinagem.get_legend_handles_labels()
-
-            # Garante que a legenda e os rótulos estão corretos e pareados
             if handles and legend_labels:
                 sorted_handles_labels = sorted(zip(handles, labels), key=lambda x: labels.index(x[1]))
                 handles, legend_labels = zip(*sorted_handles_labels)
@@ -922,7 +926,6 @@ if selected == "🌱Tratores":
 
             # Exibe o gráfico no Streamlit
             st.pyplot(fig_patinagem)
-
             #########################################################################################################
 
             if st.button('Gerar PDF para Tratores'):
