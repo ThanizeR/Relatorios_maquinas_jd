@@ -38,8 +38,8 @@ def load_data(file, file_type, encoding='utf-8'):
 #pagina_selecionada = st.sidebar.radio("Selecione a página:", ("Tratores", "Pulverizadores", "Colheitadeira"))
 
 # Função para quebrar linhas dos nomes das máquinas
-def wrap_labels(labels, width):
-    return ['\n'.join(textwrap.wrap(label, width)) for label in labels]
+def wrap_labels(labels, width=10):
+    return ['\n'.join(textwrap.wrap(str(label), width)) for label in labels]
 
 def generate_pdf_tratores(df_tractors, figures, background_image_first_page_tratores=None, background_image_other_pages=None):
     pdf_buffer = BytesIO()
@@ -995,14 +995,19 @@ elif selected == "🌱Pulverizadores":
                     # Configurar o gráfico
                     fig_pulverizador_hrmotor, ax_hrmotor = plt.subplots(figsize=(12, 8))
 
-                    # Extrair dados para plotagem
-                    maquinas_tractors_hrmotor = df_selected_tractors_hrmotor["Máquina"]
-                    horas_operacao_hrmotor = df_selected_tractors_hrmotor["Horas de Operação do Motor Período (h)"]
-                    wrapped_labels = wrap_labels(maquinas_tractors_hrmotor, width=10)  # Ajuste a largura conforme necessário
-                    # Inverter a ordem dos dados para que sejam plotados corretamente
-                    maquinas_tractors_hrmotor = maquinas_tractors_hrmotor[::-1]
-                    horas_operacao_hrmotor = horas_operacao_hrmotor[::-1]
-                    wrapped_labels = wrapped_labels[::-1]  # Também inverter os rótulos
+                    # Extrair e converter dados para plotagem
+                    maquinas_tractors_hrmotor = df_selected_tractors_hrmotor["Máquina"].astype(str)[::-1]  # Converte para string e inverte
+                    horas_operacao_hrmotor = df_selected_tractors_hrmotor["Horas de Operação do Motor Período (h)"][::-1]
+
+                    # Aplicar wrap aos rótulos
+                    wrapped_labels = wrap_labels(maquinas_tractors_hrmotor, width=10)
+
+                    # Confirmar se as listas têm o mesmo tamanho para evitar problemas na plotagem
+                    if len(maquinas_tractors_hrmotor) == len(horas_operacao_hrmotor):
+                        # Código para plotar o gráfico usando wrapped_labels, maquinas_tractors_hrmotor, e horas_operacao_hrmotor
+                        pass
+                    else:
+                        print("Erro: O número de máquinas e horas de operação não coincide.")
 
                     # Ajustar a altura das barras dinamicamente
                     bar_height_hrmotor = 0.3
@@ -1049,9 +1054,15 @@ elif selected == "🌱Pulverizadores":
                     maquinas_colheitadeira_combus = df_selected_colheitadeira_combus["Máquina"]
                     percentual_colheitadeira_combus = df_selected_colheitadeira_combus.iloc[:, 1:] 
 
-                    # Aplicar quebra de linha nos nomes das máquinas
-                    wrapped_labels = wrap_labels(maquinas_colheitadeira_combus, width=10)  # Ajuste a largura conforme necessário
+                    # Aplicar wrap aos rótulos
+                    wrapped_labels = wrap_labels(maquinas_colheitadeira_combus, width=10)
 
+                    # Confirmar se as listas têm o mesmo tamanho para evitar problemas na plotagem
+                    if len(maquinas_colheitadeira_combus) == len(percentual_colheitadeira_combus):
+                        # Código para plotar o gráfico usando wrapped_labels, maquinas_tractors_hrmotor, e horas_operacao_hrmotor
+                        pass
+                    else:
+                        print("Erro: O número de máquinas e horas de operação não coincide.")
                     # Plotar gráfico de barras verticais
                     fig_pulverizador_combus, ax_colheitadeira_combus = plt.subplots(figsize=(12, 8))
 
@@ -1125,8 +1136,15 @@ elif selected == "🌱Pulverizadores":
 
                     # Plotar gráfico de barras horizontais para % de Fator de Carga
                     fig_pulverizador_factor, ax_fator = plt.subplots(figsize=(12, 8))
-                    wrapped_labels = wrap_labels(maquinas_tractors_fator, width=10)  # Ajuste a largura conforme necessário
+                    # Aplicar wrap aos rótulos
+                    wrapped_labels = wrap_labels(maquinas_colheitadeira_combus, width=10)
 
+                    # Confirmar se as listas têm o mesmo tamanho para evitar problemas na plotagem
+                    if len(maquinas_tractors_fator) == len(fatores_percentual_tractors):
+                        # Código para plotar o gráfico usando wrapped_labels, maquinas_tractors_hrmotor, e horas_operacao_hrmotor
+                        pass
+                    else:
+                        print("")
                     # Definir as cores e labels dinamicamente
                     colors_fator = []
                     labels_fator = []
@@ -1215,7 +1233,12 @@ elif selected == "🌱Pulverizadores":
 
                     # Aplicar quebra de linha nos nomes das máquinas
                     wrapped_labels = wrap_labels(maquinas_rotacao, width=10)  # Ajuste a largura conforme necessário
-
+                    # Confirmar se as listas têm o mesmo tamanho para evitar problemas na plotagem
+                    if len(maquinas_rotacao) == len(rotacoes):
+                        # Código para plotar o gráfico usando wrapped_labels, maquinas_tractors_hrmotor, e horas_operacao_hrmotor
+                        pass
+                    else:
+                        print("")
                     # Cores e labels para as barras de rotação média
                     colors_rotacao = ['tab:green', 'tab:gray', 'tab:orange']
                     labels_rotacao = ['Trabalhando', 'Transporte', 'Ocioso']
@@ -1280,7 +1303,12 @@ elif selected == "🌱Pulverizadores":
 
                     # Aplicar quebra de linha nos nomes das máquinas
                     wrapped_labels = wrap_labels(maquinas_colheitadeira_autotrac, width=10)  # Ajuste a largura conforme necessário
-
+                    # Confirmar se as listas têm o mesmo tamanho para evitar problemas na plotagem
+                    if len(maquinas_colheitadeira_autotrac) == len(percentual_colheitadeira_autotrac):
+                        # Código para plotar o gráfico usando wrapped_labels, maquinas_tractors_hrmotor, e horas_operacao_hrmotor
+                        pass
+                    else:
+                        print("")
                     # Plotar gráfico de barras verticais
                     fig_pulverizador_autotrac, ax_colheitadeira_autotrac = plt.subplots(figsize=(12, 8))
 
@@ -1332,9 +1360,13 @@ elif selected == "🌱Pulverizadores":
                     maquinas_colheitadeira_desloc = df_selected_colheitadeira_desloc["Máquina"]
                     percentual_colheitadeira_desloc = df_selected_colheitadeira_desloc.iloc[:, 1:] 
 
-                    # Aplicar quebra de linha nos nomes das máquinas
                     wrapped_labels = wrap_labels(maquinas_colheitadeira_desloc, width=10)  # Ajuste a largura conforme necessário
-
+# Confirmar se as listas têm o mesmo tamanho para evitar problemas na plotagem
+                    if len(maquinas_colheitadeira_desloc) == len(percentual_colheitadeira_desloc):
+                        # Código para plotar o gráfico usando wrapped_labels, maquinas_tractors_hrmotor, e horas_operacao_hrmotor
+                        pass
+                    else:
+                        print("")
                     # Plotar gráfico de barras verticais
                     fig_pulverizador_desloc, ax_colheitadeira_desloc = plt.subplots(figsize=(12, 8))
 
