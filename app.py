@@ -1177,7 +1177,7 @@ elif selected == "🌱Pulverizadores":
                     ax_fator.set_yticks(bar_positions_tractors_fator + offset)
                     ax_fator.set_yticklabels(maquinas_tractors_fator)  # Nomes das máquinas
                     ax_fator.set_yticklabels(wrapped_labels)
-                    ax_fator.set_title('% de Fator de Carga por Máquina - Tratores')
+                    ax_fator.set_title('% de Fator de Carga por Máquina - Pulverizador')
 
                     # Definir os limites e marcas do eixo x
                     ax_fator.set_xlim([0, 100])
@@ -1510,7 +1510,7 @@ elif selected == "🌱Colheitadeira":
             ax_utilizacao.set_yticks(bar_positions_tractors_utilizacao)
             ax_utilizacao.set_yticklabels(wrapped_labels)
             ax_utilizacao.set_xticks([])  
-            ax_utilizacao.set_title('% de Utilização por Máquina - Tratores')
+            ax_utilizacao.set_title('% de Utilização por Máquina')
 
             # Centralizar a barra única
             if len(maquinas_tractors) == 1:
@@ -1610,7 +1610,7 @@ elif selected == "🌱Colheitadeira":
             ax_fator.set_xlabel('% de Fator de Carga')
             ax_fator.set_yticks(bar_positions_tractors_fator + offset)
             ax_fator.set_yticklabels(maquinas_tractors_fator)  # Nomes das máquinas
-            ax_fator.set_title('% de Fator de Carga por Máquina - Tratores')
+            ax_fator.set_title('% de Fator de Carga por Máquina')
 
             # Definir os limites e marcas do eixo x
             ax_fator.set_xlim([0, 100])
