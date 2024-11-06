@@ -737,7 +737,7 @@ if selected == "🌱Tratores":
             selected_columns_desloc = [
                 "Máquina", 
                 "Velocidade Média de Deslocamento Trabalhando (km/h)",
-                "Velocidade Média de Deslocamento (km/h)"
+                "Velocidade Média de Deslocamento Transporte (km/h)"
             ]
             df_selected_tractors_desloc = df_tractors[selected_columns_desloc].copy()
             df_selected_tractors_desloc = df_selected_tractors_desloc.sort_values(by="Velocidade Média de Deslocamento Trabalhando (km/h)", ascending=False)
