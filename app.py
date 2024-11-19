@@ -574,9 +574,24 @@ if selected == "🌱Tratores":
 
             # Filtrar o DataFrame para as colunas selecionadas
             df_selected_tractors_combust = df_tractors[selected_columns_combust].copy()
-            # Ordenar o DataFrame de forma decrescente baseado na "Taxa Média de Combustível (Ag) Trabalhando (l/h)"
-            df_selected_tractors_combust = df_selected_tractors_combust.sort_values(by="Taxa Média de Combustível (Ag) Trabalhando (gal/h)", ascending=False)
 
+            # Converter gal/h para l/h
+            conversion_factor = 3.78541
+            for col in selected_columns_combust[1:]:
+                df_selected_tractors_combust[col] *= conversion_factor
+
+            # Renomear colunas para refletir a unidade em l/h
+            df_selected_tractors_combust.rename(
+                columns={
+                    "Taxa Média de Combustível (Ag) Trabalhando (gal/h)": "Taxa Média de Combustível (Ag) Trabalhando (l/h)",
+                    "Taxa Média de Combustível (Ag) Transporte (gal/h)": "Taxa Média de Combustível (Ag) Transporte (l/h)",
+                    "Taxa Média de Combustível (Ag) Ocioso (gal/h)": "Taxa Média de Combustível (Ag) Ocioso (l/h)"
+                },
+                inplace=True
+            )
+
+            # Ordenar o DataFrame de forma decrescente baseado na "Taxa Média de Combustível (Ag) Trabalhando (l/h)"
+            df_selected_tractors_combust = df_selected_tractors_combust.sort_values(by="Taxa Média de Combustível (Ag) Trabalhando (l/h)", ascending=False)
 
             # Nomes das máquinas e porcentagens
             maquinas_tractors_combust = df_selected_tractors_combust["Máquina"]
@@ -597,17 +612,25 @@ if selected == "🌱Tratores":
             # Plotar as barras verticais combinadas para cada máquina
             for i, (maquina, row) in enumerate(zip(maquinas_tractors_combust, percentual_tractors_combust.values)):
                 for j, (percent, color) in enumerate(zip(row, colors_combust)):
-                    ax_combust.bar(bar_positions_tractors_combust[i] + j * bar_width_combust, percent, width=bar_width_combust,
-                                label=labels_combust[j] if i == 0 else "", color=color)
-                    ax_combust.text(bar_positions_tractors_combust[i] + j * bar_width_combust, percent + 1,
-                                    f'{percent:.1f}', ha='center', va='bottom', color='black', fontsize=10, fontweight='bold')
+                    ax_combust.bar(
+                        bar_positions_tractors_combust[i] + j * bar_width_combust,
+                        percent,
+                        width=bar_width_combust,
+                        label=labels_combust[j] if i == 0 else "",
+                        color=color
+                    )
+                    ax_combust.text(
+                        bar_positions_tractors_combust[i] + j * bar_width_combust,
+                        percent + 1,
+                        f'{percent:.1f}', ha='center', va='bottom', color='black', fontsize=10, fontweight='bold'
+                    )
 
             # Configurar rótulos e título
             ax_combust.set_xlabel('')  # Eixo X em negrito
             ax_combust.set_ylabel('')  # Eixo Y em negrito
             ax_combust.set_xticks(bar_positions_tractors_combust + bar_width_combust)
             ax_combust.set_xticklabels(wrapped_labels)  # Rótulos em negrito
-            ax_combust.set_title('Consumo de Combustível')  # Título em negrito
+            ax_combust.set_title('Consumo de Combustível (l/h)')  # Título em negrito
 
             # Definir os limites do eixo Y de forma adaptativa
             max_value_combust = percentual_tractors_combust.max().max()  # Obtém o valor máximo dos dados
@@ -636,6 +659,7 @@ if selected == "🌱Tratores":
             # Mostrar o gráfico
             col6, col7 = st.columns(2)
             col6.pyplot(fig_combust)
+
 
         ###################################################################################################
 
@@ -740,7 +764,22 @@ if selected == "🌱Tratores":
                 "Velocidade Média de Deslocamento (mi/hr)"
             ]
             df_selected_tractors_desloc = df_tractors[selected_columns_desloc].copy()
-            df_selected_tractors_desloc = df_selected_tractors_desloc.sort_values(by="Velocidade Média de Deslocamento Trabalhando (mi/hr)", ascending=False)
+
+            # Converter mi/hr para km/h
+            conversion_factor = 1.60934
+            df_selected_tractors_desloc["Velocidade Média de Deslocamento Trabalhando (mi/hr)"] *= conversion_factor
+            df_selected_tractors_desloc["Velocidade Média de Deslocamento (mi/hr)"] *= conversion_factor
+
+            # Renomear colunas para refletir km/h
+            df_selected_tractors_desloc.rename(
+                columns={
+                    "Velocidade Média de Deslocamento Trabalhando (mi/hr)": "Velocidade Média de Deslocamento Trabalhando (km/h)",
+                    "Velocidade Média de Deslocamento (mi/hr)": "Velocidade Média de Deslocamento (km/h)"
+                },
+                inplace=True
+            )
+
+            df_selected_tractors_desloc = df_selected_tractors_desloc.sort_values(by="Velocidade Média de Deslocamento Trabalhando (km/h)", ascending=False)
 
             # Manter linhas com NaN para visualização em branco
             df_selected_tractors_desloc.replace([np.inf, -np.inf], np.nan, inplace=True)
@@ -799,7 +838,7 @@ if selected == "🌱Tratores":
             if pd.notna(max_value) and max_value > 0:  # Checar se max_value é válido
                 ax_desloc.set_ylim([0, max_value * 1.1])
             else:
-                st.warning("")
+                st.warning("Os valores para velocidade média estão ausentes ou inválidos.")
                 ax_desloc.set_ylim([0, 10])  # Definir limite padrão ou outro
 
             # Adicionar legenda
@@ -807,6 +846,7 @@ if selected == "🌱Tratores":
 
             # Mostrar gráfico
             col9.pyplot(fig_desloc)
+
 
             ################################################################
 
