@@ -567,9 +567,9 @@ if selected == "🌱Tratores":
             # Definir colunas para análise de taxa média de combustível
             selected_columns_combust = [
                 "Máquina",
-                "Taxa Média de Combustível (Ag) Trabalhando (l/h)",
-                "Taxa Média de Combustível (Ag) Transporte (l/h)",
-                "Taxa Média de Combustível (Ag) Ocioso (l/h)"
+                "Taxa Média de Combustível (Ag) Trabalhando (gal/h)",
+                "Taxa Média de Combustível (Ag) Transporte (gal/h)",
+                "Taxa Média de Combustível (Ag) Ocioso (gal/h)"
             ]
 
             # Filtrar o DataFrame para as colunas selecionadas
@@ -736,8 +736,8 @@ if selected == "🌱Tratores":
             # Definir colunas para análise de velocidade média de deslocamento
             selected_columns_desloc = [
                 "Máquina", 
-                "Velocidade Média de Deslocamento Trabalhando (km/h)",
-                "Velocidade Média de Deslocamento (km/h)"
+                "Velocidade Média de Deslocamento Trabalhando (mi/h)",
+                "Velocidade Média de Deslocamento (mi/h)"
             ]
             df_selected_tractors_desloc = df_tractors[selected_columns_desloc].copy()
             df_selected_tractors_desloc = df_selected_tractors_desloc.sort_values(by="Velocidade Média de Deslocamento Trabalhando (km/h)", ascending=False)
