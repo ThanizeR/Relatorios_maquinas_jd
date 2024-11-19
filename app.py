@@ -575,7 +575,7 @@ if selected == "🌱Tratores":
             # Filtrar o DataFrame para as colunas selecionadas
             df_selected_tractors_combust = df_tractors[selected_columns_combust].copy()
             # Ordenar o DataFrame de forma decrescente baseado na "Taxa Média de Combustível (Ag) Trabalhando (l/h)"
-            df_selected_tractors_combust = df_selected_tractors_combust.sort_values(by="Taxa Média de Combustível (Ag) Trabalhando (l/h)", ascending=False)
+            df_selected_tractors_combust = df_selected_tractors_combust.sort_values(by="Taxa Média de Combustível (Ag) Trabalhando (gal/h)", ascending=False)
 
 
             # Nomes das máquinas e porcentagens
@@ -736,11 +736,11 @@ if selected == "🌱Tratores":
             # Definir colunas para análise de velocidade média de deslocamento
             selected_columns_desloc = [
                 "Máquina", 
-                "Velocidade Média de Deslocamento Trabalhando (mi/h)",
-                "Velocidade Média de Deslocamento (mi/h)"
+                "Velocidade Média de Deslocamento Trabalhando (mi/hr)",
+                "Velocidade Média de Deslocamento (mi/hr)"
             ]
             df_selected_tractors_desloc = df_tractors[selected_columns_desloc].copy()
-            df_selected_tractors_desloc = df_selected_tractors_desloc.sort_values(by="Velocidade Média de Deslocamento Trabalhando (km/h)", ascending=False)
+            df_selected_tractors_desloc = df_selected_tractors_desloc.sort_values(by="Velocidade Média de Deslocamento Trabalhando (mi/hr)", ascending=False)
 
             # Manter linhas com NaN para visualização em branco
             df_selected_tractors_desloc.replace([np.inf, -np.inf], np.nan, inplace=True)
