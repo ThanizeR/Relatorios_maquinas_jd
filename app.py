@@ -1077,18 +1077,26 @@ elif selected == "🌱Pulverizadores":
                     ax_hrmotor.legend(labels_hrmotor, loc='upper right', bbox_to_anchor=(1.22, 1.0))
                     col4, col5 = st.columns(2)
                     col4.pyplot(fig_pulverizador_hrmotor)
-
-                    #combustivel
-                    selected_columns_colheitadeira_combus = ["Máquina", 
-                                    "Taxa Média de Combustível (Ag) Ocioso (l/h)",
-                                    "Taxa Média de Combustível (Ag) Trabalhando (l/h)",
-                                    "Taxa Média de Combustível (Ag) Transporte (l/h)"
-                                    ]
+###############################################################################
+                    # Definir colunas selecionadas para análise
+                    selected_columns_colheitadeira_combus = [
+                        "Máquina", 
+                        "Taxa Média de Combustível (Ag) Ocioso (gal/h)",
+                        "Taxa Média de Combustível (Ag) Trabalhando (gal/h)",
+                        "Taxa Média de Combustível (Ag) Transporte (gal/h)"
+                    ]
 
                     # Filtrar o DataFrame para as colunas selecionadas
                     df_selected_colheitadeira_combus = df_sprayers[selected_columns_colheitadeira_combus].copy()
-                    # Ordenar o DataFrame com base na "Rotação Média do Motor Trabalhando (rpm)"
-                    df_selected_colheitadeira_combus = df_selected_colheitadeira_combus.sort_values(by="Taxa Média de Combustível (Ag) Trabalhando (l/h)", ascending=False)
+
+                    # Converter as taxas de combustível de galões para litros
+                    for col in selected_columns_colheitadeira_combus[1:]:
+                        df_selected_colheitadeira_combus[col] = df_selected_colheitadeira_combus[col] * 3.78541
+
+                    # Ordenar o DataFrame com base na "Taxa Média de Combustível (Ag) Trabalhando (l/h)"
+                    df_selected_colheitadeira_combus = df_selected_colheitadeira_combus.sort_values(
+                        by="Taxa Média de Combustível (Ag) Trabalhando (gal/h)", ascending=False
+                    )
 
                     # Nomes das máquinas e porcentagens
                     maquinas_colheitadeira_combus = df_selected_colheitadeira_combus["Máquina"]
@@ -1097,18 +1105,12 @@ elif selected == "🌱Pulverizadores":
                     # Aplicar wrap aos rótulos
                     wrapped_labels = wrap_labels(maquinas_colheitadeira_combus, width=10)
 
-                    # Confirmar se as listas têm o mesmo tamanho para evitar problemas na plotagem
-                    if len(maquinas_colheitadeira_combus) == len(percentual_colheitadeira_combus):
-                        # Código para plotar o gráfico usando wrapped_labels, maquinas_tractors_hrmotor, e horas_operacao_hrmotor
-                        pass
-                    else:
-                        print("Erro: O número de máquinas e horas de operação não coincide.")
                     # Plotar gráfico de barras verticais
                     fig_pulverizador_combus, ax_colheitadeira_combus = plt.subplots(figsize=(12, 8))
 
                     # Cores e labels para as barras
                     colors_colheitadeira_combus = ['tab:orange', 'tab:green', 'tab:gray']
-                    labels_colheitadeira_combus = ['Ocioso l/h', 'Trabalhando l/h', 'Transporte l/h']
+                    labels_colheitadeira_combus = ['Ocioso (l/h)', 'Trabalhando (l/h)', 'Transporte (l/h)']
                     bar_width_colheitadeira_combus = 0.1  # Largura das barras
 
                     # Definir posições das barras para cada grupo de dados
@@ -1117,16 +1119,23 @@ elif selected == "🌱Pulverizadores":
                     # Plotar as barras verticais combinadas para cada máquina
                     for i, (maquina, row) in enumerate(zip(maquinas_colheitadeira_combus, percentual_colheitadeira_combus.values)):
                         for j, (percent, color) in enumerate(zip(row, colors_colheitadeira_combus)):
-                            ax_colheitadeira_combus.bar(bar_positions_colheitadeira_combus[i] + j * bar_width_colheitadeira_combus, percent, width=bar_width_colheitadeira_combus, label=labels_colheitadeira_combus[j] if i == 0 else "", color=color)
-                            ax_colheitadeira_combus.text(bar_positions_colheitadeira_combus[i] + j * bar_width_colheitadeira_combus, percent + 1, f'{percent:.1f}', ha='center', va='bottom', color='black', fontsize=10, fontweight='bold')
+                            ax_colheitadeira_combus.bar(
+                                bar_positions_colheitadeira_combus[i] + j * bar_width_colheitadeira_combus, percent, 
+                                width=bar_width_colheitadeira_combus, 
+                                label=labels_colheitadeira_combus[j] if i == 0 else "", 
+                                color=color
+                            )
+                            ax_colheitadeira_combus.text(
+                                bar_positions_colheitadeira_combus[i] + j * bar_width_colheitadeira_combus, percent + 1, 
+                                f'{percent:.1f}', ha='center', va='bottom', color='black', fontsize=10, fontweight='bold'
+                            )
 
                     # Configurar rótulos e título
-                    ax_colheitadeira_combus.set_xlabel('Máquinas')  # Texto do eixo x
-                    ax_colheitadeira_combus.set_ylabel('(l/h)')  # Texto do eixo y
+                    ax_colheitadeira_combus.set_xlabel('Máquinas')
+                    ax_colheitadeira_combus.set_ylabel('(l/h)')
                     ax_colheitadeira_combus.set_xticks(bar_positions_colheitadeira_combus + bar_width_colheitadeira_combus)
-                    ax_colheitadeira_combus.set_xticklabels(maquinas_colheitadeira_combus)
-                    ax_colheitadeira_combus.set_xticklabels(wrapped_labels)  # Usar labels com quebra de linha
-                    ax_colheitadeira_combus.set_title('Combustivel (l/h)')
+                    ax_colheitadeira_combus.set_xticklabels(wrapped_labels)
+                    ax_colheitadeira_combus.set_title('Combustível (l/h)')
 
                     # Definir as numerações do eixo y
                     yticks_values = np.arange(0, 51, 10)  # Ajuste conforme necessário
@@ -1137,6 +1146,7 @@ elif selected == "🌱Pulverizadores":
                     # Adicionar legenda única
                     ax_colheitadeira_combus.legend(loc='upper right', bbox_to_anchor=(1.24, 1.0))
                     col5.pyplot(fig_pulverizador_combus)
+
                     #####################################################################################################
                     
                     # Verificar se as colunas existem no DataFrame antes de selecioná-las
@@ -1385,34 +1395,51 @@ elif selected == "🌱Pulverizadores":
                     col8.pyplot(fig_pulverizador_autotrac)
 
                     ##############################################################################################################################
+                    # Definir colunas para análise de velocidade média de deslocamento
                     selected_columns_colheitadeira_desloc = ["Máquina", 
-                               "Velocidade Média de Deslocamento Trabalhando (km/h)",
-                               "Velocidade Média de Deslocamento Transporte (km/h)"	
-                               ]
+                                "Velocidade Média de Deslocamento Trabalhando (mi/hr)",
+                                "Velocidade Média de Deslocamento Transporte (mi/hr)"
+                                ]
 
                     # Filtrar o DataFrame para as colunas selecionadas
                     df_selected_colheitadeira_desloc = df_sprayers[selected_columns_colheitadeira_desloc].copy()
-                    # Ordenar o DataFrame com base na "Rotação Média do Motor Trabalhando (rpm)"
-                    df_selected_colheitadeira_desloc = df_selected_colheitadeira_desloc.sort_values(by="Velocidade Média de Deslocamento Trabalhando (km/h)", ascending=False)
-                    
 
-                    # Nomes das máquinas e porcentagens
+                    # Converter as colunas de mi/hr para km/hr
+                    df_selected_colheitadeira_desloc["Velocidade Média de Deslocamento Trabalhando (km/h)"] = \
+                        df_selected_colheitadeira_desloc["Velocidade Média de Deslocamento Trabalhando (mi/hr)"] * 1.60934
+
+                    df_selected_colheitadeira_desloc["Velocidade Média de Deslocamento Transporte (km/h)"] = \
+                        df_selected_colheitadeira_desloc["Velocidade Média de Deslocamento Transporte (mi/hr)"] * 1.60934
+
+                    # Remover colunas antigas em mi/hr
+                    df_selected_colheitadeira_desloc = df_selected_colheitadeira_desloc.drop(
+                        ["Velocidade Média de Deslocamento Trabalhando (mi/hr)", "Velocidade Média de Deslocamento Transporte (mi/hr)"],
+                        axis=1
+                    )
+
+                    # Ordenar o DataFrame com base na "Velocidade Média de Deslocamento Trabalhando (km/h)"
+                    df_selected_colheitadeira_desloc = df_selected_colheitadeira_desloc.sort_values(
+                        by="Velocidade Média de Deslocamento Trabalhando (km/h)", ascending=False
+                    )
+
+                    # Nomes das máquinas e velocidades
                     maquinas_colheitadeira_desloc = df_selected_colheitadeira_desloc["Máquina"]
                     percentual_colheitadeira_desloc = df_selected_colheitadeira_desloc.iloc[:, 1:] 
 
                     wrapped_labels = wrap_labels(maquinas_colheitadeira_desloc, width=10)  # Ajuste a largura conforme necessário
-# Confirmar se as listas têm o mesmo tamanho para evitar problemas na plotagem
+
+                    # Confirmar se as listas têm o mesmo tamanho para evitar problemas na plotagem
                     if len(maquinas_colheitadeira_desloc) == len(percentual_colheitadeira_desloc):
-                        # Código para plotar o gráfico usando wrapped_labels, maquinas_tractors_hrmotor, e horas_operacao_hrmotor
                         pass
                     else:
-                        print("")
+                        print("Erro: Tamanho incompatível entre máquinas e dados de velocidade.")
+
                     # Plotar gráfico de barras verticais
                     fig_pulverizador_desloc, ax_colheitadeira_desloc = plt.subplots(figsize=(12, 8))
 
                     # Cores e labels para as barras
                     colors_colheitadeira_desloc = ['tab:green', 'tab:gray']
-                    labels_colheitadeira_desloc = [ 'Trabalhando (km/h)','Transporte (km/h)']
+                    labels_colheitadeira_desloc = ['Trabalhando (km/h)', 'Transporte (km/h)']
                     bar_width_colheitadeira_desloc = 0.1  # Largura das barras
 
                     # Definir posições das barras para cada grupo de dados
@@ -1421,26 +1448,43 @@ elif selected == "🌱Pulverizadores":
                     # Plotar as barras verticais combinadas para cada máquina
                     for i, (maquina, row) in enumerate(zip(maquinas_colheitadeira_desloc, percentual_colheitadeira_desloc.values)):
                         for j, (percent, color) in enumerate(zip(row, colors_colheitadeira_desloc)):
-                            ax_colheitadeira_desloc.bar(bar_positions_colheitadeira_desloc[i] + j * bar_width_colheitadeira_desloc, percent, width=bar_width_colheitadeira_desloc, label=labels_colheitadeira_desloc[j] if i == 0 else "", color=color)
-                            ax_colheitadeira_desloc.text(bar_positions_colheitadeira_desloc[i] + j * bar_width_colheitadeira_desloc, percent + 1, f'{percent:.1f}', ha='center', va='bottom', color='black', fontsize=10, fontweight='bold')
+                            ax_colheitadeira_desloc.bar(
+                                bar_positions_colheitadeira_desloc[i] + j * bar_width_colheitadeira_desloc,
+                                percent, 
+                                width=bar_width_colheitadeira_desloc, 
+                                label=labels_colheitadeira_desloc[j] if i == 0 else "", 
+                                color=color
+                            )
+                            ax_colheitadeira_desloc.text(
+                                bar_positions_colheitadeira_desloc[i] + j * bar_width_colheitadeira_desloc, 
+                                percent + 1, 
+                                f'{percent:.1f}', 
+                                ha='center', 
+                                va='bottom', 
+                                color='black', 
+                                fontsize=10, 
+                                fontweight='bold'
+                            )
 
                     # Configurar rótulos e título
                     ax_colheitadeira_desloc.set_xlabel('Máquinas')  # Texto do eixo x
-                    ax_colheitadeira_desloc.set_ylabel('')  # Texto do eixo y
+                    ax_colheitadeira_desloc.set_ylabel('Velocidade (km/h)')  # Texto do eixo y
                     ax_colheitadeira_desloc.set_xticks(bar_positions_colheitadeira_desloc + bar_width_colheitadeira_desloc)
-                    ax_colheitadeira_desloc.set_xticklabels(maquinas_colheitadeira_desloc)
                     ax_colheitadeira_desloc.set_xticklabels(wrapped_labels)  # Usar labels com quebra de linha
-                    ax_colheitadeira_desloc.set_title('Velocidade de Deslocamento km/h')
+                    ax_colheitadeira_desloc.set_title('Velocidade de Deslocamento (km/h)')
 
                     # Definir as numerações do eixo y
-                    yticks_values = np.arange(0, 26, 2)  # Ajuste conforme necessário
+                    yticks_values = np.arange(0, 45, 5)  # Ajuste conforme necessário
                     yticks_labels = [f'{val:.1f}' for val in yticks_values]
                     ax_colheitadeira_desloc.set_yticks(yticks_values)
                     ax_colheitadeira_desloc.set_yticklabels(yticks_labels)
 
                     # Adicionar legenda única
                     ax_colheitadeira_desloc.legend(loc='upper right', bbox_to_anchor=(1.24, 1.0))
+
+                    # Exibir o gráfico na coluna do Streamlit
                     col9.pyplot(fig_pulverizador_desloc)
+
 
                     #############################################################################################################
                     
@@ -1696,20 +1740,20 @@ elif selected == "🌱Colheitadeira":
             col5.pyplot(fig_fator)
 
             ###################################################################################################################################################
-            #combustivel
             selected_columns_colheitadeira_combus = ["Máquina", 
-                               "Taxa Média de Combustível (Ag) Ocioso (l/h)",
-                               "Taxa Média de Combustível (Ag) Trabalhando (l/h)",
-                               "Taxa Média de Combustível (Ag) Transporte (l/h)"
-                               ]
+                "Taxa Média de Combustível (Ag) Ocioso (gal/h)",
+                "Taxa Média de Combustível (Ag) Trabalhando (gal/h)",
+                "Taxa Média de Combustível (Ag) Transporte (gal/h)"
+            ]
 
-            # Filtrar o DataFrame para as colunas selecionadas
+            # Filtrar o DataFrame para as colunas selecionadas e converter de galões para litros
             df_selected_colheitadeira_combus = df_colheitadeira[selected_columns_colheitadeira_combus].copy()
-            df_selected_colheitadeira_combus = df_selected_colheitadeira_combus.sort_values(by="Taxa Média de Combustível (Ag) Trabalhando (l/h)", ascending=False)
+            df_selected_colheitadeira_combus.iloc[:, 1:] *= 3.78541  # Conversão de galões para litros
+            df_selected_colheitadeira_combus = df_selected_colheitadeira_combus.sort_values(by="Taxa Média de Combustível (Ag) Trabalhando (gal/h)", ascending=False)
 
             # Nomes das máquinas e porcentagens
             maquinas_colheitadeira_combus = df_selected_colheitadeira_combus["Máquina"]
-            percentual_colheitadeira_combus = df_selected_colheitadeira_combus.iloc[:, 1:] 
+            percentual_colheitadeira_combus = df_selected_colheitadeira_combus.iloc[:, 1:]
 
             # Aplicar quebra de linha nos nomes das máquinas
             wrapped_labels = wrap_labels(maquinas_colheitadeira_combus, width=10)  # Ajuste a largura conforme necessário
@@ -1719,7 +1763,7 @@ elif selected == "🌱Colheitadeira":
 
             # Cores e labels para as barras
             colors_colheitadeira_combus = ['tab:orange', 'tab:green', 'tab:gray']
-            labels_colheitadeira_combus = ['Ocioso l/h', 'Trabalhando l/h', 'Transporte l/h']
+            labels_colheitadeira_combus = ['Ocioso (l/h)', 'Trabalhando (l/h)', 'Transporte (l/h)']
             bar_width_colheitadeira_combus = 0.1  # Largura das barras
 
             # Definir posições das barras para cada grupo de dados
@@ -1728,27 +1772,33 @@ elif selected == "🌱Colheitadeira":
             # Plotar as barras verticais combinadas para cada máquina
             for i, (maquina, row) in enumerate(zip(maquinas_colheitadeira_combus, percentual_colheitadeira_combus.values)):
                 for j, (percent, color) in enumerate(zip(row, colors_colheitadeira_combus)):
-                    ax_colheitadeira_combus.bar(bar_positions_colheitadeira_combus[i] + j * bar_width_colheitadeira_combus, percent, width=bar_width_colheitadeira_combus, label=labels_colheitadeira_combus[j] if i == 0 else "", color=color)
-                    ax_colheitadeira_combus.text(bar_positions_colheitadeira_combus[i] + j * bar_width_colheitadeira_combus, percent + 1, f'{percent:.1f}', ha='center', va='bottom', color='black', fontsize=10, fontweight='bold')
+                    ax_colheitadeira_combus.bar(bar_positions_colheitadeira_combus[i] + j * bar_width_colheitadeira_combus, percent, 
+                                                width=bar_width_colheitadeira_combus, 
+                                                label=labels_colheitadeira_combus[j] if i == 0 else "", 
+                                                color=color)
+                    ax_colheitadeira_combus.text(bar_positions_colheitadeira_combus[i] + j * bar_width_colheitadeira_combus, percent + 1, 
+                                                f'{percent:.1f}', ha='center', va='bottom', color='black', fontsize=10, fontweight='bold')
 
             # Configurar rótulos e título
             ax_colheitadeira_combus.set_xlabel('Máquinas')  # Texto do eixo x
             ax_colheitadeira_combus.set_ylabel('(l/h)')  # Texto do eixo y
             ax_colheitadeira_combus.set_xticks(bar_positions_colheitadeira_combus + bar_width_colheitadeira_combus)
-            ax_colheitadeira_combus.set_xticklabels(maquinas_colheitadeira_combus)
             ax_colheitadeira_combus.set_xticklabels(wrapped_labels)  # Usar labels com quebra de linha
-            ax_colheitadeira_combus.set_title('Combustivel (l/h)')
+            ax_colheitadeira_combus.set_title('Combustível (l/h)')
 
             # Definir as numerações do eixo y
-            yticks_values = np.arange(0, 101, 10)  # Ajuste conforme necessário
+            yticks_values = np.arange(0, 400, 50)  # Ajuste conforme necessário
             yticks_labels = [f'{val:.1f}' for val in yticks_values]
             ax_colheitadeira_combus.set_yticks(yticks_values)
             ax_colheitadeira_combus.set_yticklabels(yticks_labels)
 
             # Adicionar legenda única
             ax_colheitadeira_combus.legend(loc='upper right', bbox_to_anchor=(1.24, 1.0))
+
+            # Exibir o gráfico em colunas do Streamlit
             col6, col7 = st.columns(2)
             col6.pyplot(fig_colheitadeira_combus)
+
             ###################################################################################################################################################
            # Definir colunas para análise de rotação média do motor
             selected_columns_rotacao = ["Máquina", 
@@ -1823,15 +1873,20 @@ elif selected == "🌱Colheitadeira":
             # Mostrar o gráfico de rotação média
             col7.pyplot(fig_rotacao)
 
-
             #####################################################################################################################
             # Definir colunas para análise de velocidade de deslocamento
             selected_columns_colheitadeira_desloc = ["Máquina", 
-                                        "Velocidade Média de Deslocamento (km/h)",
-                                        "Velocidade Média de Deslocamento Trabalhando (km/h)"]
+                                                    "Velocidade Média de Deslocamento (mi/hr)",
+                                                    "Velocidade Média de Deslocamento Trabalhando (mi/hr)"]
 
             # Filtrar o DataFrame para as colunas selecionadas
             df_selected_colheitadeira_desloc = df_colheitadeira[selected_columns_colheitadeira_desloc].copy()
+
+            # Converter as velocidades de mi/hr para km/h
+            df_selected_colheitadeira_desloc["Velocidade Média de Deslocamento (km/h)"] = df_selected_colheitadeira_desloc["Velocidade Média de Deslocamento (mi/hr)"] * 1.60934
+            df_selected_colheitadeira_desloc["Velocidade Média de Deslocamento Trabalhando (km/h)"] = df_selected_colheitadeira_desloc["Velocidade Média de Deslocamento Trabalhando (mi/hr)"] * 1.60934
+
+            # Ordenar pelo valor de velocidade de deslocamento trabalhando
             df_selected_colheitadeira_desloc = df_selected_colheitadeira_desloc.sort_values(by="Velocidade Média de Deslocamento Trabalhando (km/h)", ascending=False)
 
             # Nomes das máquinas e porcentagens
@@ -1855,15 +1910,21 @@ elif selected == "🌱Colheitadeira":
             # Plotar as barras verticais combinadas para cada máquina
             for i, (maquina, row) in enumerate(zip(maquinas_colheitadeira_desloc, percentual_colheitadeira_desloc.values)):
                 for j, (percent, color) in enumerate(zip(row, colors_colheitadeira_desloc)):
-                    ax_colheitadeira_desloc.bar(bar_positions_colheitadeira_desloc[i] + j * bar_width_colheitadeira_desloc, percent, width=bar_width_colheitadeira_desloc, label=labels_colheitadeira_desloc[j] if i == 0 else "", color=color)
-                    ax_colheitadeira_desloc.text(bar_positions_colheitadeira_desloc[i] + j * bar_width_colheitadeira_desloc, percent + 0.5, f'{percent:.1f}', ha='center', va='bottom', color='black', fontsize=10, fontweight='bold')  # Ajuste para o número mais próximo da barra
+                    ax_colheitadeira_desloc.bar(bar_positions_colheitadeira_desloc[i] + j * bar_width_colheitadeira_desloc, 
+                                                percent, 
+                                                width=bar_width_colheitadeira_desloc, 
+                                                label=labels_colheitadeira_desloc[j] if i == 0 else "", 
+                                                color=color)
+                    ax_colheitadeira_desloc.text(bar_positions_colheitadeira_desloc[i] + j * bar_width_colheitadeira_desloc, 
+                                                percent + 0.5, f'{percent:.1f}', ha='center', va='bottom', 
+                                                color='black', fontsize=10, fontweight='bold')  # Ajuste para o número mais próximo da barra
 
             # Configurar rótulos e título
             ax_colheitadeira_desloc.set_xlabel('Máquinas')  # Texto do eixo x
             ax_colheitadeira_desloc.set_ylabel('')  # Texto do eixo y
             ax_colheitadeira_desloc.set_xticks(bar_positions_colheitadeira_desloc + bar_width_colheitadeira_desloc / 2)
             ax_colheitadeira_desloc.set_xticklabels(wrapped_labels)  # Usar labels com quebra de linha
-            ax_colheitadeira_desloc.set_title('Velocidade de Deslocamento km/h')
+            ax_colheitadeira_desloc.set_title('Velocidade de Deslocamento (km/h)')
 
             # Definir as numerações do eixo y
             yticks_values = np.arange(0, 13, 2)  # Ajuste conforme necessário
@@ -1877,6 +1938,7 @@ elif selected == "🌱Colheitadeira":
             # Mostrar o gráfico
             col8, col9 = st.columns(2)
             col9.pyplot(fig_colheitadeira_desloc)
+
 
             ######################################################################################################################################################################################
 
