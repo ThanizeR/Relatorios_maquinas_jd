@@ -470,7 +470,7 @@ if selected == "🌱Tratores":
             # Adicionar colunas opcionais apenas se existirem
             if "Fator de Carga Médio do Motor Marcha Lenta (%)" in df_tractors.columns:
                 colunas_disponiveis.append("Fator de Carga Médio do Motor Marcha Lenta (%)")
-            if "Fator de Carga Média do Motor Ocioso (%)" in df_tractors.columns:
+            if "Fator de Carga Médio do Motor Ocioso (%)" in df_tractors.columns:
                 colunas_disponiveis.append("Fator de Carga Médio do Motor Ocioso (%)")
 
             # Filtrar o DataFrame para as colunas de fator de carga disponíveis
