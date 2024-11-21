@@ -1052,21 +1052,21 @@ elif selected == "🌱Pulverizadores":
                     # Definir colunas selecionadas para análise
                     selected_columns_colheitadeira_combus = [
                         "Máquina", 
-                        "Taxa Média de Combustível (Ag) Ocioso (gal/h)",
-                        "Taxa Média de Combustível (Ag) Trabalhando (gal/h)",
-                        "Taxa Média de Combustível (Ag) Transporte (gal/h)"
+                        "Taxa Média de Combustível (Ag) Ocioso (l/h)",
+                        "Taxa Média de Combustível (Ag) Trabalhando (l/h)",
+                        "Taxa Média de Combustível (Ag) Transporte (l/h)"
                     ]
 
                     # Filtrar o DataFrame para as colunas selecionadas
                     df_selected_colheitadeira_combus = df_sprayers[selected_columns_colheitadeira_combus].copy()
 
                     # Converter as taxas de combustível de galões para litros
-                    for col in selected_columns_colheitadeira_combus[1:]:
-                        df_selected_colheitadeira_combus[col] = df_selected_colheitadeira_combus[col] * 3.78541
+                    #for col in selected_columns_colheitadeira_combus[1:]:
+                        #df_selected_colheitadeira_combus[col] = df_selected_colheitadeira_combus[col] * 3.78541
 
                     # Ordenar o DataFrame com base na "Taxa Média de Combustível (Ag) Trabalhando (l/h)"
                     df_selected_colheitadeira_combus = df_selected_colheitadeira_combus.sort_values(
-                        by="Taxa Média de Combustível (Ag) Trabalhando (gal/h)", ascending=False
+                        by="Taxa Média de Combustível (Ag) Trabalhando (l/h)", ascending=False
                     )
 
                     # Nomes das máquinas e porcentagens
@@ -1122,14 +1122,14 @@ elif selected == "🌱Pulverizadores":
                     
                     # Verificar se as colunas existem no DataFrame antes de selecioná-las
                     colunas_disponiveis = ["Máquina", 
-                                        "Fator de Carga Média do Motor (Ag) Trabalho (%)",
-                                        "Fator de Carga Média do Motor (Ag) Transporte (%)"]
+                                        "Fator de Carga Médio do Motor Trabalho (%)",
+                                        "Fator de Carga Médio do Motor Transporte (%)"]
 
                     # Adicionar colunas opcionais apenas se existirem
-                    if "Fator de Carga Média do Motor (Ag) Marcha Lenta (%)" in df_sprayers.columns:
-                        colunas_disponiveis.append("Fator de Carga Média do Motor (Ag) Marcha Lenta (%)")
-                    if "Fator de Carga Média do Motor (Ag) Ocioso (%)" in df_sprayers.columns:
-                        colunas_disponiveis.append("Fator de Carga Média do Motor (Ag) Ocioso (%)")
+                    if "Fator de Carga Médio do Motor Marcha Lenta (%)" in df_sprayers.columns:
+                        colunas_disponiveis.append("Fator de Carga Médio do Motor Marcha Lenta (%)")
+                    if "Fator de Carga Médio do Motor Ocioso (%)" in df_sprayers.columns:
+                        colunas_disponiveis.append("Fator de Carga Médio do Motor Ocioso (%)")
 
                     # Filtrar o DataFrame para as colunas de fator de carga disponíveis
                     df_selected_tractors_fator = df_sprayers[colunas_disponiveis].copy()
@@ -1145,9 +1145,9 @@ elif selected == "🌱Pulverizadores":
                     df_selected_tractors_fator = pd.concat([df_non_zeros, df_zeros])
 
                     # Verificar se a coluna "Fator de Carga Média do Motor (Ag) Trabalho (%)" está presente
-                    if "Fator de Carga Média do Motor (Ag) Trabalho (%)" in df_selected_tractors_fator.columns:
+                    if "Fator de Carga Médio do Motor Trabalho (%)" in df_selected_tractors_fator.columns:
                         # Ordenar o DataFrame com base no "Fator de Carga Média do Motor (Ag) Trabalho (%)" de forma decrescente
-                        df_selected_tractors_fator = df_selected_tractors_fator.sort_values(by="Fator de Carga Média do Motor (Ag) Trabalho (%)", ascending=True)
+                        df_selected_tractors_fator = df_selected_tractors_fator.sort_values(by="Fator de Carga Médio do Motor Trabalho (%)", ascending=True)
                     # Reverter a ordem para o gráfico, de modo que o maior valor apareça no topo
                     df_selected_tractors_fator = df_selected_tractors_fator[::-1]
 
@@ -1170,19 +1170,19 @@ elif selected == "🌱Pulverizadores":
                     colors_fator = []
                     labels_fator = []
 
-                    if "Fator de Carga Média do Motor (Ag) Trabalho (%)" in df_selected_tractors_fator.columns:
+                    if "Fator de Carga Média do Motor Trabalho (%)" in df_selected_tractors_fator.columns:
                         colors_fator.append('tab:green')
                         labels_fator.append('Trabalhando')
 
-                    if "Fator de Carga Média do Motor (Ag) Transporte (%)" in df_selected_tractors_fator.columns:
+                    if "Fator de Carga Média do Motor Transporte (%)" in df_selected_tractors_fator.columns:
                         colors_fator.append('tab:gray')
                         labels_fator.append('Transporte')
 
-                    if "Fator de Carga Média do Motor (Ag) Marcha Lenta (%)" in df_selected_tractors_fator.columns:
+                    if "Fator de Carga Média do Motor Marcha Lenta (%)" in df_selected_tractors_fator.columns:
                         colors_fator.append('tab:orange')
                         labels_fator.append('Marcha Lenta')
 
-                    if "Fator de Carga Média do Motor (Ag) Ocioso (%)" in df_selected_tractors_fator.columns:
+                    if "Fator de Carga Média do Motor Ocioso (%)" in df_selected_tractors_fator.columns:
                         colors_fator.append('tab:orange')
                         labels_fator.append('Ocioso')
 
@@ -1368,25 +1368,12 @@ elif selected == "🌱Pulverizadores":
                     ##############################################################################################################################
                     # Definir colunas para análise de velocidade média de deslocamento
                     selected_columns_colheitadeira_desloc = ["Máquina", 
-                                "Velocidade Média de Deslocamento Trabalhando (mi/hr)",
-                                "Velocidade Média de Deslocamento Transporte (mi/hr)"
+                                "Velocidade Média de Deslocamento Trabalhando (km/h)",
+                                "Velocidade Média de Deslocamento Transporte (km/h)"
                                 ]
 
                     # Filtrar o DataFrame para as colunas selecionadas
                     df_selected_colheitadeira_desloc = df_sprayers[selected_columns_colheitadeira_desloc].copy()
-
-                    # Converter as colunas de mi/hr para km/hr
-                    df_selected_colheitadeira_desloc["Velocidade Média de Deslocamento Trabalhando (km/h)"] = \
-                        df_selected_colheitadeira_desloc["Velocidade Média de Deslocamento Trabalhando (mi/hr)"] * 1.60934
-
-                    df_selected_colheitadeira_desloc["Velocidade Média de Deslocamento Transporte (km/h)"] = \
-                        df_selected_colheitadeira_desloc["Velocidade Média de Deslocamento Transporte (mi/hr)"] * 1.60934
-
-                    # Remover colunas antigas em mi/hr
-                    df_selected_colheitadeira_desloc = df_selected_colheitadeira_desloc.drop(
-                        ["Velocidade Média de Deslocamento Trabalhando (mi/hr)", "Velocidade Média de Deslocamento Transporte (mi/hr)"],
-                        axis=1
-                    )
 
                     # Ordenar o DataFrame com base na "Velocidade Média de Deslocamento Trabalhando (km/h)"
                     df_selected_colheitadeira_desloc = df_selected_colheitadeira_desloc.sort_values(
@@ -1524,21 +1511,21 @@ elif selected == "🌱Colheitadeira":
             selected_columns_utilizacao = ["Máquina"]
 
             # Verificar se as colunas opcionais existem e adicioná-las
-            if "Utilização (Agricultura) Trabalho (%)" in df_colheitadeira.columns:
-                selected_columns_utilizacao.append("Utilização (Agricultura) Trabalho (%)")
+            if "Utilização Trabalho (%)" in df_colheitadeira.columns:
+                selected_columns_utilizacao.append("Utilização Trabalho (%)")
 
-            if "Utilização (Agricultura) Transporte (%)" in df_colheitadeira.columns:
-                selected_columns_utilizacao.append("Utilização (Agricultura) Transporte (%)")
+            if "Utilização Transporte (%)" in df_colheitadeira.columns:
+                selected_columns_utilizacao.append("Utilização Transporte (%)")
 
-            if "Utilização (Agricultura) Marcha Lenta (%)" in df_colheitadeira.columns:
-                selected_columns_utilizacao.append("Utilização (Agricultura) Marcha Lenta (%)")
+            if "Utilização Marcha Lenta (%)" in df_colheitadeira.columns:
+                selected_columns_utilizacao.append("Utilização Marcha Lenta (%)")
 
-            if "Utilização (Agricultura) Ocioso (%)" in df_colheitadeira.columns:
-                selected_columns_utilizacao.append("Utilização (Agricultura) Ocioso (%)")
+            if "Utilização Ocioso (%)" in df_colheitadeira.columns:
+                selected_columns_utilizacao.append("Utilização Ocioso (%)")
 
             # Selecionar os dados com as colunas presentes
             df_selected_tractors_utilizacao = df_colheitadeira[selected_columns_utilizacao].copy()
-            df_selected_tractors_utilizacao = df_selected_tractors_utilizacao.sort_values(by="Utilização (Agricultura) Trabalho (%)", ascending=True)
+            df_selected_tractors_utilizacao = df_selected_tractors_utilizacao.sort_values(by="Utilização Trabalho (%)", ascending=True)
             
 
             # Nomes das máquinas e porcentagens de utilização
@@ -1549,7 +1536,7 @@ elif selected == "🌱Colheitadeira":
 
             # Criar um DataFrame para facilitar a manipulação
             df_plot = df_selected_tractors_utilizacao.copy()
-            df_plot['Utilização (Agricultura) Trabalho (%)'] = df_plot['Utilização (Agricultura) Trabalho (%)'].fillna(0)
+            df_plot['Utilização Trabalho (%)'] = df_plot['Utilização Trabalho (%)'].fillna(0)
 
 
             # Ajustar a altura das barras dinamicamente
@@ -1566,19 +1553,19 @@ elif selected == "🌱Colheitadeira":
             colors_utilizacao = []
             labels_utilizacao = []
 
-            if "Utilização (Agricultura) Trabalho (%)" in df_selected_tractors_utilizacao.columns:
+            if "Utilização Trabalho (%)" in df_selected_tractors_utilizacao.columns:
                 colors_utilizacao.append('tab:green')
                 labels_utilizacao.append('Trabalhando')
 
-            if "Utilização (Agricultura) Transporte (%)" in df_selected_tractors_utilizacao.columns:
+            if "Utilização Transporte (%)" in df_selected_tractors_utilizacao.columns:
                 colors_utilizacao.append('tab:gray')
                 labels_utilizacao.append('Transporte')
 
-            if "Utilização (Agricultura) Marcha Lenta (%)" in df_selected_tractors_utilizacao.columns:
+            if "Utilização Marcha Lenta (%)" in df_selected_tractors_utilizacao.columns:
                 colors_utilizacao.append('tab:orange')
                 labels_utilizacao.append('Marcha Lenta')
 
-            if "Utilização (Agricultura) Ocioso (%)" in df_selected_tractors_utilizacao.columns:
+            if "Utilização Ocioso (%)" in df_selected_tractors_utilizacao.columns:
                 colors_utilizacao.append('tab:orange')
                 labels_utilizacao.append('Ocioso')
 
@@ -1613,14 +1600,14 @@ elif selected == "🌱Colheitadeira":
             ##############################################################################################################################################################################
             # Verificar se as colunas existem no DataFrame antes de selecioná-las
             colunas_disponiveis = ["Máquina", 
-                                "Fator de Carga Média do Motor (Ag) Trabalho (%)",
-                                "Fator de Carga Média do Motor (Ag) Transporte (%)"]
+                                "Fator de Carga Médio do Motor Trabalho (%)",
+                                "Fator de Carga Médio do Motor Transporte (%)"]
 
             # Adicionar colunas opcionais apenas se existirem
-            if "Fator de Carga Média do Motor (Ag) Marcha Lenta (%)" in df_colheitadeira.columns:
-                colunas_disponiveis.append("Fator de Carga Média do Motor (Ag) Marcha Lenta (%)")
-            if "Fator de Carga Média do Motor (Ag) Ocioso (%)" in df_colheitadeira.columns:
-                colunas_disponiveis.append("Fator de Carga Média do Motor (Ag) Ocioso (%)")
+            if "Fator de Carga Médio do Motor Marcha Lenta (%)" in df_colheitadeira.columns:
+                colunas_disponiveis.append("Fator de Carga Média do Motor Marcha Lenta (%)")
+            if "Fator de Carga Médio do Motor Ocioso (%)" in df_colheitadeira.columns:
+                colunas_disponiveis.append("Fator de Carga Médio do Motor Ocioso (%)")
 
             # Filtrar o DataFrame para as colunas de fator de carga disponíveis
             df_selected_tractors_fator = df_colheitadeira[colunas_disponiveis].copy()
@@ -1635,9 +1622,9 @@ elif selected == "🌱Colheitadeira":
             # Concatenar os DataFrames, primeiro os não-zero, depois os zero
             df_selected_tractors_fator = pd.concat([df_non_zeros, df_zeros])
             # Verificar se a coluna "Fator de Carga Média do Motor (Ag) Trabalho (%)" está presente
-            if "Fator de Carga Média do Motor (Ag) Trabalho (%)" in df_selected_tractors_fator.columns:
+            if "Fator de Carga Médio do Motor Trabalho (%)" in df_selected_tractors_fator.columns:
                         # Ordenar o DataFrame com base no "Fator de Carga Média do Motor (Ag) Trabalho (%)" de forma decrescente
-                df_selected_tractors_fator = df_selected_tractors_fator.sort_values(by="Fator de Carga Média do Motor (Ag) Trabalho (%)", ascending=False)
+                df_selected_tractors_fator = df_selected_tractors_fator.sort_values(by="Fator de Carga Médio do Motor Trabalho (%)", ascending=False)
             # Reverter a ordem para o gráfico, de modo que o maior valor apareça no topo
             df_selected_tractors_fator = df_selected_tractors_fator[::-1]
 
@@ -1652,19 +1639,19 @@ elif selected == "🌱Colheitadeira":
             colors_fator = []
             labels_fator = []
 
-            if "Fator de Carga Média do Motor (Ag) Trabalho (%)" in df_selected_tractors_fator.columns:
+            if "Fator de Carga Médio do Motor Trabalho (%)" in df_selected_tractors_fator.columns:
                 colors_fator.append('tab:green')
                 labels_fator.append('Trabalhando')
 
-            if "Fator de Carga Média do Motor (Ag) Transporte (%)" in df_selected_tractors_fator.columns:
+            if "Fator de Carga Médio do Motor Transporte (%)" in df_selected_tractors_fator.columns:
                 colors_fator.append('tab:gray')
                 labels_fator.append('Transporte')
 
-            if "Fator de Carga Média do Motor (Ag) Marcha Lenta (%)" in df_selected_tractors_fator.columns:
+            if "Fator de Carga Médio do Motor Marcha Lenta (%)" in df_selected_tractors_fator.columns:
                 colors_fator.append('tab:orange')
                 labels_fator.append('Marcha Lenta')
 
-            if "Fator de Carga Média do Motor (Ag) Ocioso (%)" in df_selected_tractors_fator.columns:
+            if "Fator de Carga Médio do Motor Ocioso (%)" in df_selected_tractors_fator.columns:
                 colors_fator.append('tab:orange')
                 labels_fator.append('Ocioso')
 
@@ -1712,15 +1699,15 @@ elif selected == "🌱Colheitadeira":
 
             ###################################################################################################################################################
             selected_columns_colheitadeira_combus = ["Máquina", 
-                "Taxa Média de Combustível (Ag) Ocioso (gal/h)",
-                "Taxa Média de Combustível (Ag) Trabalhando (gal/h)",
-                "Taxa Média de Combustível (Ag) Transporte (gal/h)"
+                "Taxa Média de Combustível (Ag) Ocioso (l/h)",
+                "Taxa Média de Combustível (Ag) Trabalhando (l/h)",
+                "Taxa Média de Combustível (Ag) Transporte (l/h)"
             ]
 
             # Filtrar o DataFrame para as colunas selecionadas e converter de galões para litros
             df_selected_colheitadeira_combus = df_colheitadeira[selected_columns_colheitadeira_combus].copy()
             df_selected_colheitadeira_combus.iloc[:, 1:] *= 3.78541  # Conversão de galões para litros
-            df_selected_colheitadeira_combus = df_selected_colheitadeira_combus.sort_values(by="Taxa Média de Combustível (Ag) Trabalhando (gal/h)", ascending=False)
+            df_selected_colheitadeira_combus = df_selected_colheitadeira_combus.sort_values(by="Taxa Média de Combustível (Ag) Trabalhando (l/h)", ascending=False)
 
             # Nomes das máquinas e porcentagens
             maquinas_colheitadeira_combus = df_selected_colheitadeira_combus["Máquina"]
@@ -1847,16 +1834,13 @@ elif selected == "🌱Colheitadeira":
             #####################################################################################################################
             # Definir colunas para análise de velocidade de deslocamento
             selected_columns_colheitadeira_desloc = ["Máquina", 
-                                                    "Velocidade Média de Deslocamento (mi/hr)",
-                                                    "Velocidade Média de Deslocamento Trabalhando (mi/hr)"]
+                                                    "Velocidade Média de Deslocamento Transporte (km/h)",
+                                                    "Velocidade Média de Deslocamento Trabalhando (km/h)"]
 
             # Filtrar o DataFrame para as colunas selecionadas
             df_selected_colheitadeira_desloc = df_colheitadeira[selected_columns_colheitadeira_desloc].copy()
 
-            # Converter as velocidades de mi/hr para km/h
-            df_selected_colheitadeira_desloc["Velocidade Média de Deslocamento (km/h)"] = df_selected_colheitadeira_desloc["Velocidade Média de Deslocamento (mi/hr)"] * 1.60934
-            df_selected_colheitadeira_desloc["Velocidade Média de Deslocamento Trabalhando (km/h)"] = df_selected_colheitadeira_desloc["Velocidade Média de Deslocamento Trabalhando (mi/hr)"] * 1.60934
-
+        
             # Ordenar pelo valor de velocidade de deslocamento trabalhando
             df_selected_colheitadeira_desloc = df_selected_colheitadeira_desloc.sort_values(by="Velocidade Média de Deslocamento Trabalhando (km/h)", ascending=False)
 
@@ -1871,8 +1855,8 @@ elif selected == "🌱Colheitadeira":
             fig_colheitadeira_desloc, ax_colheitadeira_desloc = plt.subplots(figsize=(12, 8))
 
             # Cores e labels para as barras
-            colors_colheitadeira_desloc = ['tab:green', 'tab:orange']
-            labels_colheitadeira_desloc = ['Trabalhando (km/h)', 'Deslocamento (km/h)']
+            colors_colheitadeira_desloc = ['tab:green', 'tab:gray']
+            labels_colheitadeira_desloc = ['Trabalhando (km/h)', 'Transporte (km/h)']
             bar_width_colheitadeira_desloc = 0.1  # Largura das barras
 
             # Definir posições das barras para cada grupo de dados
@@ -1964,6 +1948,7 @@ elif selected == "🌱Colheitadeira":
             col8.pyplot(fig_colheitadeira_autotrac)
 
             ######################################################################################################################################################
+     
             ## Definir os dados
             selected_columns_hrmotor = ["Máquina", "Horas de Operação do Motor Período (h)"]
             df_selected_tractors_hrmotor = df_colheitadeira[selected_columns_hrmotor].copy()
@@ -1980,8 +1965,20 @@ elif selected == "🌱Colheitadeira":
 
              # Aplicar quebra de linha nos nomes das máquinas
             wrapped_labels = wrap_labels(maquinas_tractors_hrmotor, width=10)  # Ajuste a largura conforme necessário
+             # Confirmar se as listas têm o mesmo tamanho para evitar problemas na plotagem
+            if len(maquinas_tractors_hrmotor) == len(horas_operacao_hrmotor):
+                        # Código para plotar o gráfico usando wrapped_labels, maquinas_tractors_hrmotor, e horas_operacao_hrmotor
+                pass
+            else:
+                print("Erro: O número de máquinas e horas de operação não coincide.")
+
             # Plotar barras horizontais com cor verde musgo claro
-            bars = ax_hrmotor.barh(maquinas_tractors_hrmotor, horas_operacao_hrmotor, height=0.2, color='green')
+            # Ajustar a altura das barras dinamicamente
+            bar_height_hrmotor_col = 0.3
+            if len(maquinas_tractors_hrmotor) == 1:
+                bar_height_hrmotor_col = 0.1  # Barra mais fina
+
+            bars = ax_hrmotor.barh(maquinas_tractors_hrmotor, horas_operacao_hrmotor, height=bar_height_hrmotor_col, color='green')
             labels_hrmotor = ['Hr de operação']
 
             # Adicionar os números de horas formatados no final de cada barra
