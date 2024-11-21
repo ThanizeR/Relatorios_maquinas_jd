@@ -1170,19 +1170,19 @@ elif selected == "🌱Pulverizadores":
                     colors_fator = []
                     labels_fator = []
 
-                    if "Fator de Carga Média do Motor Trabalho (%)" in df_selected_tractors_fator.columns:
+                    if "Fator de Carga Médio do Motor Trabalho (%)" in df_selected_tractors_fator.columns:
                         colors_fator.append('tab:green')
                         labels_fator.append('Trabalhando')
 
-                    if "Fator de Carga Média do Motor Transporte (%)" in df_selected_tractors_fator.columns:
+                    if "Fator de Carga Médio do Motor Transporte (%)" in df_selected_tractors_fator.columns:
                         colors_fator.append('tab:gray')
                         labels_fator.append('Transporte')
 
-                    if "Fator de Carga Média do Motor Marcha Lenta (%)" in df_selected_tractors_fator.columns:
+                    if "Fator de Carga Médio do Motor Marcha Lenta (%)" in df_selected_tractors_fator.columns:
                         colors_fator.append('tab:orange')
                         labels_fator.append('Marcha Lenta')
 
-                    if "Fator de Carga Média do Motor Ocioso (%)" in df_selected_tractors_fator.columns:
+                    if "Fator de Carga Médio do Motor Ocioso (%)" in df_selected_tractors_fator.columns:
                         colors_fator.append('tab:orange')
                         labels_fator.append('Ocioso')
 
