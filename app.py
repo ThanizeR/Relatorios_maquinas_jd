@@ -366,6 +366,7 @@ if selected == "🌱Tratores":
             col8.pyplot(fig_hrmotor)
             #######################################################################################
             ## Definir as colunas principais e opcionais para análise de utilização
+            # Definir as colunas principais e opcionais para análise de utilização
             selected_columns_utilizacao = ["Máquina"]
 
             # Verificar se as colunas opcionais existem e adicioná-las
@@ -388,23 +389,8 @@ if selected == "🌱Tratores":
             maquinas_tractors = df_selected_tractors_utilizacao["Máquina"]
             velocidades_total_tractors = df_selected_tractors_utilizacao.iloc[:, 1:].sum(axis=1)
             velocidades_percentual_tractors = df_selected_tractors_utilizacao.iloc[:, 1:].div(velocidades_total_tractors, axis=0) * 100
-            wrapped_labels = wrap_labels(maquinas_tractors, width=10)  # Ajuste a largura conforme necessário
 
-            # Criar um DataFrame para facilitar a manipulação
-            df_plot = df_selected_tractors_utilizacao.copy()
-            df_plot['Utilização Trabalho (%)'] = df_plot['Utilização Trabalho (%)'].fillna(0)
-
-            # Ordenar máquinas com base na utilização de "Trabalhando"
-            df_plot = df_plot.sort_values(by='Utilização Trabalho (%)', ascending=True)
-
-            # Ajustar a altura das barras dinamicamente
-            bar_height_utilizacao = 0.6
-            if len(maquinas_tractors) == 1:
-                bar_height_utilizacao = 0.2  # Barra mais fina
-
-            bar_positions_tractors_utilizacao = np.arange(len(maquinas_tractors))
-
-            # Plotar gráfico de barras horizontais para % de Utilização
+            # Criar o gráfico diretamente com os dados originais (sem ordenação)
             fig_utilizacao, ax_utilizacao = plt.subplots(figsize=(12, 8))
 
             # Definir as cores e labels dinamicamente com base nas colunas disponíveis
@@ -427,11 +413,18 @@ if selected == "🌱Tratores":
                 colors_utilizacao.append('tab:orange')
                 labels_utilizacao.append('Ocioso')
 
-            # Plotar as barras horizontais para cada máquina (utilização)
-            for i, (maquina, row) in enumerate(zip(df_plot["Máquina"], velocidades_percentual_tractors.loc[df_plot.index].values)):
+            # Ajustar a altura das barras dinamicamente
+            bar_height_utilizacao = 0.6
+            if len(maquinas_tractors) == 1:
+                bar_height_utilizacao = 0.2  # Barra mais fina
+
+            bar_positions_tractors_utilizacao = np.arange(len(maquinas_tractors))
+
+            # Plotar as barras horizontais para cada máquina (utilização) sem alterar a ordem
+            for i, (maquina, row) in enumerate(zip(maquinas_tractors, velocidades_percentual_tractors.values)):
                 left = 0
                 # Plotar "Trabalhando" primeiro
-                if "Utilização Trabalho (%)" in df_plot.columns:
+                if "Utilização Trabalho (%)" in df_selected_tractors_utilizacao.columns:
                     percent = row[0]  # Percentagem de Trabalhando
                     ax_utilizacao.barh(i, percent, height=bar_height_utilizacao, left=left, color='tab:green')
                     ax_utilizacao.text(left + percent / 2, i, f'{percent:.1f}%', ha='center', va='center', color='black', fontsize=10, fontweight='bold')
@@ -444,18 +437,14 @@ if selected == "🌱Tratores":
                     left += percent
 
             # Configurar os eixos e título
-            ax_utilizacao.set_xlabel('')
+            ax_utilizacao.set_xlabel('% de Utilização')
             ax_utilizacao.set_yticks(bar_positions_tractors_utilizacao)
-            ax_utilizacao.set_yticklabels(wrapped_labels)
-            ax_utilizacao.set_xticks([])  
+            ax_utilizacao.set_yticklabels(maquinas_tractors)  # Usar os nomes originais das máquinas
             ax_utilizacao.set_title('% de Utilização por Máquina - Tratores')
-
-            # Centralizar a barra única
-            if len(maquinas_tractors) == 1:
-                ax_utilizacao.set_ylim(-0.5, 0.5)  # Centralizar a barra no meio do gráfico
 
             # Adicionar legenda única para Utilização
             ax_utilizacao.legend(labels_utilizacao, loc='upper right', bbox_to_anchor=(1.21, 1.0))
+
 
             # Mostrar o gráfico de Utilização
             col4, col5 = st.columns(2)
