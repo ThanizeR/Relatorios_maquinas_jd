@@ -1495,92 +1495,99 @@ elif selected == "🌱Colheitadeira":
                         'Other Event': 'rgb(255, 127, 14)'
                     }
     ##############################################################################################################################################################################
-    # Definir colunas para análise de utilização da colheitadeira
-    # Definir as colunas principais e opcionais para análise de utilização
-            selected_columns_utilizacao = ["Máquina"]
+            # Lista de colunas esperadas
+            selected_columns_utilizacao = [
+                "Máquina", 
+                "Utilização Colheita (%)", 
+                "Utilização Colheita e Descarga (%)", 
+                "Utilização Descarga sem Colheita (%)", 
+                "Utilização Ocioso com Tanque Graneleiro Cheio (%)", 
+                "Utilização Ocioso com Tanque Graneleiro não Cheio (%)", 
+                "Utilização Trabalho (%)", 
+                "Utilização Ocioso (%)", 
+                "Utilização Transporte (%)"
+            ]
 
-            # Verificar se as colunas opcionais existem e adicioná-las
-            if "Utilização Trabalho (%)" in df_colheitadeira.columns:
-                selected_columns_utilizacao.append("Utilização Trabalho (%)")
+            # Verifica se o DataFrame existe e contém dados
+            try:
+                # Verifica se as colunas existem, e cria as que estiverem ausentes com valores 0
+                missing_columns = [col for col in selected_columns_utilizacao if col not in df_colheitadeira.columns]
+                if missing_columns:
+                    for col in missing_columns:
+                        df_colheitadeira[col] = 0  # Adiciona a coluna com valores 0 (ou qualquer valor padrão)
+                
+                df_selected_utilizacao = df_colheitadeira[selected_columns_utilizacao].copy()
+            except NameError:
+                # Caso o DataFrame não exista, cria um DataFrame vazio com as colunas esperadas
+                df_selected_utilizacao = pd.DataFrame(columns=selected_columns_utilizacao)
 
-            if "Utilização Transporte (%)" in df_colheitadeira.columns:
-                selected_columns_utilizacao.append("Utilização Transporte (%)")
+            # Substitui valores infinitos por NaN e preenche NaNs com zero para não quebrar o gráfico
+            df_selected_utilizacao.replace([np.inf, -np.inf], np.nan, inplace=True)
+            df_selected_utilizacao.fillna(0, inplace=True)
 
-            if "Utilização Marcha Lenta (%)" in df_colheitadeira.columns:
-                selected_columns_utilizacao.append("Utilização Marcha Lenta (%)")
+            # Se não houver dados válidos, cria um DataFrame vazio
+            if df_selected_utilizacao.empty or df_selected_utilizacao.isnull().all().all():
+                maquinas = ["Máquina 1", "Máquina 2", "Máquina 3"]
+                utilizacao_values = pd.DataFrame(0, index=range(len(maquinas)), columns=selected_columns_utilizacao[1:])
+            else:
+                maquinas = df_selected_utilizacao["Máquina"]
+                utilizacao_values = df_selected_utilizacao.iloc[:, 1:] * 100
 
-            if "Utilização Ocioso (%)" in df_colheitadeira.columns:
-                selected_columns_utilizacao.append("Utilização Ocioso (%)")
+            # Ajusta os rótulos das máquinas para caberem no gráfico
+            wrapped_labels = wrap_labels(maquinas, width=10)
 
-            # Selecionar os dados com as colunas presentes
-            df_selected_tractors_utilizacao = df_colheitadeira[selected_columns_utilizacao].copy()
-            df_selected_tractors_utilizacao = df_selected_tractors_utilizacao.sort_values(by="Utilização Trabalho (%)", ascending=True)
-            
-
-            # Nomes das máquinas e porcentagens de utilização
-            maquinas_tractors = df_selected_tractors_utilizacao["Máquina"]
-            velocidades_total_tractors = df_selected_tractors_utilizacao.iloc[:, 1:].sum(axis=1)
-            velocidades_percentual_tractors = df_selected_tractors_utilizacao.iloc[:, 1:].div(velocidades_total_tractors, axis=0) * 100
-            wrapped_labels = wrap_labels(maquinas_tractors, width=10)  # Ajuste a largura conforme necessário
-
-            # Criar um DataFrame para facilitar a manipulação
-            df_plot = df_selected_tractors_utilizacao.copy()
-            df_plot['Utilização Trabalho (%)'] = df_plot['Utilização Trabalho (%)'].fillna(0)
-
-
-            # Ajustar a altura das barras dinamicamente
-            bar_height_utilizacao = 0.6
-            if len(maquinas_tractors) == 1:
-                bar_height_utilizacao = 0.2  # Barra mais fina
-
-            bar_positions_tractors_utilizacao = np.arange(len(maquinas_tractors))
-
-            # Plotar gráfico de barras horizontais para % de Utilização
+            # Configura o gráfico de barras
             fig_colheitadeira_util, ax_utilizacao = plt.subplots(figsize=(12, 8))
 
-            # Definir as cores e labels dinamicamente com base nas colunas disponíveis
-            colors_utilizacao = []
-            labels_utilizacao = []
+            # Cores e labels correspondentes
+            colors = ['tab:blue', 'tab:red', 'tab:pink', 'tab:cyan', 'tab:brown', 'tab:green', 'tab:orange', 'tab:gray']
+            labels = [
+                'Colheita', 'Colheita e Descarga', 'Descarga sem Colheita', 'Ocioso com Tanque Cheio', 
+                'Ocioso com Tanque não Cheio', 'Trabalho', 'Ocioso', 'Transporte'
+            ]
 
-            if "Utilização Trabalho (%)" in df_selected_tractors_utilizacao.columns:
-                colors_utilizacao.append('tab:green')
-                labels_utilizacao.append('Trabalhando')
+            # Geração das barras empilhadas
+            bar_width = 4  # Largura das barras
+            space_between_bars = 2  # Espaço entre as barras coloridas
+            machine_offset = 4  # Espaço entre cada máquina
 
-            if "Utilização Transporte (%)" in df_selected_tractors_utilizacao.columns:
-                colors_utilizacao.append('tab:gray')
-                labels_utilizacao.append('Transporte')
+            for i, (maquina, row) in enumerate(zip(maquinas, utilizacao_values.values)):
+                base_position = i * (len(colors) * (bar_width + space_between_bars) + machine_offset)
+                
+                for j, (value, color, label) in enumerate(zip(row, colors, labels)):
+                    value_arredondado = round(value, 2)
+                    
+                    if value_arredondado >= 0.01 or value_arredondado == 0:
+                        bar_position = base_position + j * (bar_width + space_between_bars)
+                        ax_utilizacao.bar(bar_position, value_arredondado, width=bar_width, label=label if i == 0 else "", color=color)
 
-            if "Utilização Marcha Lenta (%)" in df_selected_tractors_utilizacao.columns:
-                colors_utilizacao.append('tab:orange')
-                labels_utilizacao.append('Marcha Lenta')
+            # Ajusta o eixo Y para sempre exibir valores de 5 em 5%
+            y_limit = 100  # Define o limite superior como 100%
+            y_ticks = np.arange(0, 105, 5)  # Criando os ticks de 5 em 5
 
-            if "Utilização Ocioso (%)" in df_selected_tractors_utilizacao.columns:
-                colors_utilizacao.append('tab:orange')
-                labels_utilizacao.append('Ocioso')
+            ax_utilizacao.set_ylim(0, y_limit)
+            ax_utilizacao.set_yticks(y_ticks)
 
-            # Plotar as barras horizontais combinadas para cada máquina (utilização)
-            for i, (maquina, row) in enumerate(zip(maquinas_tractors, velocidades_percentual_tractors.values)):
-                left = 0
-                for j, (percent, color) in enumerate(zip(row, colors_utilizacao)):
-                    ax_utilizacao.barh(bar_positions_tractors_utilizacao[i], percent, height=bar_height_utilizacao, 
-                                    left=left, label=labels_utilizacao[j] if i == 0 else "", color=color)
-                    ax_utilizacao.text(left + percent / 2, bar_positions_tractors_utilizacao[i], 
-                                    f'{percent:.1f}%', ha='center', va='center', color='black', fontsize=10, fontweight='bold')
-                    left += percent
+            # Linhas de referência no gráfico
+            for y in y_ticks:
+                ax_utilizacao.axhline(y, color='gray', linestyle='--', linewidth=0.5)
 
-            # Configurar os eixos e título
-            ax_utilizacao.set_xlabel('')
-            ax_utilizacao.set_yticks(bar_positions_tractors_utilizacao)
-            ax_utilizacao.set_yticklabels(wrapped_labels)
-            ax_utilizacao.set_xticks([])  
+            # Configuração dos eixos e título
+            ax_utilizacao.set_ylabel('Utilização (%)')
+            ax_utilizacao.set_xticks([
+                i * (len(colors) * (bar_width + space_between_bars) + machine_offset) + 
+                (len(colors) * (bar_width + space_between_bars) - space_between_bars) / 2 
+                for i in range(len(maquinas))
+            ])
+            ax_utilizacao.set_xticklabels(wrapped_labels, rotation=45, ha='right')
             ax_utilizacao.set_title('% de Utilização por Máquina')
 
-            # Centralizar a barra única
-            if len(maquinas_tractors) == 1:
-                ax_utilizacao.set_ylim(-0.5, 0.5)  # Centralizar a barra no meio do gráfico
-
             # Adicionar legenda única para Utilização
-            ax_utilizacao.legend(labels_utilizacao, loc='upper right', bbox_to_anchor=(1.21, 1.0))
+            handles, legend_labels = ax_utilizacao.get_legend_handles_labels()
+            if handles and legend_labels:
+                sorted_handles_labels = sorted(zip(handles, labels), key=lambda x: labels.index(x[1]))
+                handles, legend_labels = zip(*sorted_handles_labels)
+                ax_utilizacao.legend(handles, legend_labels, loc='upper right', bbox_to_anchor=(1.3, 1.0))
 
             # Mostrar o gráfico
             col4, col5 = st.columns(2)
@@ -1687,31 +1694,34 @@ elif selected == "🌱Colheitadeira":
             col5.pyplot(fig_fator)
 
             ###################################################################################################################################################
-            selected_columns_colheitadeira_combus = ["Máquina", 
-                "Taxa Média de Combustível (Ag) Ocioso (l/h)",
+            # Definir colunas para análise de taxa média de combustível
+            selected_columns_colheitadeira_combus = [
+                "Máquina",
                 "Taxa Média de Combustível (Ag) Trabalhando (l/h)",
-                "Taxa Média de Combustível (Ag) Transporte (l/h)"
+                "Taxa Média de Combustível (Ag) Transporte (l/h)",
+                "Taxa Média de Combustível (Ag) Ocioso (l/h)"
             ]
 
-            # Filtrar o DataFrame para as colunas selecionadas e converter de galões para litros
+            # Filtrar o DataFrame para as colunas selecionadas
             df_selected_colheitadeira_combus = df_colheitadeira[selected_columns_colheitadeira_combus].copy()
-            df_selected_colheitadeira_combus.iloc[:, 1:] *= 3.78541  # Conversão de galões para litros
-            df_selected_colheitadeira_combus = df_selected_colheitadeira_combus.sort_values(by="Taxa Média de Combustível (Ag) Trabalhando (l/h)", ascending=False)
+
+            # Ordenar o DataFrame de forma decrescente baseado na "Taxa Média de Combustível (Ag) Trabalhando (l/h)"
+            df_selected_colheitadeira_combus = df_selected_colheitadeira_combus.sort_values(
+                by="Taxa Média de Combustível (Ag) Trabalhando (l/h)", ascending=False
+            )
 
             # Nomes das máquinas e porcentagens
             maquinas_colheitadeira_combus = df_selected_colheitadeira_combus["Máquina"]
             percentual_colheitadeira_combus = df_selected_colheitadeira_combus.iloc[:, 1:]
-
-            # Aplicar quebra de linha nos nomes das máquinas
-            wrapped_labels = wrap_labels(maquinas_colheitadeira_combus, width=10)  # Ajuste a largura conforme necessário
+            wrapped_labels = wrap_labels(maquinas_colheitadeira_combus, width=10)
 
             # Plotar gráfico de barras verticais
             fig_colheitadeira_combus, ax_colheitadeira_combus = plt.subplots(figsize=(12, 8))
 
             # Cores e labels para as barras
-            colors_colheitadeira_combus = ['tab:orange', 'tab:green', 'tab:gray']
-            labels_colheitadeira_combus = ['Ocioso (l/h)', 'Trabalhando (l/h)', 'Transporte (l/h)']
-            bar_width_colheitadeira_combus = 0.1  # Largura das barras
+            colors_colheitadeira_combus = ['tab:green', 'tab:gray', 'tab:orange']
+            labels_colheitadeira_combus = ['Trabalhando (l/h)', 'Transporte (l/h)', 'Ocioso (l/h)']
+            bar_width_colheitadeira_combus = 0.2  # Largura das barras
 
             # Definir posições das barras para cada grupo de dados
             bar_positions_colheitadeira_combus = np.arange(len(maquinas_colheitadeira_combus))
@@ -1719,22 +1729,43 @@ elif selected == "🌱Colheitadeira":
             # Plotar as barras verticais combinadas para cada máquina
             for i, (maquina, row) in enumerate(zip(maquinas_colheitadeira_combus, percentual_colheitadeira_combus.values)):
                 for j, (percent, color) in enumerate(zip(row, colors_colheitadeira_combus)):
-                    ax_colheitadeira_combus.bar(bar_positions_colheitadeira_combus[i] + j * bar_width_colheitadeira_combus, percent, 
-                                                width=bar_width_colheitadeira_combus, 
-                                                label=labels_colheitadeira_combus[j] if i == 0 else "", 
-                                                color=color)
-                    ax_colheitadeira_combus.text(bar_positions_colheitadeira_combus[i] + j * bar_width_colheitadeira_combus, percent + 1, 
-                                                f'{percent:.1f}', ha='center', va='bottom', color='black', fontsize=10, fontweight='bold')
+                    ax_colheitadeira_combus.bar(
+                        bar_positions_colheitadeira_combus[i] + j * bar_width_colheitadeira_combus,
+                        percent,
+                        width=bar_width_colheitadeira_combus,
+                        label=labels_colheitadeira_combus[j] if i == 0 else "",
+                        color=color
+                    )
+                    ax_colheitadeira_combus.text(
+                        bar_positions_colheitadeira_combus[i] + j * bar_width_colheitadeira_combus,
+                        percent + 1,
+                        f'{percent:.1f}', ha='center', va='bottom', color='black', fontsize=10, fontweight='bold'
+                    )
 
             # Configurar rótulos e título
-            ax_colheitadeira_combus.set_xlabel('Máquinas')  # Texto do eixo x
-            ax_colheitadeira_combus.set_ylabel('(l/h)')  # Texto do eixo y
+            ax_colheitadeira_combus.set_xlabel('')  # Eixo X em negrito
+            ax_colheitadeira_combus.set_ylabel('')  # Eixo Y em negrito
             ax_colheitadeira_combus.set_xticks(bar_positions_colheitadeira_combus + bar_width_colheitadeira_combus)
-            ax_colheitadeira_combus.set_xticklabels(wrapped_labels)  # Usar labels com quebra de linha
-            ax_colheitadeira_combus.set_title('Combustível (l/h)')
+            ax_colheitadeira_combus.set_xticklabels(wrapped_labels)  # Rótulos em negrito
+            ax_colheitadeira_combus.set_title('Consumo de Combustível (l/h)')  # Título em negrito
+
+            # Definir os limites do eixo Y de forma adaptativa
+            max_value_colheitadeira_combus = percentual_colheitadeira_combus.max().max()
+            if max_value_colheitadeira_combus <= 15:
+                y_limit_colheitadeira_combus = 15
+            elif max_value_colheitadeira_combus <= 25:
+                y_limit_colheitadeira_combus = 25
+            elif max_value_colheitadeira_combus <= 50:
+                y_limit_colheitadeira_combus = 50
+            elif max_value_colheitadeira_combus <= 75:
+                y_limit_colheitadeira_combus = 75
+            else:
+                y_limit_colheitadeira_combus = 100
+
+            ax_colheitadeira_combus.set_ylim(0, y_limit_colheitadeira_combus)
 
             # Definir as numerações do eixo y
-            yticks_values = np.arange(0, 400, 50)  # Ajuste conforme necessário
+            yticks_values = np.arange(0, y_limit_colheitadeira_combus + 1, 10)
             yticks_labels = [f'{val:.1f}' for val in yticks_values]
             ax_colheitadeira_combus.set_yticks(yticks_values)
             ax_colheitadeira_combus.set_yticklabels(yticks_labels)
@@ -1742,7 +1773,7 @@ elif selected == "🌱Colheitadeira":
             # Adicionar legenda única
             ax_colheitadeira_combus.legend(loc='upper right', bbox_to_anchor=(1.24, 1.0))
 
-            # Exibir o gráfico em colunas do Streamlit
+            # Mostrar o gráfico
             col6, col7 = st.columns(2)
             col6.pyplot(fig_colheitadeira_combus)
 
