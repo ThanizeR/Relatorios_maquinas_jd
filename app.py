@@ -1698,7 +1698,6 @@ elif selected == "🌱Colheitadeira":
             selected_columns_colheitadeira_combus = [
                 "Máquina",
                 "Taxa Média de Combustível (Ag) Trabalhando (l/h)",
-                "Taxa Média de Combustível (Ag) Transporte (l/h)",
                 "Taxa Média de Combustível (Ag) Ocioso (l/h)"
             ]
 
@@ -1719,8 +1718,8 @@ elif selected == "🌱Colheitadeira":
             fig_colheitadeira_combus, ax_colheitadeira_combus = plt.subplots(figsize=(12, 8))
 
             # Cores e labels para as barras
-            colors_colheitadeira_combus = ['tab:green', 'tab:gray', 'tab:orange']
-            labels_colheitadeira_combus = ['Trabalhando (l/h)', 'Transporte (l/h)', 'Ocioso (l/h)']
+            colors_colheitadeira_combus = ['tab:green', 'tab:orange']
+            labels_colheitadeira_combus = ['Trabalhando (l/h)', 'Ocioso (l/h)']
             bar_width_colheitadeira_combus = 0.2  # Largura das barras
 
             # Definir posições das barras para cada grupo de dados
