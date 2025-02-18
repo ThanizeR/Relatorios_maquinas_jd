@@ -1874,8 +1874,8 @@ elif selected == "🌱Colheitadeira":
             fig_colheitadeira_desloc, ax_colheitadeira_desloc = plt.subplots(figsize=(12, 8))
 
             # Cores e labels para as barras
-            colors_colheitadeira_desloc = ['tab:green', 'tab:gray']
-            labels_colheitadeira_desloc = ['Trabalhando (km/h)', 'Transporte (km/h)']
+            colors_colheitadeira_desloc = ['tab:gray', 'tab:green']
+            labels_colheitadeira_desloc = ['Transporte (km/h)', 'Trabalhando (km/h)']
             bar_width_colheitadeira_desloc = 0.1  # Largura das barras
 
             # Definir posições das barras para cada grupo de dados
