@@ -1853,8 +1853,8 @@ elif selected == "🌱Colheitadeira":
             #####################################################################################################################
             # Definir colunas para análise de velocidade de deslocamento
             selected_columns_colheitadeira_desloc = ["Máquina", 
-                                                    "Velocidade Média de Deslocamento Transporte (km/h)",
-                                                    "Velocidade Média de Deslocamento Trabalhando (km/h)"]
+                                                    "Velocidade Média de Deslocamento Trabalhando (km/h)",
+                                                    "Velocidade Média de Deslocamento Transporte (km/h)"]
 
             # Filtrar o DataFrame para as colunas selecionadas
             df_selected_colheitadeira_desloc = df_colheitadeira[selected_columns_colheitadeira_desloc].copy()
@@ -1874,8 +1874,8 @@ elif selected == "🌱Colheitadeira":
             fig_colheitadeira_desloc, ax_colheitadeira_desloc = plt.subplots(figsize=(12, 8))
 
             # Cores e labels para as barras
-            colors_colheitadeira_desloc = ['tab:gray', 'tab:green']
-            labels_colheitadeira_desloc = ['Transporte (km/h)', 'Trabalhando (km/h)']
+            colors_colheitadeira_desloc = ['tab:green', 'tab:gray']
+            labels_colheitadeira_desloc = ['Trabalhando (km/h)', 'Transporte (km/h)']
             bar_width_colheitadeira_desloc = 0.1  # Largura das barras
 
             # Definir posições das barras para cada grupo de dados
