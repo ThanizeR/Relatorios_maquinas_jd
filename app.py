@@ -478,7 +478,7 @@ if selected == "🌱Tratores":
             # Verificar se a coluna "Fator de Carga Média do Motor (Ag) Trabalho (%)" está presente
             if "Fator de Carga Médio do Motor Trabalho (%)" in df_selected_tractors_fator.columns:
                 # Ordenar o DataFrame com base no "Fator de Carga Média do Motor (Ag) Trabalho (%)" de forma decrescente
-                df_selected_tractors_fator = df_selected_tractors_fator.sort_values(by="Fator de Carga Médio do Motor Trabalho (%)", ascending=False)
+                df_selected_tractors_fator = df_selected_tractors_fator.sort_values(by="Fator de Carga Médio do Motor Trabalho (%)", ascending=True)
 
             # Reverter a ordem para o gráfico, de modo que o maior valor apareça no topo
             df_selected_tractors_fator = df_selected_tractors_fator[::-1]
@@ -1136,7 +1136,7 @@ elif selected == "🌱Pulverizadores":
                     # Verificar se a coluna "Fator de Carga Média do Motor (Ag) Trabalho (%)" está presente
                     if "Fator de Carga Médio do Motor Trabalho (%)" in df_selected_tractors_fator.columns:
                         # Ordenar o DataFrame com base no "Fator de Carga Média do Motor (Ag) Trabalho (%)" de forma decrescente
-                        df_selected_tractors_fator = df_selected_tractors_fator.sort_values(by="Fator de Carga Médio do Motor Trabalho (%)", ascending=False)
+                        df_selected_tractors_fator = df_selected_tractors_fator.sort_values(by="Fator de Carga Médio do Motor Trabalho (%)", ascending=True)
                     # Reverter a ordem para o gráfico, de modo que o maior valor apareça no topo
                     df_selected_tractors_fator = df_selected_tractors_fator[::-1]
 
@@ -1620,7 +1620,7 @@ elif selected == "🌱Colheitadeira":
             # Verificar se a coluna "Fator de Carga Média do Motor (Ag) Trabalho (%)" está presente
             if "Fator de Carga Médio do Motor Trabalho (%)" in df_selected_tractors_fator.columns:
                         # Ordenar o DataFrame com base no "Fator de Carga Média do Motor (Ag) Trabalho (%)" de forma decrescente
-                df_selected_tractors_fator = df_selected_tractors_fator.sort_values(by="Fator de Carga Médio do Motor Trabalho (%)", ascending=False)
+                df_selected_tractors_fator = df_selected_tractors_fator.sort_values(by="Fator de Carga Médio do Motor Trabalho (%)", ascending=True)
             # Reverter a ordem para o gráfico, de modo que o maior valor apareça no topo
             df_selected_tractors_fator = df_selected_tractors_fator[::-1]
 
