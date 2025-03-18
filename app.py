@@ -1219,6 +1219,7 @@ elif selected == "🌱Pulverizadores":
                     col6.pyplot(fig_pulverizador_factor)
 
 
+
                     ############################################################################################################
                     # Definir colunas para análise de rotação média do motor
                     selected_columns_rotacao = ["Máquina", 
