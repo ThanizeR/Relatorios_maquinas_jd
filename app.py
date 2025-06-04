@@ -41,18 +41,15 @@ def load_data(file, file_type, encoding='utf-8'):
 def wrap_labels(labels, width=10):
     return ['\n'.join(textwrap.wrap(str(label), width)) for label in labels]
 
-def generate_pdf_tratores(df_tractors, figures, background_image_first_page_tratores=None, background_image_other_pages=None):
+# Novo layout com 6 gráficos na segunda página (3x2) e 1 gráfico (patinagem) em página separada
+def generate_pdf_tratores(df_tractors, figures, background_image_first_page_tratores=None, background_image_other_pages=None): 
     pdf_buffer = BytesIO()
     c = canvas.Canvas(pdf_buffer, pagesize=landscape(A4))
 
     page_width, page_height = landscape(A4)
-    x_margin = 60  # Margem lateral
-    y_margin = 40  # Margem vertical ajustada para subir o gráfico
-    header_space_other_pages = 70  # Espaço para a organização e datas
-
-    # Tamanho do gráfico
-    graph_width = page_width - 2 * x_margin  # Largura do gráfico
-    graph_height = page_height - header_space_other_pages - 2 * y_margin  # Altura do gráfico
+    x_margin = 60
+    y_margin = 40
+    header_space_other_pages = 70
 
     def set_background(page_num):
         if page_num == 0 and background_image_first_page_tratores:
@@ -67,44 +64,63 @@ def generate_pdf_tratores(df_tractors, figures, background_image_first_page_trat
     set_background(0)
     c.showPage()
 
-    # Segunda página com organização, datas e gráficos
+    # Segunda página
     set_background(1)
 
-    # Adicionando informações da organização e datas na segunda página
+    # Info da organização
     if 'Data de Início' in df_tractors.columns and 'Data Final' in df_tractors.columns and 'Organização' in df_tractors.columns:
         data_inicio = pd.to_datetime(df_tractors['Data de Início'].iloc[0], dayfirst=True)
         data_final = pd.to_datetime(df_tractors['Data Final'].iloc[0], dayfirst=True)
         organizacao = df_tractors['Organização'].iloc[0]
 
-        # Texto à esquerda com espaçamento como dois Tabs
         c.setFont("Helvetica", 10)
         c.drawString(x_margin - 20, page_height - 40, f"Organização: {organizacao}")
         c.drawString(x_margin - 20, page_height - 55, f"Data de Início: {data_inicio.strftime('%d/%m/%Y')}")
         c.drawString(x_margin - 20, page_height - 70, f"Data Final: {data_final.strftime('%d/%m/%Y')}")
 
-    page_num = 1
-    graph_index = 0
+    # Nome dos gráficos
+    graph_names = [
+        'fig_hrmotor', 'fig_utilizacao', 'fig_fator',
+        'fig_combust', 'fig_rotacao', 'fig_desloc', 'fig_patinagem'
+    ]
 
-    while graph_index < len(figures):
-        fig = figures[graph_index]
+    graph_layout = [
+        {'x': x_margin - 50 ,    'y': page_height - y_margin - 260, 'width': 270, 'height': 210},
+        {'x': x_margin + 220,   'y': page_height - y_margin - 260, 'width': 270, 'height': 210},
+        {'x': x_margin + 500,   'y': page_height - y_margin - 260, 'width': 270, 'height': 210},
 
-        if not isinstance(fig, plt.Figure):
-            print(f"Skipping non-Matplotlib figure: {type(fig)}")
-            continue
+        {'x': x_margin - 50,    'y': page_height - y_margin - 490, 'width': 270, 'height': 210},
+        {'x': x_margin + 220,   'y': page_height - y_margin - 490, 'width': 270, 'height': 210},
+        {'x': x_margin + 500,   'y': page_height - y_margin - 490, 'width': 270, 'height': 210},
+    ]
 
-        # Salvar gráfico como imagem
+
+    # Renderizar os 6 primeiros
+    for i, name in enumerate(graph_names[:6]):
+        fig = figures[i]
         img_data = BytesIO()
         fig.savefig(img_data, format='png', bbox_inches='tight')
         img_data.seek(0)
+        pos = graph_layout[i]
+        c.drawImage(ImageReader(img_data), pos['x'], pos['y'], width=pos['width'], height=pos['height'])
 
-        # Centralizar o gráfico e movê-lo um pouco mais para cima
-        c.drawImage(ImageReader(img_data), x_margin, y_margin + 20, width=graph_width, height=graph_height)  # Aumentar para subir
-        graph_index += 1
+    c.showPage()
 
-        if graph_index < len(figures):
-            c.showPage()
-            page_num += 1
-            set_background(page_num)
+    # Página para o gráfico de patinagem
+    set_background(2)
+    fig = figures[6]
+    img_data = BytesIO()
+    fig.savefig(img_data, format='png', bbox_inches='tight')
+    img_data.seek(0)
+
+    # Novo tamanho e posição (menor e centralizado)
+    c.drawImage(
+        ImageReader(img_data),
+        x_margin + 120,                      # mais centralizado
+        y_margin + 80,                       # mais acima
+        width=page_width - 2 * x_margin - 160,  # menor largura
+        height=page_height - 2 * y_margin - 160  # menor altura
+    )
 
     c.showPage()
     c.save()
@@ -120,13 +136,9 @@ def generate_pdf_pulverizador(df_sprayers, figures, background_image_first_page_
     c = canvas.Canvas(pdf_buffer, pagesize=landscape(A4))
 
     page_width, page_height = landscape(A4)
-    x_margin = 60  # Margem lateral
-    y_margin = 40  # Margem vertical ajustada para subir o gráfico
-    header_space_other_pages = 70  # Espaço para a organização e datas
-
-    # Tamanho do gráfico
-    graph_width = page_width - 2 * x_margin  # Largura do gráfico
-    graph_height = page_height - header_space_other_pages - 2 * y_margin  # Altura do gráfico
+    x_margin = 60
+    y_margin = 40
+    header_space_other_pages = 70
 
     def set_background(page_num):
         if page_num == 0 and background_image_first_page_pulverizador:
@@ -144,41 +156,40 @@ def generate_pdf_pulverizador(df_sprayers, figures, background_image_first_page_
     # Segunda página com organização, datas e gráficos
     set_background(1)
 
-    # Adicionando informações da organização e datas na segunda página
     if 'Data de Início' in df_sprayers.columns and 'Data Final' in df_sprayers.columns and 'Organização' in df_sprayers.columns:
         data_inicio = pd.to_datetime(df_sprayers['Data de Início'].iloc[0], dayfirst=True)
         data_final = pd.to_datetime(df_sprayers['Data Final'].iloc[0], dayfirst=True)
         organizacao = df_sprayers['Organização'].iloc[0]
 
-        # Texto à esquerda com espaçamento como dois Tabs
         c.setFont("Helvetica", 10)
         c.drawString(x_margin - 20, page_height - 40, f"Organização: {organizacao}")
         c.drawString(x_margin - 20, page_height - 55, f"Data de Início: {data_inicio.strftime('%d/%m/%Y')}")
         c.drawString(x_margin - 20, page_height - 70, f"Data Final: {data_final.strftime('%d/%m/%Y')}")
 
-    page_num = 1
-    graph_index = 0
+    # Nome dos gráficos
+    graph_names = [
+        'fig_pulverizador_hrmotor', 'fig_pulverizador_combus', ' fig_pulverizador_factor',
+        ' fig_pulverizador_rotacao', 'fig_pulverizador_autotrac', 'fig_pulverizador_desloc'
+    ]
 
-    while graph_index < len(figures):
-        fig = figures[graph_index]
+    graph_layout = [
+        {'x': x_margin - 50 ,    'y': page_height - y_margin - 260, 'width': 270, 'height': 210},
+        {'x': x_margin + 220,   'y': page_height - y_margin - 260, 'width': 270, 'height': 210},
+        {'x': x_margin + 500,   'y': page_height - y_margin - 260, 'width': 270, 'height': 210},
 
-        if not isinstance(fig, plt.Figure):
-            print(f"Skipping non-Matplotlib figure: {type(fig)}")
-            continue
+        {'x': x_margin - 50,    'y': page_height - y_margin - 490, 'width': 270, 'height': 210},
+        {'x': x_margin + 220,   'y': page_height - y_margin - 490, 'width': 270, 'height': 210},
+        {'x': x_margin + 500,   'y': page_height - y_margin - 490, 'width': 270, 'height': 210},
+    ]
 
-        # Salvar gráfico como imagem
+    # Renderizar os 6 primeiros
+    for i, name in enumerate(graph_names[:6]):
+        fig = figures[i]
         img_data = BytesIO()
         fig.savefig(img_data, format='png', bbox_inches='tight')
         img_data.seek(0)
-
-        # Centralizar o gráfico e movê-lo um pouco mais para cima
-        c.drawImage(ImageReader(img_data), x_margin, y_margin + 20, width=graph_width, height=graph_height)  # Aumentar para subir
-        graph_index += 1
-
-        if graph_index < len(figures):
-            c.showPage()
-            page_num += 1
-            set_background(page_num)
+        pos = graph_layout[i]
+        c.drawImage(ImageReader(img_data), pos['x'], pos['y'], width=pos['width'], height=pos['height'])
 
     c.showPage()
     c.save()
@@ -193,13 +204,8 @@ def generate_pdf_colheitadeira(df_colheitadeira, figures, background_image_first
     c = canvas.Canvas(pdf_buffer, pagesize=landscape(A4))
 
     page_width, page_height = landscape(A4)
-    x_margin = 60  # Margem lateral
-    y_margin = 40  # Margem vertical ajustada para subir o gráfico
-    header_space_other_pages = 70  # Espaço para a organização e datas
-
-    # Tamanho do gráfico
-    graph_width = page_width - 2 * x_margin  # Largura do gráfico
-    graph_height = page_height - header_space_other_pages - 2 * y_margin  # Altura do gráfico
+    x_margin = 60
+    y_margin = 40
 
     def set_background(page_num):
         if page_num == 0 and background_image_first_page_colheitadeira:
@@ -210,48 +216,66 @@ def generate_pdf_colheitadeira(df_colheitadeira, figures, background_image_first
             return
         c.drawImage(background, 0, 0, width=page_width, height=page_height)
 
-    # Primeira página (capa)
+    # Página de capa
     set_background(0)
     c.showPage()
 
-    # Segunda página com organização, datas e gráficos
+    # Página de gráficos
     set_background(1)
 
-    # Adicionando informações da organização e datas na segunda página
+    # Cabeçalho com dados
     if 'Data de Início' in df_colheitadeira.columns and 'Data Final' in df_colheitadeira.columns and 'Organização' in df_colheitadeira.columns:
         data_inicio = pd.to_datetime(df_colheitadeira['Data de Início'].iloc[0], dayfirst=True)
         data_final = pd.to_datetime(df_colheitadeira['Data Final'].iloc[0], dayfirst=True)
         organizacao = df_colheitadeira['Organização'].iloc[0]
 
-        # Texto à esquerda com espaçamento como dois Tabs
         c.setFont("Helvetica", 10)
         c.drawString(x_margin - 20, page_height - 40, f"Organização: {organizacao}")
         c.drawString(x_margin - 20, page_height - 55, f"Data de Início: {data_inicio.strftime('%d/%m/%Y')}")
         c.drawString(x_margin - 20, page_height - 70, f"Data Final: {data_final.strftime('%d/%m/%Y')}")
 
-    page_num = 1
-    graph_index = 0
+    # Nomes dos gráficos (opcional, só pra referência)
+    graph_names = [
+        'fig_hrmotor', 'fig_colheitadeira_desloc', 'fig_fator', 'fig_colheitadeira_combus',
+        'fig_rotacao', 'fig_colheitadeira_autotrac', 'fig_colheitadeira_util'
+    ]
 
-    while graph_index < len(figures):
-        fig = figures[graph_index]
+    graph_layout = [
+        {'x': x_margin - 50 ,    'y': page_height - y_margin - 260, 'width': 270, 'height': 210},
+        {'x': x_margin + 220,   'y': page_height - y_margin - 260, 'width': 270, 'height': 210},
+        {'x': x_margin + 500,   'y': page_height - y_margin - 260, 'width': 270, 'height': 210},
 
-        if not isinstance(fig, plt.Figure):
-            print(f"Skipping non-Matplotlib figure: {type(fig)}")
-            continue
+        {'x': x_margin - 50,    'y': page_height - y_margin - 490, 'width': 270, 'height': 210},
+        {'x': x_margin + 220,   'y': page_height - y_margin - 490, 'width': 270, 'height': 210},
+        {'x': x_margin + 500,   'y': page_height - y_margin - 490, 'width': 270, 'height': 210},
+    ]
 
-        # Salvar gráfico como imagem
+   # Renderizar os 6 primeiros
+    for i in range(6):
+        fig = figures[i]
         img_data = BytesIO()
         fig.savefig(img_data, format='png', bbox_inches='tight')
         img_data.seek(0)
+        pos = graph_layout[i]
+        c.drawImage(ImageReader(img_data), pos['x'], pos['y'], width=pos['width'], height=pos['height'])
 
-        # Centralizar o gráfico e movê-lo um pouco mais para cima
-        c.drawImage(ImageReader(img_data), x_margin, y_margin + 20, width=graph_width, height=graph_height)  # Aumentar para subir
-        graph_index += 1
+    c.showPage()
 
-        if graph_index < len(figures):
-            c.showPage()
-            page_num += 1
-            set_background(page_num)
+    # Página 2 com o último gráfico
+    set_background(2)
+    fig = figures[6]
+    img_data = BytesIO()
+    fig.savefig(img_data, format='png', bbox_inches='tight')
+    img_data.seek(0)
+
+    # Centralizado e um pouco menor
+    final_width = page_width - 2 * x_margin - 100
+    final_height = page_height - 2 * y_margin - 100
+    final_x = (page_width - final_width) / 2
+    final_y = (page_height - final_height) / 2
+
+    c.drawImage(ImageReader(img_data), final_x, final_y, width=final_width, height=final_height)
+
 
     c.showPage()
     c.save()
@@ -2025,7 +2049,7 @@ elif selected == "🌱Colheitadeira":
                 first_organization_name = df_colheitadeira['Organização'].iloc[0].split()[0]
 
                 # Gerar o PDF
-                figures = [fig_hrmotor, fig_colheitadeira_util, fig_fator, fig_colheitadeira_combus, fig_rotacao, fig_colheitadeira_autotrac, fig_colheitadeira_desloc]
+                figures = [fig_hrmotor, fig_fator, fig_colheitadeira_combus, fig_rotacao, fig_colheitadeira_autotrac, fig_colheitadeira_desloc, fig_colheitadeira_util]
                 pdf_buffer = generate_pdf_colheitadeira(df_colheitadeira, figures, background_image_first_page_colheitadeira, background_image_other_pages)
 
                 # Configurar o nome do arquivo dinamicamente
