@@ -580,16 +580,16 @@ if selected == "🌱Tratores":
             # Definir colunas para análise de taxa média de combustível
             selected_columns_combust = [
                 "Máquina",
-                "Taxa Média de Combustível (Ag) Trabalhando (l/h)",
-                "Taxa Média de Combustível (Ag) Transporte (l/h)",
-                "Taxa Média de Combustível (Ag) Ocioso (l/h)"
+                "Taxa Média de Combustível Trabalhando (l/h)",
+                "Taxa Média de Combustível Transporte (l/h)",
+                "Taxa Média de Combustível Ocioso (l/h)"
             ]
 
             # Filtrar o DataFrame para as colunas selecionadas
             df_selected_tractors_combust = df_tractors[selected_columns_combust].copy()
 
             # Ordenar o DataFrame de forma decrescente baseado na "Taxa Média de Combustível (Ag) Trabalhando (l/h)"
-            df_selected_tractors_combust = df_selected_tractors_combust.sort_values(by="Taxa Média de Combustível (Ag) Trabalhando (l/h)", ascending=False)
+            df_selected_tractors_combust = df_selected_tractors_combust.sort_values(by="Taxa Média de Combustível Trabalhando (l/h)", ascending=False)
 
             # Nomes das máquinas e porcentagens
             maquinas_tractors_combust = df_selected_tractors_combust["Máquina"]
