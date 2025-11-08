@@ -657,7 +657,7 @@ if selected == "🌱Tratores":
             # Mostrar o gráfico
             col6, col7 = st.columns(2)
             col6.pyplot(fig_combust)
-
+######
 
         ###################################################################################################
 
