@@ -1065,9 +1065,9 @@ elif selected == "🌱Pulverizadores":
                     # Definir colunas selecionadas para análise
                     selected_columns_colheitadeira_combus = [
                         "Máquina", 
-                        "Taxa Média de Combustível (Ag) Ocioso (l/h)",
-                        "Taxa Média de Combustível (Ag) Trabalhando (l/h)",
-                        "Taxa Média de Combustível (Ag) Transporte (l/h)"
+                        "Taxa Média de Combustível Ocioso (l/h)",
+                        "Taxa Média de Combustível Trabalhando (l/h)",
+                        "Taxa Média de Combustível Transporte (l/h)"
                     ]
 
                     # Filtrar o DataFrame para as colunas selecionadas
@@ -1079,7 +1079,7 @@ elif selected == "🌱Pulverizadores":
 
                     # Ordenar o DataFrame com base na "Taxa Média de Combustível (Ag) Trabalhando (l/h)"
                     df_selected_colheitadeira_combus = df_selected_colheitadeira_combus.sort_values(
-                        by="Taxa Média de Combustível (Ag) Trabalhando (l/h)", ascending=False
+                        by="Taxa Média de Combustível Trabalhando (l/h)", ascending=False
                     )
 
                     # Nomes das máquinas e porcentagens
@@ -1722,8 +1722,8 @@ elif selected == "🌱Colheitadeira":
             # Definir colunas para análise de taxa média de combustível
             selected_columns_colheitadeira_combus = [
                 "Máquina",
-                "Taxa Média de Combustível (Ag) Trabalhando (l/h)",
-                "Taxa Média de Combustível (Ag) Ocioso (l/h)"
+                "Taxa Média de Combustível Trabalhando (l/h)",
+                "Taxa Média de Combustível Ocioso (l/h)"
             ]
 
             # Filtrar o DataFrame para as colunas selecionadas
@@ -1731,7 +1731,7 @@ elif selected == "🌱Colheitadeira":
 
             # Ordenar o DataFrame de forma decrescente baseado na "Taxa Média de Combustível (Ag) Trabalhando (l/h)"
             df_selected_colheitadeira_combus = df_selected_colheitadeira_combus.sort_values(
-                by="Taxa Média de Combustível (Ag) Trabalhando (l/h)", ascending=False
+                by="Taxa Média de Combustível Trabalhando (l/h)", ascending=False
             )
 
             # Nomes das máquinas e porcentagens
