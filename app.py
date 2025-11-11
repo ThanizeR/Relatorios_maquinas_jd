@@ -42,16 +42,16 @@ def wrap_labels(labels, width=10):
     return ['\n'.join(textwrap.wrap(str(label), width)) for label in labels]
 
 # Novo layout com 6 gráficos na segunda página (3x2) e 1 gráfico (patinagem) em página separada
-def generate_pdf_tratores(df_tractors, figures, background_image_first_page_tratores=None, background_image_other_pages=None): 
+def generate_pdf_tratores(df_tractors, figures, background_image_first_page_tratores=None, background_image_other_pages=None):
     pdf_buffer = BytesIO()
     c = canvas.Canvas(pdf_buffer, pagesize=landscape(A4))
 
     page_width, page_height = landscape(A4)
     x_margin = 60
     y_margin = 40
-    header_space_other_pages = 70
 
     def set_background(page_num):
+        """Aplica a imagem de fundo conforme a página."""
         if page_num == 0 and background_image_first_page_tratores:
             background = ImageReader(background_image_first_page_tratores)
         elif background_image_other_pages:
@@ -60,15 +60,19 @@ def generate_pdf_tratores(df_tractors, figures, background_image_first_page_trat
             return
         c.drawImage(background, 0, 0, width=page_width, height=page_height)
 
-    # Primeira página (capa)
+    # -----------------------------------------
+    # 1️⃣ Primeira página – Capa
+    # -----------------------------------------
     set_background(0)
     c.showPage()
 
-    # Segunda página
+    # -----------------------------------------
+    # 2️⃣ Segunda página – 6 gráficos (layout 3x2)
+    # -----------------------------------------
     set_background(1)
 
-    # Info da organização
-    if 'Data de Início' in df_tractors.columns and 'Data Final' in df_tractors.columns and 'Organização' in df_tractors.columns:
+    # Informações da organização
+    if {'Data de Início', 'Data Final', 'Organização'}.issubset(df_tractors.columns):
         data_inicio = pd.to_datetime(df_tractors['Data de Início'].iloc[0], dayfirst=True)
         data_final = pd.to_datetime(df_tractors['Data Final'].iloc[0], dayfirst=True)
         organizacao = df_tractors['Organização'].iloc[0]
@@ -78,25 +82,18 @@ def generate_pdf_tratores(df_tractors, figures, background_image_first_page_trat
         c.drawString(x_margin - 20, page_height - 55, f"Data de Início: {data_inicio.strftime('%d/%m/%Y')}")
         c.drawString(x_margin - 20, page_height - 70, f"Data Final: {data_final.strftime('%d/%m/%Y')}")
 
-    # Nome dos gráficos
-    graph_names = [
-        'fig_hrmotor', 'fig_utilizacao', 'fig_fator',
-        'fig_combust', 'fig_rotacao', 'fig_desloc', 'fig_patinagem'
-    ]
-
+    # Layout 3x2 (6 gráficos)
     graph_layout = [
-        {'x': x_margin - 50 ,    'y': page_height - y_margin - 260, 'width': 270, 'height': 210},
-        {'x': x_margin + 220,   'y': page_height - y_margin - 260, 'width': 270, 'height': 210},
-        {'x': x_margin + 500,   'y': page_height - y_margin - 260, 'width': 270, 'height': 210},
-
-        {'x': x_margin - 50,    'y': page_height - y_margin - 490, 'width': 270, 'height': 210},
-        {'x': x_margin + 220,   'y': page_height - y_margin - 490, 'width': 270, 'height': 210},
-        {'x': x_margin + 500,   'y': page_height - y_margin - 490, 'width': 270, 'height': 210},
+        {'x': x_margin - 50, 'y': page_height - y_margin - 260, 'width': 270, 'height': 210},
+        {'x': x_margin + 220, 'y': page_height - y_margin - 260, 'width': 270, 'height': 210},
+        {'x': x_margin + 500, 'y': page_height - y_margin - 260, 'width': 270, 'height': 210},
+        {'x': x_margin - 50, 'y': page_height - y_margin - 490, 'width': 270, 'height': 210},
+        {'x': x_margin + 220, 'y': page_height - y_margin - 490, 'width': 270, 'height': 210},
+        {'x': x_margin + 500, 'y': page_height - y_margin - 490, 'width': 270, 'height': 210},
     ]
 
-
-    # Renderizar os 6 primeiros
-    for i, name in enumerate(graph_names[:6]):
+    # Renderizar os 6 primeiros gráficos
+    for i in range(6):
         fig = figures[i]
         img_data = BytesIO()
         fig.savefig(img_data, format='png', bbox_inches='tight')
@@ -106,26 +103,48 @@ def generate_pdf_tratores(df_tractors, figures, background_image_first_page_trat
 
     c.showPage()
 
-    # Página para o gráfico de patinagem
+    # -----------------------------------------
+    # 3️⃣ Terceira página – 2 gráficos lado a lado
+    # (média do motor e patinagem)
+    # -----------------------------------------
+        # Página 1 - Gráfico de Média do Motor
     set_background(2)
-    fig = figures[6]
-    img_data = BytesIO()
-    fig.savefig(img_data, format='png', bbox_inches='tight')
-    img_data.seek(0)
 
-    # Novo tamanho e posição (menor e centralizado)
-    c.drawImage(
-        ImageReader(img_data),
-        x_margin + 120,                      # mais centralizado
-        y_margin + 80,                       # mais acima
-        width=page_width - 2 * x_margin - 160,  # menor largura
-        height=page_height - 2 * y_margin - 160  # menor altura
-    )
+    # Dimensões para gráfico centralizado e grande
+    graph_width = page_width - 2 * x_margin - 100
+    graph_height = graph_width * 0.65
+    y_pos = (page_height - graph_height) / 2
+
+    # Renderizar gráfico de média do motor
+    fig_media_motor = figures[6]
+    img_media_motor = BytesIO()
+    fig_media_motor.savefig(img_media_motor, format='png', bbox_inches='tight')
+    img_media_motor.seek(0)
+    c.drawImage(ImageReader(img_media_motor),
+                x_margin + 50, y_pos,
+                width=graph_width, height=graph_height)
+
+    # Nova página
+    c.showPage()
+
+    # Página 2 - Gráfico de Patinagem
+    set_background(2)
+
+    # Renderizar gráfico de patinagem
+    fig_patinagem = figures[7]
+    img_patinagem = BytesIO()
+    fig_patinagem.savefig(img_patinagem, format='png', bbox_inches='tight')
+    img_patinagem.seek(0)
+    c.drawImage(ImageReader(img_patinagem),
+                x_margin + 50, y_pos,
+                width=graph_width, height=graph_height)
 
     c.showPage()
     c.save()
     pdf_buffer.seek(0)
     return pdf_buffer
+
+
 
 # Caminho para as imagens de fundo
 background_image_first_page_tratores = 'background_pdf_first_page_tratores.jpg'
@@ -827,12 +846,96 @@ if selected == "🌱Tratores":
 
             # Adicionar legenda
             ax_desloc.legend(labels_desloc, loc='upper right', bbox_to_anchor=(1.2, 1.0))
-
+            # Mostrar o gráfico
+            
             # Mostrar gráfico
             col9.pyplot(fig_desloc)
 
 
             ################################################################
+                    # Definir colunas para análise de taxa média de combustível
+            selected_columns_media_oleo = [
+                "Máquina",
+                "Temperatura Máx. do Líq. de Arrefecimento Período (°C)",
+                "Temp. Média do Líq. de Arref. Período (°C)",
+                "Temperatura Máx. do Óleo da Transm. Período (°C)",
+                "Temp. Média do Óleo da Transm. Período (°C)",
+                "Temp. Máx. do Óleo Hidráulico Período (°C)",
+                "Temp. Média do Óleo Hidráulico Período (°C)"
+            ]
+
+            # Filtrar o DataFrame para as colunas selecionadas
+            df_selected_tractors_media_oleo = df_tractors[selected_columns_media_oleo].copy()
+
+            # Ordenar o DataFrame de forma decrescente baseado 
+            df_selected_tractors_media_oleo = df_selected_tractors_media_oleo.sort_values(by="Temperatura Máx. do Líq. de Arrefecimento Período (°C)", ascending=False)
+
+            # Nomes das máquinas e porcentagens
+            maquinas_tractors_media_oleo = df_selected_tractors_media_oleo["Máquina"]
+            percentual_tractors_media_oleo = df_selected_tractors_media_oleo.iloc[:, 1:]
+            wrapped_labels = wrap_labels(maquinas_tractors_media_oleo, width=10)
+
+            # Plotar gráfico de barras verticais
+            fig_media_oleo, ax_media_oleo = plt.subplots(figsize=(12, 8))
+
+            # Cores e labels para as barras
+            colors_media_oleo = ["#026e02", "#00ff2a", "#d1a700", "#fff674", "#000e8d", "#5cc3ff"]
+            labels_media_oleo = ['Máxima Líq. de Arref. Período (°C)','Média Líq. de Arref. Período (°C)', 'Máxima Óleo da Transm. Período (°C)', 'Média Óleo da Transm. Período (°C)', 'Máxima Óleo Hidráulico Período (°C)', 'Média Óleo Hidráulico Período (°C)']
+            bar_width_media_oleo = 0.1  # Largura das barras
+
+            # Definir posições das barras para cada grupo de dados
+            bar_positions_tractors_media_oleo = np.arange(len(maquinas_tractors_media_oleo))
+
+            # Plotar as barras verticais combinadas para cada máquina
+            for i, (maquina, row) in enumerate(zip(maquinas_tractors_media_oleo, percentual_tractors_media_oleo.values)):
+                for j, (percent, color) in enumerate(zip(row, colors_media_oleo)):
+                    ax_media_oleo.bar(
+                        bar_positions_tractors_media_oleo[i] + j * bar_width_media_oleo,
+                        percent,
+                        width=bar_width_media_oleo,
+                        label=labels_media_oleo[j] if i == 0 else "",
+                        color=color
+                    )
+                    ax_media_oleo.text(
+                        bar_positions_tractors_media_oleo[i] + j * bar_width_media_oleo,
+                        percent + 1,
+                        f'{percent:.1f}', ha='center', va='bottom', color='black', fontsize=10, fontweight='bold'
+                    )
+
+            # Configurar rótulos e título
+            ax_media_oleo.set_xlabel('')  # Eixo X em negrito
+            ax_media_oleo.set_ylabel('')  # Eixo Y em negrito
+            ax_media_oleo.set_xticks(bar_positions_tractors_media_oleo + bar_width_media_oleo)
+            ax_media_oleo.set_xticklabels(wrapped_labels)  # Rótulos em negrito
+            ax_media_oleo.set_title('Temparatura máxima e média do motor')  # Título em negrito
+
+            # Definir os limites do eixo Y de forma adaptativa
+            max_value_media_oleo = percentual_tractors_media_oleo.max().max()  # Obtém o valor máximo dos dados
+            if max_value_media_oleo <= 15:
+                y_limit_media_oleo = 15
+            elif max_value_media_oleo <= 25:
+                y_limit_media_oleo = 25
+            elif max_value_media_oleo <= 50:
+                y_limit_media_oleo = 50
+            elif max_value_media_oleo <= 75:
+                y_limit_media_oleo = 75
+            else:
+                y_limit_media_oleo = 100
+
+            ax_media_oleo.set_ylim(0, y_limit_media_oleo)  # Define o limite do eixo Y
+
+            # Definir as numerações do eixo y
+            yticks_values = np.arange(0, y_limit_media_oleo + 1, 10)  # Ajusta conforme necessário
+            yticks_labels = [f'{val:.1f}' for val in yticks_values]
+            ax_media_oleo.set_yticks(yticks_values)
+            ax_media_oleo.set_yticklabels(yticks_labels)  # Rótulos do eixo Y em negrito
+
+            # Adicionar legenda única
+            ax_media_oleo.legend(loc='upper right', bbox_to_anchor=(1.37, 1.0))  # Legenda em negrito
+            col10, col12 = st.columns(2)
+            col10.pyplot(fig_media_oleo)
+
+            ##################################################################
 
             # Seleciona as colunas de patinagem na ordem exata da planilha
             selected_columns_patinagem = [
@@ -952,24 +1055,33 @@ if selected == "🌱Tratores":
             st.pyplot(fig_patinagem)
             #########################################################################################################
 
+            # Caminho para as imagens de fundo
             if st.button('Gerar PDF para Tratores'):
-                # Supondo que 'Nome_Organizacao' seja uma coluna no dataframe df_tractors
+                # Nome da organização (primeira palavra)
                 first_organization_name = df_tractors['Organização'].iloc[0].split()[0]
 
-                # Gerar o PDF
-                figures = [fig_hrmotor, fig_utilizacao, fig_fator, fig_combust, fig_rotacao, fig_desloc, fig_patinagem]
-                pdf_buffer = generate_pdf_tratores(df_tractors, figures, background_image_first_page_tratores, background_image_other_pages)
+                # Gerar o PDF com os 8 gráficos
+                figures = [
+                    fig_hrmotor, fig_utilizacao, fig_fator,
+                    fig_combust, fig_rotacao, fig_desloc,
+                    fig_media_oleo, fig_patinagem
+                ]
 
-                # Configurar o nome do arquivo dinamicamente
+                pdf_buffer = generate_pdf_tratores(
+                    df_tractors, figures,
+                    background_image_first_page_tratores,
+                    background_image_other_pages
+                )
+
                 file_name = f"relatorio_tratores_{first_organization_name}.pdf"
 
-                # Download do PDF
                 st.download_button(
                     label="Baixar PDF",
                     data=pdf_buffer,
                     file_name=file_name,
                     mime="application/pdf"
                 )
+
 # Lógica para Pulverizadores
 elif selected == "🌱Pulverizadores":
     st.subheader("Pulverizadores")
