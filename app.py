@@ -103,35 +103,17 @@ def generate_pdf_tratores(df_tractors, figures, background_image_first_page_trat
 
     c.showPage()
 
-    # -----------------------------------------
-    # 3️⃣ Terceira página – 2 gráficos lado a lado
-    # (média do motor e patinagem)
-    # -----------------------------------------
-        # Página 1 - Gráfico de Média do Motor
-    set_background(2)
-
     # Dimensões para gráfico centralizado e grande
     graph_width = page_width - 2 * x_margin - 100
     graph_height = graph_width * 0.65
     y_pos = (page_height - graph_height) / 2
 
-    # Renderizar gráfico de média do motor
-    fig_media_motor = figures[6]
-    img_media_motor = BytesIO()
-    fig_media_motor.savefig(img_media_motor, format='png', bbox_inches='tight')
-    img_media_motor.seek(0)
-    c.drawImage(ImageReader(img_media_motor),
-                x_margin + 50, y_pos,
-                width=graph_width, height=graph_height)
-
-    # Nova página
-    c.showPage()
 
     # Página 2 - Gráfico de Patinagem
     set_background(2)
 
     # Renderizar gráfico de patinagem
-    fig_patinagem = figures[7]
+    fig_patinagem = figures[6]
     img_patinagem = BytesIO()
     fig_patinagem.savefig(img_patinagem, format='png', bbox_inches='tight')
     img_patinagem.seek(0)
@@ -778,7 +760,7 @@ if selected == "🌱Tratores":
             selected_columns_desloc = [
                 "Máquina", 
                 "Velocidade Média de Deslocamento Trabalhando (km/h)",
-                "Velocidade Média de Deslocamento (km/h)"
+                "Velocidade Média de Deslocamento Período (km/h)"
             ]
             df_selected_tractors_desloc = df_tractors[selected_columns_desloc].copy()
 
@@ -850,91 +832,7 @@ if selected == "🌱Tratores":
             
             # Mostrar gráfico
             col9.pyplot(fig_desloc)
-
-
-            ################################################################
-                    # Definir colunas para análise de taxa média de combustível
-            selected_columns_media_oleo = [
-                "Máquina",
-                "Temperatura Máx. do Líq. de Arrefecimento Período (°C)",
-                "Temp. Média do Líq. de Arref. Período (°C)",
-                "Temperatura Máx. do Óleo da Transm. Período (°C)",
-                "Temp. Média do Óleo da Transm. Período (°C)",
-                "Temp. Máx. do Óleo Hidráulico Período (°C)",
-                "Temp. Média do Óleo Hidráulico Período (°C)"
-            ]
-
-            # Filtrar o DataFrame para as colunas selecionadas
-            df_selected_tractors_media_oleo = df_tractors[selected_columns_media_oleo].copy()
-
-            # Ordenar o DataFrame de forma decrescente baseado 
-            df_selected_tractors_media_oleo = df_selected_tractors_media_oleo.sort_values(by="Temperatura Máx. do Líq. de Arrefecimento Período (°C)", ascending=False)
-
-            # Nomes das máquinas e porcentagens
-            maquinas_tractors_media_oleo = df_selected_tractors_media_oleo["Máquina"]
-            percentual_tractors_media_oleo = df_selected_tractors_media_oleo.iloc[:, 1:]
-            wrapped_labels = wrap_labels(maquinas_tractors_media_oleo, width=10)
-
-            # Plotar gráfico de barras verticais
-            fig_media_oleo, ax_media_oleo = plt.subplots(figsize=(12, 8))
-
-            # Cores e labels para as barras
-            colors_media_oleo = ["#026e02", "#00ff2a", "#d1a700", "#fff674", "#000e8d", "#5cc3ff"]
-            labels_media_oleo = ['Máxima Líq. de Arref. Período (°C)','Média Líq. de Arref. Período (°C)', 'Máxima Óleo da Transm. Período (°C)', 'Média Óleo da Transm. Período (°C)', 'Máxima Óleo Hidráulico Período (°C)', 'Média Óleo Hidráulico Período (°C)']
-            bar_width_media_oleo = 0.1  # Largura das barras
-
-            # Definir posições das barras para cada grupo de dados
-            bar_positions_tractors_media_oleo = np.arange(len(maquinas_tractors_media_oleo))
-
-            # Plotar as barras verticais combinadas para cada máquina
-            for i, (maquina, row) in enumerate(zip(maquinas_tractors_media_oleo, percentual_tractors_media_oleo.values)):
-                for j, (percent, color) in enumerate(zip(row, colors_media_oleo)):
-                    ax_media_oleo.bar(
-                        bar_positions_tractors_media_oleo[i] + j * bar_width_media_oleo,
-                        percent,
-                        width=bar_width_media_oleo,
-                        label=labels_media_oleo[j] if i == 0 else "",
-                        color=color
-                    )
-                    ax_media_oleo.text(
-                        bar_positions_tractors_media_oleo[i] + j * bar_width_media_oleo,
-                        percent + 1,
-                        f'{percent:.1f}', ha='center', va='bottom', color='black', fontsize=10, fontweight='bold'
-                    )
-
-            # Configurar rótulos e título
-            ax_media_oleo.set_xlabel('')  # Eixo X em negrito
-            ax_media_oleo.set_ylabel('')  # Eixo Y em negrito
-            ax_media_oleo.set_xticks(bar_positions_tractors_media_oleo + bar_width_media_oleo)
-            ax_media_oleo.set_xticklabels(wrapped_labels)  # Rótulos em negrito
-            ax_media_oleo.set_title('Temparatura máxima e média do motor')  # Título em negrito
-
-            # Definir os limites do eixo Y de forma adaptativa
-            max_value_media_oleo = percentual_tractors_media_oleo.max().max()  # Obtém o valor máximo dos dados
-            if max_value_media_oleo <= 15:
-                y_limit_media_oleo = 15
-            elif max_value_media_oleo <= 25:
-                y_limit_media_oleo = 25
-            elif max_value_media_oleo <= 50:
-                y_limit_media_oleo = 50
-            elif max_value_media_oleo <= 75:
-                y_limit_media_oleo = 75
-            else:
-                y_limit_media_oleo = 100
-
-            ax_media_oleo.set_ylim(0, y_limit_media_oleo)  # Define o limite do eixo Y
-
-            # Definir as numerações do eixo y
-            yticks_values = np.arange(0, y_limit_media_oleo + 1, 10)  # Ajusta conforme necessário
-            yticks_labels = [f'{val:.1f}' for val in yticks_values]
-            ax_media_oleo.set_yticks(yticks_values)
-            ax_media_oleo.set_yticklabels(yticks_labels)  # Rótulos do eixo Y em negrito
-
-            # Adicionar legenda única
-            ax_media_oleo.legend(loc='upper right', bbox_to_anchor=(1.37, 1.0))  # Legenda em negrito
-            col10, col12 = st.columns(2)
-            col10.pyplot(fig_media_oleo)
-
+           
             ##################################################################
 
             # Seleciona as colunas de patinagem na ordem exata da planilha
@@ -1063,8 +961,7 @@ if selected == "🌱Tratores":
                 # Gerar o PDF com os 8 gráficos
                 figures = [
                     fig_hrmotor, fig_utilizacao, fig_fator,
-                    fig_combust, fig_rotacao, fig_desloc,
-                    fig_media_oleo, fig_patinagem
+                    fig_combust, fig_rotacao, fig_desloc, fig_patinagem
                 ]
 
                 pdf_buffer = generate_pdf_tratores(
