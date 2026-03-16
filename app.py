@@ -625,6 +625,7 @@ if selected == "🌱Tratores":
                     )
 
             # Configurar rótulos e título
+            ax_combust.set_xticklabels(wrapped_labels, rotation=45, ha='right')
             ax_combust.set_xlabel('')  # Eixo X em negrito
             ax_combust.set_ylabel('')  # Eixo Y em negrito
             ax_combust.set_xticks(bar_positions_tractors_combust + bar_width_combust)
@@ -812,6 +813,7 @@ if selected == "🌱Tratores":
                         )
 
             # Configurar os eixos e título
+            ax_desloc.set_xticklabels(wrapped_labels, rotation=45, ha='right')
             ax_desloc.set_ylabel('km/h')  
             ax_desloc.set_yticks([])  # Remover marcações do eixo Y
             ax_desloc.set_xticks(bar_positions_desloc)
