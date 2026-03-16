@@ -1777,7 +1777,6 @@ elif selected == "🌱Colheitadeira":
                     )
 
             # Configurar rótulos e título
-            ax_colheitadeira_combus.set_xticklabels(wrapped_labels, rotation=45, ha='right')
             ax_colheitadeira_combus.set_xlabel('')  # Eixo X em negrito
             ax_colheitadeira_combus.set_ylabel('')  # Eixo Y em negrito
             ax_colheitadeira_combus.set_xticks(bar_positions_colheitadeira_combus + bar_width_colheitadeira_combus)
@@ -1930,7 +1929,6 @@ elif selected == "🌱Colheitadeira":
                                                 color='black', fontsize=10, fontweight='bold')  # Ajuste para o número mais próximo da barra
 
             # Configurar rótulos e título
-            ax_colheitadeira_desloc.set_xticklabels(wrapped_labels, rotation=45, ha='right')
             ax_colheitadeira_desloc.set_xlabel('Máquinas')  # Texto do eixo x
             ax_colheitadeira_desloc.set_ylabel('')  # Texto do eixo y
             ax_colheitadeira_desloc.set_xticks(bar_positions_colheitadeira_desloc + bar_width_colheitadeira_desloc / 2)
@@ -1986,7 +1984,6 @@ elif selected == "🌱Colheitadeira":
                     ax_colheitadeira_autotrac.text(bar_positions_colheitadeira_autotrac[i] + j * bar_width_colheitadeira_autotrac, percent + 1, f'{percent:.1f}%', ha='center', va='bottom', color='black', fontsize=10, fontweight='bold')
 
             # Configurar rótulos e título
-            ax_colheitadeira_autotrac.set_xticklabels(wrapped_labels, rotation=45, ha='right')
             ax_colheitadeira_autotrac.set_xlabel('Máquinas')  # Texto do eixo x
             ax_colheitadeira_autotrac.set_ylabel('')  # Texto do eixo y
             ax_colheitadeira_autotrac.set_xticks(bar_positions_colheitadeira_desloc + bar_width_colheitadeira_desloc)
