@@ -340,18 +340,18 @@ if selected == "🌱Tratores":
 
 
             # Definir os dados
-            selected_columns_hrmotor = ["Máquina", "Horas de Operação do Motor Período (h)"]
+            selected_columns_hrmotor = ["Máquina", "Horas de Operação do Motor Período"]
             df_selected_tractors_hrmotor = df_tractors[selected_columns_hrmotor].copy()
 
             # Ordenar o DataFrame com base nas horas de operação do motor usando sort_values
-            df_selected_tractors_hrmotor = df_selected_tractors_hrmotor.sort_values(by="Horas de Operação do Motor Período (h)", ascending=False)
+            df_selected_tractors_hrmotor = df_selected_tractors_hrmotor.sort_values(by="Horas de Operação do Motor Período", ascending=False)
 
             # Configurar o gráfico
             fig_hrmotor, ax_hrmotor = plt.subplots(figsize=(12, 8))
 
             # Extrair dados para plotagem
             maquinas_tractors_hrmotor = df_selected_tractors_hrmotor["Máquina"]
-            horas_operacao_hrmotor = df_selected_tractors_hrmotor["Horas de Operação do Motor Período (h)"]
+            horas_operacao_hrmotor = df_selected_tractors_hrmotor["Horas de Operação do Motor Período"]
             wrapped_labels = wrap_labels(maquinas_tractors_hrmotor, width=10)  # Ajuste a largura conforme necessário
 
             # Inverter a ordem dos dados para que sejam plotados corretamente
@@ -395,17 +395,17 @@ if selected == "🌱Tratores":
             selected_columns_utilizacao = ["Máquina"]
 
             # Verificar se as colunas opcionais existem e adicioná-las
-            if "Utilização Trabalho (%)" in df_tractors.columns:
-                selected_columns_utilizacao.append("Utilização Trabalho (%)")
+            if "Utilização Trabalhando" in df_tractors.columns:
+                selected_columns_utilizacao.append("Utilização Trabalhando")
 
-            if "Utilização Transporte (%)" in df_tractors.columns:
-                selected_columns_utilizacao.append("Utilização Transporte (%)")
+            if "Utilização Transporte" in df_tractors.columns:
+                selected_columns_utilizacao.append("Utilização Transporte")
 
-            if "Utilização Marcha Lenta (%)" in df_tractors.columns:
-                selected_columns_utilizacao.append("Utilização Marcha Lenta (%)")
+            if "Utilização Marcha Lenta" in df_tractors.columns:
+                selected_columns_utilizacao.append("Utilização Marcha Lenta")
 
-            if "Utilização Ocioso (%)" in df_tractors.columns:
-                selected_columns_utilizacao.append("Utilização Ocioso (%)")
+            if "Utilização Ocioso" in df_tractors.columns:
+                selected_columns_utilizacao.append("Utilização Ocioso")
 
             # Selecionar os dados com as colunas presentes
             df_selected_tractors_utilizacao = df_tractors[selected_columns_utilizacao].copy()
@@ -422,19 +422,19 @@ if selected == "🌱Tratores":
             colors_utilizacao = []
             labels_utilizacao = []
 
-            if "Utilização Trabalho (%)" in df_selected_tractors_utilizacao.columns:
+            if "Utilização Trabalhando" in df_selected_tractors_utilizacao.columns:
                 colors_utilizacao.append('tab:green')
                 labels_utilizacao.append('Trabalhando')
 
-            if "Utilização Transporte (%)" in df_selected_tractors_utilizacao.columns:
+            if "Utilização Transporte" in df_selected_tractors_utilizacao.columns:
                 colors_utilizacao.append('tab:gray')
                 labels_utilizacao.append('Transporte')
 
-            if "Utilização Marcha Lenta (%)" in df_selected_tractors_utilizacao.columns:
+            if "Utilização Marcha Lenta" in df_selected_tractors_utilizacao.columns:
                 colors_utilizacao.append('tab:orange')
                 labels_utilizacao.append('Marcha Lenta')
 
-            if "Utilização Ocioso (%)" in df_selected_tractors_utilizacao.columns:
+            if "Utilização Ocioso" in df_selected_tractors_utilizacao.columns:
                 colors_utilizacao.append('tab:orange')
                 labels_utilizacao.append('Ocioso')
 
@@ -449,7 +449,7 @@ if selected == "🌱Tratores":
             for i, (maquina, row) in enumerate(zip(maquinas_tractors, velocidades_percentual_tractors.values)):
                 left = 0
                 # Plotar "Trabalhando" primeiro
-                if "Utilização Trabalho (%)" in df_selected_tractors_utilizacao.columns:
+                if "Utilização Trabalhando" in df_selected_tractors_utilizacao.columns:
                     percent = row[0]  # Percentagem de Trabalhando
                     ax_utilizacao.barh(i, percent, height=bar_height_utilizacao, left=left, color='tab:green')
                     ax_utilizacao.text(left + percent / 2, i, f'{percent:.1f}%', ha='center', va='center', color='black', fontsize=10, fontweight='bold')
@@ -478,14 +478,14 @@ if selected == "🌱Tratores":
             #############################################################
            # Verificar se as colunas existem no DataFrame antes de selecioná-las
             colunas_disponiveis = ["Máquina", 
-                                "Fator de Carga Médio do Motor Trabalho (%)",
-                                "Fator de Carga Médio do Motor Transporte (%)"]
+                                "Fator de Carga Médio do Motor Trabalhando",
+                                "Fator de Carga Médio do Motor Transporte"]
 
             # Adicionar colunas opcionais apenas se existirem
-            if "Fator de Carga Médio do Motor Marcha Lenta (%)" in df_tractors.columns:
-                colunas_disponiveis.append("Fator de Carga Médio do Motor Marcha Lenta (%)")
-            if "Fator de Carga Médio do Motor Ocioso (%)" in df_tractors.columns:
-                colunas_disponiveis.append("Fator de Carga Médio do Motor Ocioso (%)")
+            if "Fator de Carga Médio do Motor Marcha Lenta" in df_tractors.columns:
+                colunas_disponiveis.append("Fator de Carga Médio do Motor Marcha Lenta")
+            if "Fator de Carga Médio do Motor Ocioso" in df_tractors.columns:
+                colunas_disponiveis.append("Fator de Carga Médio do Motor Ocioso")
 
             # Filtrar o DataFrame para as colunas de fator de carga disponíveis
             df_selected_tractors_fator = df_tractors[colunas_disponiveis].copy()
@@ -501,16 +501,16 @@ if selected == "🌱Tratores":
             df_selected_tractors_fator = pd.concat([df_non_zeros, df_zeros])
 
             # Verificar se a coluna "Fator de Carga Média do Motor (Ag) Trabalho (%)" está presente
-            if "Fator de Carga Médio do Motor Trabalho (%)" in df_selected_tractors_fator.columns:
+            if "Fator de Carga Médio do Motor Trabalhando" in df_selected_tractors_fator.columns:
                 # Ordenar o DataFrame com base no "Fator de Carga Média do Motor (Ag) Trabalho (%)" de forma decrescente
-                df_selected_tractors_fator = df_selected_tractors_fator.sort_values(by="Fator de Carga Médio do Motor Trabalho (%)", ascending=True)
+                df_selected_tractors_fator = df_selected_tractors_fator.sort_values(by="Fator de Carga Médio do Motor Trabalhando", ascending=True)
 
             # Reverter a ordem para o gráfico, de modo que o maior valor apareça no topo
             df_selected_tractors_fator = df_selected_tractors_fator[::-1]
 
             # Nomes das máquinas e porcentagens de fator de carga
             maquinas_tractors_fator = df_selected_tractors_fator["Máquina"]
-            fatores_percentual_tractors = df_selected_tractors_fator.iloc[:, 1:] * 100
+            fatores_percentual_tractors = df_selected_tractors_fator.iloc[:, 1:]
 
             # Plotar gráfico de barras horizontais para % de Fator de Carga
             fig_fator, ax_fator = plt.subplots(figsize=(12, 8))
@@ -519,19 +519,19 @@ if selected == "🌱Tratores":
             colors_fator = []
             labels_fator = []
 
-            if "Fator de Carga Médio do Motor Trabalho (%)" in df_selected_tractors_fator.columns:
+            if "Fator de Carga Médio do Motor Trabalhando" in df_selected_tractors_fator.columns:
                 colors_fator.append('tab:green')
                 labels_fator.append('Trabalhando')
 
-            if "Fator de Carga Médio do Motor Transporte (%)" in df_selected_tractors_fator.columns:
+            if "Fator de Carga Médio do Motor Transporte" in df_selected_tractors_fator.columns:
                 colors_fator.append('tab:gray')
                 labels_fator.append('Transporte')
 
-            if "Fator de Carga Médio do Motor Marcha Lenta (%)" in df_selected_tractors_fator.columns:
+            if "Fator de Carga Médio do Motor Marcha Lenta" in df_selected_tractors_fator.columns:
                 colors_fator.append('tab:orange')
                 labels_fator.append('Marcha Lenta')
 
-            if "Fator de Carga Médio do Motor Ocioso (%)" in df_selected_tractors_fator.columns:
+            if "Fator de Carga Médio do Motor Ocioso" in df_selected_tractors_fator.columns:
                 colors_fator.append('tab:orange')
                 labels_fator.append('Ocioso')
 
@@ -581,16 +581,16 @@ if selected == "🌱Tratores":
             # Definir colunas para análise de taxa média de combustível
             selected_columns_combust = [
                 "Máquina",
-                "Taxa Média de Combustível (Ag) Trabalhando (l/h)",
-                "Taxa Média de Combustível (Ag) Transporte (l/h)",
-                "Taxa Média de Combustível (Ag) Ocioso (l/h)"
+                "Taxa Média de Combustível Trabalhando",
+                "Taxa Média de Combustível Transporte",
+                "Taxa Média de Combustível Ocioso"
             ]
 
             # Filtrar o DataFrame para as colunas selecionadas
             df_selected_tractors_combust = df_tractors[selected_columns_combust].copy()
 
             # Ordenar o DataFrame de forma decrescente baseado na "Taxa Média de Combustível (Ag) Trabalhando (l/h)"
-            df_selected_tractors_combust = df_selected_tractors_combust.sort_values(by="Taxa Média de Combustível (Ag) Trabalhando (l/h)", ascending=False)
+            df_selected_tractors_combust = df_selected_tractors_combust.sort_values(by="Taxa Média de Combustível Trabalhando", ascending=False)
 
             # Nomes das máquinas e porcentagens
             maquinas_tractors_combust = df_selected_tractors_combust["Máquina"]
@@ -666,12 +666,12 @@ if selected == "🌱Tratores":
            # Filtrar colunas relevantes
             colunas_disponiveis_rotacao = [
                 "Máquina", 
-                "Rotação Média do Motor Trabalhando (rpm)",
-                "Rotação Média do Motor Transporte (rpm)"
+                "Rotação Média do Motor Trabalhando",
+                "Rotação Média do Motor Transporte"
             ]
 
-            if "Rotação Média do Motor Ocioso (rpm)" in df_tractors.columns:
-                colunas_disponiveis_rotacao.append("Rotação Média do Motor Ocioso (rpm)")
+            if "Rotação Média do Motor Ocioso" in df_tractors.columns:
+                colunas_disponiveis_rotacao.append("Rotação Média do Motor Ocioso")
 
             df_selected_tractors_rotacao = df_tractors[colunas_disponiveis_rotacao].copy()
 
@@ -683,7 +683,7 @@ if selected == "🌱Tratores":
             df_selected_tractors_rotacao = pd.concat([df_non_zeros_rotacao, df_zeros_rotacao])
 
             # Ordenar o DataFrame
-            df_selected_tractors_rotacao = df_selected_tractors_rotacao.sort_values(by="Rotação Média do Motor Trabalhando (rpm)", ascending=False)
+            df_selected_tractors_rotacao = df_selected_tractors_rotacao.sort_values(by="Rotação Média do Motor Trabalhando", ascending=False)
 
             # Reverter a ordem para o gráfico
             df_selected_tractors_rotacao = df_selected_tractors_rotacao[::-1]
@@ -703,15 +703,15 @@ if selected == "🌱Tratores":
             colors_rotacao = []
             labels_rotacao = []
 
-            if "Rotação Média do Motor Trabalhando (rpm)" in df_selected_tractors_rotacao.columns:
+            if "Rotação Média do Motor Trabalhando" in df_selected_tractors_rotacao.columns:
                 colors_rotacao.append('tab:green')
                 labels_rotacao.append('Trabalhando')
 
-            if "Rotação Média do Motor Transporte (rpm)" in df_selected_tractors_rotacao.columns:
+            if "Rotação Média do Motor Transporte" in df_selected_tractors_rotacao.columns:
                 colors_rotacao.append('tab:gray')
                 labels_rotacao.append('Transporte')
 
-            if "Rotação Média do Motor Ocioso (rpm)" in df_selected_tractors_rotacao.columns:
+            if "Rotação Média do Motor Ocioso" in df_selected_tractors_rotacao.columns:
                 colors_rotacao.append('tab:orange')
                 labels_rotacao.append('Ocioso')
 
@@ -760,12 +760,12 @@ if selected == "🌱Tratores":
             # Definir colunas para análise de velocidade média de deslocamento
             selected_columns_desloc = [
                 "Máquina", 
-                "Velocidade Média de Deslocamento Trabalhando (km/h)",
-                "Velocidade Média de Deslocamento (km/h)"
+                "Velocidade Média de Deslocamento Trabalhando",
+                "Velocidade Média de Deslocamento Período"
             ]
             df_selected_tractors_desloc = df_tractors[selected_columns_desloc].copy()
 
-            df_selected_tractors_desloc = df_selected_tractors_desloc.sort_values(by="Velocidade Média de Deslocamento Trabalhando (km/h)", ascending=False)
+            df_selected_tractors_desloc = df_selected_tractors_desloc.sort_values(by="Velocidade Média de Deslocamento Trabalhando", ascending=False)
 
             # Manter linhas com NaN para visualização em branco
             df_selected_tractors_desloc.replace([np.inf, -np.inf], np.nan, inplace=True)
@@ -841,16 +841,16 @@ if selected == "🌱Tratores":
             # Seleciona as colunas de patinagem na ordem exata da planilha
             selected_columns_patinagem = [
                 "Máquina", 
-                "Tempo de Patinagem das Rodas no Nível 0,00–2,00% (h)",
-                "Tempo de Patinagem das Rodas no Nível 2,01–4,00% (h)",
-                "Tempo de Patinagem das Rodas no Nível 4,01–6,00% (h)",
-                "Tempo de Patinagem das Rodas no Nível 6,01–8,00% (h)",
-                "Tempo de Patinagem das Rodas no Nível 8,01-10,00% (h)",
-                "Tempo de Patinagem das Rodas no Nível 10,01–12,00% (h)",
-                "Tempo de Patinagem das Rodas no Nível 12,01–14,00% (h)",
-                "Tempo de Patinagem das Rodas no Nível 14,01–16,00% (h)",
-                "Tempo de Patinagem das Rodas no Nível 16,01–18,00% (h)",
-                "Tempo de Patinagem das Rodas no Nível 18,01–100,00% (h)"
+                "Tempo de Patinagem das Rodas no Nível 0,00–2,00%",
+                "Tempo de Patinagem das Rodas no Nível 2,01–4,00%",
+                "Tempo de Patinagem das Rodas no Nível 4,01–6,00%",
+                "Tempo de Patinagem das Rodas no Nível 6,01–8,00%",
+                "Tempo de Patinagem das Rodas no Nível 8,01-10,00%",
+                "Tempo de Patinagem das Rodas no Nível 10,01–12,00%",
+                "Tempo de Patinagem das Rodas no Nível 12,01–14,00%",
+                "Tempo de Patinagem das Rodas no Nível 14,01–16,00%",
+                "Tempo de Patinagem das Rodas no Nível 16,01–18,00%",
+                "Tempo de Patinagem das Rodas no Nível 18,01–100,00%"
             ]
 
             # Verifica se há dados, caso contrário, cria DataFrame vazio com colunas definidas
